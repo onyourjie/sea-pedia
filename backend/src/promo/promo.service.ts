@@ -26,6 +26,8 @@ export class PromoService {
     const p = await this.prisma.promo.findUnique({ where: { code } });
     if (!p) return { valid: false, reason: 'Promo not found' };
     if (p.expiresAt < new Date()) return { valid: false, reason: 'Promo expired' };
+    if (p.usageLimit > 0 && p.usageCount >= p.usageLimit)
+      return { valid: false, reason: 'Promo usage limit reached' };
     return { valid: true, promo: p };
   }
 }

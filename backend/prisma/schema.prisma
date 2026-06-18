@@ -255,6 +255,8 @@ model Promo {
   discountPct    Decimal? @db.Decimal(5, 2)
   maxDiscount    Decimal? @db.Decimal(15, 2)
   minOrder       Decimal? @db.Decimal(15, 2)
+  usageLimit     Int      @default(0)
+  usageCount     Int      @default(0)
   expiresAt      DateTime
   createdAt      DateTime @default(now())
 

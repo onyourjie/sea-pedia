@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './review.dto';
+import sanitizeHtml from 'sanitize-html';
 
-// Strip HTML tags to prevent XSS in stored content
+// Strict sanitization: strip ALL tags and attributes for plain-text comment storage
 function sanitize(str: string): string {
-  return str.replace(/<[^>]*>/g, '').trim();
+  return sanitizeHtml(str, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'discard',
+  }).trim();
 }
 
 @Injectable()

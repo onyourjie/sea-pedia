@@ -80,6 +80,8 @@ export class OrderService {
       const promo = await this.prisma.promo.findUnique({ where: { code: dto.promoCode } });
       if (!promo) throw new BadRequestException('Invalid promo code');
       if (promo.expiresAt < new Date()) throw new BadRequestException('Promo has expired');
+      if (promo.usageLimit > 0 && promo.usageCount >= promo.usageLimit)
+        throw new BadRequestException('Promo usage limit reached');
       if (promo.minOrder && subtotal < Number(promo.minOrder))
         throw new BadRequestException(`Minimum order Rp ${promo.minOrder} required for this promo`);
 
@@ -163,6 +165,10 @@ export class OrderService {
       // Increment voucher usage
       if (voucherId) {
         await tx.voucher.update({ where: { id: voucherId }, data: { usageCount: { increment: 1 } } });
+      }
+      // Increment promo usage
+      if (promoId) {
+        await tx.promo.update({ where: { id: promoId }, data: { usageCount: { increment: 1 } } });
       }
 
       // Clear cart
