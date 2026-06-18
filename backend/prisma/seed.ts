@@ -42,19 +42,158 @@ async function main() {
     update: {},
     create: {
       userId: sellerUser.id,
-      name: 'Toko Elektronik Maju',
-      description: 'Toko elektronik terpercaya',
+      name: 'Oceanic Pro Store',
+      description: 'Toko peralatan selam dan kelautan terpercaya di Indonesia',
     },
   });
   await prisma.product.createMany({
     skipDuplicates: true,
     data: [
-      { storeId: store.id, name: 'Laptop Gaming', description: 'Laptop untuk gaming', price: 15000000, stock: 10 },
-      { storeId: store.id, name: 'Mouse Wireless', description: 'Mouse wireless ergonomis', price: 250000, stock: 50 },
-      { storeId: store.id, name: 'Keyboard Mechanical', description: 'Keyboard mechanical RGB', price: 800000, stock: 30 },
+      {
+        storeId: store.id,
+        name: 'Masker Selam Scubapro Ghost - Black Series',
+        description: 'Masker selam premium dengan lensa tempered ultra-clear untuk pandangan bawah air tajam tanpa distorsi. Teknologi Trufit Generasi Kedua dengan silikon ganda.',
+        price: 1250000,
+        stock: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
+      },
+      {
+        storeId: store.id,
+        name: 'Fin Diving Cressi Frog Plus - Yellow High Visibility',
+        description: 'Fin selam Cressi dengan desain ergonomis untuk efisiensi tendangan maksimal. Warna kuning high visibility untuk keamanan di laut.',
+        price: 850000,
+        stock: 40,
+        imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
+      },
+      {
+        storeId: store.id,
+        name: 'BCD Aqualung Pro HD - Weight Integrated',
+        description: 'BCD profesional dengan sistem integrasi pemberat, bahan durable untuk kondisi laut keras. Cocok untuk penyelam profesional maupun rekreasi.',
+        price: 6500000,
+        stock: 15,
+        imageUrl: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400',
+      },
+      {
+        storeId: store.id,
+        name: 'Regulator Set Apeks XTX50 + DST',
+        description: 'Set regulator premium Apeks dengan teknologi terbaru untuk pernapasan mudah di kedalaman. Termasuk dive computer DST.',
+        price: 9850000,
+        stock: 10,
+        imageUrl: 'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=400',
+      },
+      {
+        storeId: store.id,
+        name: 'Wetsuit Mares Rover 3mm Full Body',
+        description: 'Wetsuit full body 3mm untuk penyelaman tropis. Material neoprene berkualitas tinggi dengan jahitan flatlock untuk kenyamanan maksimal.',
+        price: 2100000,
+        stock: 20,
+        imageUrl: 'https://images.unsplash.com/photo-1601760562234-9814eea6db4d?w=400',
+      },
+      {
+        storeId: store.id,
+        name: 'Senter Selam Bigblue AL1200NP - 1200 Lumens',
+        description: 'Senter selam profesional 1200 lumens dengan sudut sinar lebar. Tahan air hingga 100 meter, baterai lithium tahan lama.',
+        price: 1850000,
+        stock: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
+      },
     ],
   });
   console.log('Seller + store + products created:', sellerUser.username);
+
+  // Seller 2 - Ikan & Hasil Laut
+  const sellerUser2 = await prisma.user.upsert({
+    where: { username: 'seller2' },
+    update: {},
+    create: {
+      username: 'seller2',
+      email: 'seller2@seapedia.com',
+      passwordHash: await hash('seller123'),
+      roles: { create: [{ role: RoleType.SELLER }] },
+    },
+  });
+  const store2 = await prisma.store.upsert({
+    where: { userId: sellerUser2.id },
+    update: {},
+    create: {
+      userId: sellerUser2.id,
+      name: 'Sumber Bahari Segar',
+      description: 'Supplier ikan segar dan hasil laut langsung dari nelayan. Pengiriman cepat ke seluruh Indonesia.',
+    },
+  });
+  await prisma.product.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        storeId: store2.id,
+        name: 'Udang Vannamei Super Ekspor 1kg',
+        description: 'Udang vannamei segar kualitas ekspor, dipanen langsung dari tambak terpercaya. Ukuran 30-40 ekor/kg.',
+        price: 125000,
+        stock: 100,
+        imageUrl: 'https://images.unsplash.com/photo-1565680018093-ebb6b9ab5460?w=400',
+      },
+      {
+        storeId: store2.id,
+        name: 'Ikan Kerapu Merah Segar 1kg',
+        description: 'Ikan kerapu merah segar pilihan dari perairan Sulawesi. Cocok untuk dibakar, dikukus, atau digoreng.',
+        price: 185000,
+        stock: 50,
+        imageUrl: 'https://images.unsplash.com/photo-1535140728325-a4d3707eee61?w=400',
+      },
+      {
+        storeId: store2.id,
+        name: 'Cumi-cumi Segar 1kg',
+        description: 'Cumi-cumi segar berkualitas tinggi, langsung dari nelayan lokal. Tekstur kenyal dan rasa laut yang autentik.',
+        price: 95000,
+        stock: 80,
+        imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=400',
+      },
+    ],
+  });
+  console.log('Seller2 + store + products created:', sellerUser2.username);
+
+  // Seller 3 - Alat Pancing
+  const sellerUser3 = await prisma.user.upsert({
+    where: { username: 'seller3' },
+    update: {},
+    create: {
+      username: 'seller3',
+      email: 'seller3@seapedia.com',
+      passwordHash: await hash('seller123'),
+      roles: { create: [{ role: RoleType.SELLER }] },
+    },
+  });
+  const store3 = await prisma.store.upsert({
+    where: { userId: sellerUser3.id },
+    update: {},
+    create: {
+      userId: sellerUser3.id,
+      name: 'Angler Heaven',
+      description: 'Toko alat pancing lengkap untuk pemula hingga profesional. Stok terbesar di Indonesia.',
+    },
+  });
+  await prisma.product.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        storeId: store3.id,
+        name: 'Set Pancing Spinning Carbon 2.1m',
+        description: 'Set lengkap joran spinning karbon ringan 2.1m dengan reel berkualitas. Ideal untuk mancing di laut maupun sungai.',
+        price: 1450000,
+        stock: 35,
+        imageUrl: 'https://images.unsplash.com/photo-1559648028-9bb09d2d3e95?w=400',
+      },
+      {
+        storeId: store3.id,
+        name: 'Jaring Ikan Nilon Premium 100m',
+        description: 'Jaring ikan nilon kuat dan tahan lama 100 meter. Mata jaring 2cm, cocok untuk berbagai jenis ikan.',
+        price: 350000,
+        stock: 60,
+        imageUrl: 'https://images.unsplash.com/photo-1573160813959-1c6bfda65c4e?w=400',
+      },
+    ],
+  });
+  console.log('Seller3 + store + products created:', sellerUser3.username);
 
   // Buyer
   const buyerUser = await prisma.user.upsert({
@@ -140,6 +279,34 @@ async function main() {
     update: {},
     create: { userId: multiUser.id },
   });
+  const multiStore = await prisma.store.upsert({
+    where: { userId: multiUser.id },
+    update: {},
+    create: {
+      userId: multiUser.id,
+      name: 'Samudra Jaya Marine',
+      description: 'Toko perlengkapan kapal dan navigasi laut dari nelayan berpengalaman.',
+    },
+  });
+  await prisma.product.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        storeId: multiStore.id,
+        name: 'Mesin Tempel Kapal Yamaha 15HP 2-Stroke',
+        description: 'Mesin tempel kapal Yamaha 15HP 2-stroke bertenaga dan irit bahan bakar. Cocok untuk kapal nelayan 5-7 meter.',
+        price: 24500000,
+        stock: 5,
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Perahu Karet Inflatable Boat 4 Orang',
+        description: 'Perahu karet inflatable kapasitas 4 orang, material PVC tebal tahan abrasi. Lengkap dengan pompa dan dayung.',
+        price: 5800000,
+        stock: 8,
+      },
+    ],
+  });
   console.log('Multi-role user created:', multiUser.username);
 
   // Vouchers
@@ -181,13 +348,15 @@ async function main() {
     },
   });
 
-  // Sample reviews
+  // Sample reviews - maritime theme
   await prisma.review.createMany({
     skipDuplicates: false,
     data: [
-      { reviewerName: 'Andi', rating: 5, comment: 'Marketplace terbaik, pengiriman cepat!' },
-      { reviewerName: 'Budi', rating: 4, comment: 'Produk lengkap dan harga terjangkau.' },
-      { reviewerName: 'Citra', rating: 5, comment: 'Sangat mudah digunakan, recommended!' },
+      { reviewerName: 'Budi Santoso', rating: 5, comment: 'Seapedia memudahkan saya mencari suku cadang mesin kapal tanpa harus keliling. Barangnya asli dan pengirimannya cepat!' },
+      { reviewerName: 'Siti Aminah', rating: 5, comment: 'Ikan yang saya dapatkan dari seller di sini selalu segar. Sangat membantu bisnis kuliner saya yang membutuhkan bahan baku berkualitas.' },
+      { reviewerName: 'Andi Wijaya', rating: 4, comment: 'Marketplace maritim terlengkap. Mulai dari peralatan selam sampai hasil laut semua ada. Sistem pembayarannya juga sangat aman.' },
+      { reviewerName: 'Rini Kusuma', rating: 5, comment: 'Alat pancing yang saya beli kualitasnya luar biasa. Harga bersaing dan seller-nya responsif. Highly recommended!' },
+      { reviewerName: 'Hendra Laut', rating: 4, comment: 'Platform yang sangat membantu nelayan seperti saya untuk menjual hasil tangkapan langsung ke konsumen. Pendapatan meningkat signifikan.' },
     ],
   }).catch(() => {});
 
