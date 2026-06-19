@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ShoppingCart, Trash2, Minus, Plus, Store, AlertCircle, ArrowRight } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface CartItem {
@@ -48,7 +48,7 @@ export default function CartPage() {
       api.patch(`/cart/items/${productId}`, { quantity }).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal update kuantitas");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal update kuantitas", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -56,7 +56,7 @@ export default function CartPage() {
     mutationFn: (productId: string) => api.delete(`/cart/items/${productId}`).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Item dihapus dari keranjang");
+      Swal.fire({ title: "Dihapus!", text: "Item dihapus dari keranjang.", icon: "success", timer: 1200, showConfirmButton: false, toast: true, position: "top-end" });
     },
   });
 
@@ -64,7 +64,7 @@ export default function CartPage() {
     mutationFn: () => api.delete("/cart/clear").then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Keranjang dikosongkan");
+      Swal.fire({ title: "Keranjang Dikosongkan", icon: "success", timer: 1200, showConfirmButton: false, toast: true, position: "top-end" });
     },
   });
 
@@ -72,7 +72,7 @@ export default function CartPage() {
     const next = item.quantity + delta;
     if (next < 1) return;
     if (next > item.product.stock) {
-      toast.error("Stok tidak cukup");
+      Swal.fire({ title: "Stok Tidak Cukup", text: `Stok tersedia: ${item.product.stock}`, icon: "warning", confirmButtonColor: "#06b6d4" });
       return;
     }
     setBusy(item.productId);

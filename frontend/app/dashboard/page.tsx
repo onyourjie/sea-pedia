@@ -6,9 +6,10 @@ import { useAuthStore } from "@/store/auth.store";
 
 export default function DashboardRedirectPage() {
   const router = useRouter();
-  const { user, token } = useAuthStore();
+  const { user, token, hasHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!token || !user) {
       router.replace("/login");
       return;
@@ -21,7 +22,7 @@ export default function DashboardRedirectPage() {
     };
     const role = user.activeRole || "";
     router.replace(map[role] || "/login");
-  }, [token, user, router]);
+  }, [hasHydrated, token, user, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -32,3 +33,4 @@ export default function DashboardRedirectPage() {
     </div>
   );
 }
+

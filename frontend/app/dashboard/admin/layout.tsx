@@ -24,14 +24,16 @@ const NAV = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, hasHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!token || user?.activeRole !== "ADMIN") {
       router.replace("/login");
     }
-  }, [token, user, router]);
+  }, [hasHydrated, token, user, router]);
 
+  if (!hasHydrated) return null;
   if (!token) return null;
 
   return (
@@ -84,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             })}
           </nav>
           <button
-            onClick={() => { logout(); router.push("/login"); }}
+            onClick={async () => { await logout(); router.push("/login"); }}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition mt-4"
           >
             <LogOut className="w-4 h-4" />

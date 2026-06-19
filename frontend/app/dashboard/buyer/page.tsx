@@ -57,7 +57,7 @@ export default function BuyerDashboardPage() {
     queryFn: () => api.get("/orders/buyer/report").then((r) => r.data),
   });
 
-  const walletBalance = walletData?.data?.balance ?? 0;
+  const walletBalance = walletData?.balance ?? walletData?.data?.balance ?? 0;
   const orders: Order[] = ordersData?.data || [];
   const products: Product[] = productsData?.data || [];
   const report = reportData?.data;

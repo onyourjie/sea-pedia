@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Plus, Pencil, Trash2, Star, X } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface Address {
@@ -43,11 +43,11 @@ export default function AddressesPage() {
     mutationFn: (dto: FormState) => api.post("/addresses", dto).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success("Alamat ditambahkan");
+      Swal.fire({ title: "Berhasil!", text: "Alamat ditambahkan.", icon: "success", timer: 1500, showConfirmButton: false });
       reset();
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal menambah alamat");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal menambah alamat", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -56,11 +56,11 @@ export default function AddressesPage() {
       api.patch(`/addresses/${id}`, dto).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success("Alamat diperbarui");
+      Swal.fire({ title: "Berhasil!", text: "Alamat diperbarui.", icon: "success", timer: 1500, showConfirmButton: false });
       reset();
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal memperbarui alamat");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal memperbarui alamat", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -68,9 +68,9 @@ export default function AddressesPage() {
     mutationFn: (id: string) => api.delete(`/addresses/${id}`).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["addresses"] });
-      toast.success("Alamat dihapus");
+      Swal.fire({ title: "Terhapus!", text: "Alamat berhasil dihapus.", icon: "success", timer: 1500, showConfirmButton: false });
     },
-    onError: () => toast.error("Gagal menghapus alamat"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Gagal menghapus alamat.", icon: "error", confirmButtonColor: "#ef4444" }),
   });
 
   const reset = () => {
@@ -206,8 +206,18 @@ export default function AddressesPage() {
                   <Pencil className="w-3.5 h-3.5" /> Edit
                 </button>
                 <button
-                  onClick={() => {
-                    if (confirm("Hapus alamat ini?")) remove.mutate(a.id);
+                  onClick={async () => {
+                    const result = await Swal.fire({
+                      title: "Hapus Alamat?",
+                      text: "Alamat ini akan dihapus permanen.",
+                      icon: "warning",
+                      showCancelButton: true,
+                      confirmButtonColor: "#ef4444",
+                      cancelButtonColor: "#6b7280",
+                      confirmButtonText: "Ya, Hapus",
+                      cancelButtonText: "Batal",
+                    });
+                    if (result.isConfirmed) remove.mutate(a.id);
                   }}
                   className="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
                 >

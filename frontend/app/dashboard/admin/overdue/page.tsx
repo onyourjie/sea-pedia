@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { AlertTriangle, FastForward, Calendar, RotateCcw } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface OverdueOrder {
@@ -50,9 +50,9 @@ export default function AdminOverduePage() {
       qc.invalidateQueries({ queryKey: ["admin-overdue"] });
       qc.invalidateQueries({ queryKey: ["admin-system-date"] });
       qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-      toast.success(`Hari berikutnya: ${new Date(data.currentDate).toLocaleDateString("id-ID")}. ${data.overdueProcessed} order overdue diproses.`);
+      Swal.fire({ title: "Hari Dimajukan!", text: `Tanggal: ${new Date(data.currentDate).toLocaleDateString("id-ID")}. ${data.overdueProcessed} order overdue diproses.`, icon: "success", confirmButtonColor: "#06b6d4" });
     },
-    onError: () => toast.error("Gagal advance day"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Gagal advance day.", icon: "error", confirmButtonColor: "#ef4444" }),
   });
 
   const processOverdue = useMutation({
@@ -60,9 +60,9 @@ export default function AdminOverduePage() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["admin-overdue"] });
       qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-      toast.success(`${data} order overdue diproses (refund + restock)`);
+      Swal.fire({ title: "Overdue Diproses!", text: `${data} order overdue diproses (refund + restock).`, icon: "success", confirmButtonColor: "#06b6d4" });
     },
-    onError: () => toast.error("Gagal proses overdue"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Gagal proses overdue.", icon: "error", confirmButtonColor: "#ef4444" }),
   });
 
   const orders = overdue || [];

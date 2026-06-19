@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Tag, Plus, X } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface Voucher {
@@ -68,19 +68,19 @@ export default function AdminVouchersPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-vouchers"] });
-      toast.success("Voucher berhasil dibuat");
+      Swal.fire({ title: "Berhasil!", text: "Voucher berhasil dibuat.", icon: "success", timer: 1500, showConfirmButton: false });
       setForm(empty);
       setShowForm(false);
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal membuat voucher");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal membuat voucher", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.code.trim() || !form.expiresAt) {
-      toast.error("Kode dan tanggal kedaluwarsa wajib diisi");
+      Swal.fire({ title: "Input Tidak Lengkap", text: "Kode dan tanggal kedaluwarsa wajib diisi.", icon: "warning", confirmButtonColor: "#ef4444" });
       return;
     }
     create.mutate(form);
