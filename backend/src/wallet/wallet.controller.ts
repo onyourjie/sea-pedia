@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import { TopUpDto } from './wallet.dto';
@@ -19,6 +19,21 @@ export class WalletController {
   @Get()
   getWallet(@CurrentUser() user: any) {
     return this.walletService.getWallet(user.id);
+  }
+
+  @Get('transactions')
+  getTransactions(
+    @CurrentUser() user: any,
+    @Query('type') type?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.walletService.getTransactions(
+      user.id,
+      type,
+      limit ? parseInt(limit) : 50,
+      offset ? parseInt(offset) : 0,
+    );
   }
 
   @Post('topup')

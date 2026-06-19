@@ -6,7 +6,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getProfile(userId: string) {
-    return this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -24,5 +24,12 @@ export class UsersService {
         driver: { select: { id: true, earnings: true } },
       },
     });
+    if (!user) return null;
+    return {
+      ...user,
+      roles: user.roles.map((r) => r.role),
+      walletBalance: user.buyer?.wallet ? Number(user.buyer.wallet.balance) : null,
+      driverEarnings: user.driver ? Number(user.driver.earnings) : null,
+    };
   }
 }

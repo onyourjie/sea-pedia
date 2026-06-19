@@ -106,12 +106,15 @@ export class OrderService {
 
     // Create order in transaction
     const order = await this.prisma.$transaction(async (tx) => {
-      // Deduct stock
+      // Deduct stock atomically — prevents negative stock under concurrent checkouts
       for (const item of cart.items) {
-        await tx.product.update({
-          where: { id: item.productId },
+        const updated = await tx.product.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
           data: { stock: { decrement: item.quantity } },
         });
+        if (updated.count === 0) {
+          throw new BadRequestException(`Insufficient stock for "${item.product.name}"`);
+        }
       }
 
       // Create order
@@ -148,7 +151,7 @@ export class OrderService {
       await tx.delivery.create({ data: { orderId: newOrder.id } });
 
       // Deduct wallet
-      await tx.wallet.update({
+      const updatedWallet = await tx.wallet.update({
         where: { buyerId: buyer.id },
         data: { balance: { decrement: total } },
       });
@@ -157,6 +160,7 @@ export class OrderService {
           walletId: buyer.wallet!.id,
           type: 'PAYMENT',
           amount: total,
+          balanceAfter: updatedWallet.balance,
           description: `Payment for order ${newOrder.id}`,
           orderId: newOrder.id,
         },
@@ -286,13 +290,30 @@ export class OrderService {
     const store = await this.prisma.store.findUnique({ where: { userId } });
     if (!store) throw new NotFoundException('Store not found');
 
-    const orders = await this.prisma.order.findMany({
-      where: { storeId: store.id, status: OrderStatus.PESANAN_SELESAI },
-      include: { items: true },
-    });
+    const [completedOrders, pendingOrders] = await Promise.all([
+      this.prisma.order.findMany({
+        where: { storeId: store.id, status: OrderStatus.PESANAN_SELESAI },
+        include: { items: true },
+      }),
+      this.prisma.order.findMany({
+        where: {
+          storeId: store.id,
+          status: { in: [OrderStatus.SEDANG_DIKEMAS, OrderStatus.MENUNGGU_PENGIRIM, OrderStatus.SEDANG_DIKIRIM] },
+        },
+        include: { items: true },
+      }),
+    ]);
 
-    const totalIncome = orders.reduce((sum, o) => sum + Number(o.total), 0);
-    return { totalOrders: orders.length, totalIncome, orders };
+    const totalIncome = completedOrders.reduce((sum, o) => sum + Number(o.total), 0);
+    const pendingIncome = pendingOrders.reduce((sum, o) => sum + Number(o.total), 0);
+
+    return {
+      totalOrders: completedOrders.length,
+      totalIncome,
+      pendingOrders: pendingOrders.length,
+      pendingIncome,
+      orders: completedOrders,
+    };
   }
 
   async getBuyerSpendingReport(userId: string) {

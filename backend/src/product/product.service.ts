@@ -6,11 +6,31 @@ import { CreateProductDto, UpdateProductDto } from './product.dto';
 export class ProductService {
   constructor(private prisma: PrismaService) {}
 
-  async listPublic(page = 1, limit = 20, search?: string, storeId?: string) {
+  async listPublic(
+    page = 1,
+    limit = 20,
+    search?: string,
+    storeId?: string,
+    sort?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    promo?: boolean,
+  ) {
     const skip = (page - 1) * limit;
     const where: any = { isActive: true };
     if (search) where.name = { contains: search, mode: 'insensitive' };
     if (storeId) where.storeId = storeId;
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+    if (promo) where.discount = { gt: 0 };
+
+    let orderBy: any = { createdAt: 'desc' };
+    if (sort === 'price_asc') orderBy = { price: 'asc' };
+    else if (sort === 'price_desc') orderBy = { price: 'desc' };
+    else if (sort === 'newest') orderBy = { createdAt: 'desc' };
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
@@ -18,7 +38,7 @@ export class ProductService {
         skip,
         take: limit,
         include: { store: { select: { id: true, name: true } } },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.product.count({ where }),
     ]);

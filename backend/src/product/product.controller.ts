@@ -19,8 +19,21 @@ export class ProductController {
     @Query('limit') limit = 20,
     @Query('search') search?: string,
     @Query('storeId') storeId?: string,
+    @Query('sort') sort?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('promo') promo?: string,
   ) {
-    return this.productService.listPublic(+page, +limit, search, storeId);
+    return this.productService.listPublic(
+      +page,
+      +limit,
+      search,
+      storeId,
+      sort,
+      minPrice ? +minPrice : undefined,
+      maxPrice ? +maxPrice : undefined,
+      promo === '1',
+    );
   }
 
   @Get(':productId')
