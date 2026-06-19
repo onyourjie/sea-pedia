@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Truck, MapPin, Store, CheckCircle2, Clock } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface Job {
@@ -42,10 +42,10 @@ export default function DriverActivePage() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["driver-my-jobs"] });
       qc.invalidateQueries({ queryKey: ["driver-available-jobs"] });
-      toast.success(`Job selesai! Earning: ${formatPrice(data.earning)}`);
+      Swal.fire({ title: "Job Selesai!", text: `Earning kamu: ${formatPrice(data.earning)}`, icon: "success", confirmButtonColor: "#16a34a" });
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal menyelesaikan job");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal menyelesaikan job", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -116,8 +116,18 @@ export default function DriverActivePage() {
                     <p className="text-lg font-bold text-green-600">{formatPrice(earning)}</p>
                   </div>
                   <button
-                    onClick={() => {
-                      if (confirm("Konfirmasi pengiriman selesai?")) completeJob.mutate(j.id);
+                    onClick={async () => {
+                      const result = await Swal.fire({
+                        title: "Konfirmasi Selesai?",
+                        text: "Pastikan paket sudah diterima oleh pembeli.",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonColor: "#16a34a",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Ya, Selesai",
+                        cancelButtonText: "Batal",
+                      });
+                      if (result.isConfirmed) completeJob.mutate(j.id);
                     }}
                     disabled={completeJob.isPending}
                     className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-green-600/25 flex items-center gap-2"

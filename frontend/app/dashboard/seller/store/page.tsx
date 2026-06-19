@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Store, Save, Package, ClipboardList } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface MyStore {
@@ -42,10 +42,10 @@ export default function SellerStorePage() {
     mutationFn: () => api.post("/stores", { name, description }).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-my-store"] });
-      toast.success("Toko berhasil dibuat!");
+      Swal.fire({ title: "Berhasil!", text: "Toko berhasil dibuat!", icon: "success", confirmButtonColor: "#f97316" });
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal membuat toko");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal membuat toko", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -53,17 +53,17 @@ export default function SellerStorePage() {
     mutationFn: () => api.patch("/stores", { name, description }).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-my-store"] });
-      toast.success("Toko berhasil diperbarui!");
+      Swal.fire({ title: "Berhasil!", text: "Toko berhasil diperbarui!", icon: "success", confirmButtonColor: "#f97316" });
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal memperbarui toko");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal memperbarui toko", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error("Nama toko wajib diisi");
+      Swal.fire({ title: "Input Tidak Lengkap", text: "Nama toko wajib diisi.", icon: "warning", confirmButtonColor: "#f97316" });
       return;
     }
     if (store) update.mutate();

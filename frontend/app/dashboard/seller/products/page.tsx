@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Package, Plus, Pencil, Trash2, X } from "lucide-react";
-import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 
@@ -48,11 +47,11 @@ export default function SellerProductsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-products"] });
       qc.invalidateQueries({ queryKey: ["seller-my-store"] });
-      toast.success("Produk berhasil ditambahkan");
+      Swal.fire({ title: "Berhasil!", text: "Produk berhasil ditambahkan.", icon: "success", timer: 1500, showConfirmButton: false });
       reset();
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal menambah produk");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal menambah produk", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -61,11 +60,11 @@ export default function SellerProductsPage() {
       api.patch(`/products/seller/${id}`, dto).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-products"] });
-      toast.success("Produk diperbarui");
+      Swal.fire({ title: "Berhasil!", text: "Produk diperbarui.", icon: "success", timer: 1500, showConfirmButton: false });
       reset();
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal memperbarui produk");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal memperbarui produk", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
@@ -100,7 +99,7 @@ export default function SellerProductsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || form.price <= 0) {
-      toast.error("Nama produk dan harga wajib diisi");
+      Swal.fire({ title: "Input Tidak Lengkap", text: "Nama produk dan harga wajib diisi.", icon: "warning", confirmButtonColor: "#f97316" });
       return;
     }
     if (editingId) update.mutate({ id: editingId, dto: form });

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Truck, Tag, Wallet, CheckCircle2, Plus } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface Address {
@@ -95,7 +95,7 @@ export default function CheckoutPage() {
     mutationFn: (code: string) => api.get(`/vouchers/validate/${code}`).then((r) => r.data),
     onSuccess: (data) => {
       if (!data.valid) {
-        toast.error(data.reason || "Voucher tidak valid");
+        Swal.fire({ title: "Voucher Tidak Valid", text: data.reason || "Voucher tidak valid", icon: "error", confirmButtonColor: "#ef4444" });
         setVoucherDiscount(0);
         return;
       }
@@ -103,21 +103,21 @@ export default function CheckoutPage() {
       const raw = v.discountPct ? (subtotal * Number(v.discountPct)) / 100 : Number(v.discountAmount || 0);
       const applied = v.maxDiscount ? Math.min(raw, Number(v.maxDiscount)) : raw;
       if (v.minOrder && subtotal < Number(v.minOrder)) {
-        toast.error(`Minimum belanja Rp ${v.minOrder} untuk voucher ini`);
+        Swal.fire({ title: "Minimum Belanja", text: `Minimum belanja ${formatPrice(Number(v.minOrder))} untuk voucher ini.`, icon: "warning", confirmButtonColor: "#06b6d4" });
         setVoucherDiscount(0);
         return;
       }
       setVoucherDiscount(applied);
-      toast.success(`Voucher diterapkan: -${formatPrice(applied)}`);
+      Swal.fire({ title: "Voucher Diterapkan!", text: `Hemat ${formatPrice(applied)}`, icon: "success", timer: 1500, showConfirmButton: false });
     },
-    onError: () => toast.error("Voucher tidak valid"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Voucher tidak valid.", icon: "error", confirmButtonColor: "#ef4444" }),
   });
 
   const validatePromo = useMutation({
     mutationFn: (code: string) => api.get(`/promos/validate/${code}`).then((r) => r.data),
     onSuccess: (data) => {
       if (!data.valid) {
-        toast.error(data.reason || "Promo tidak valid");
+        Swal.fire({ title: "Promo Tidak Valid", text: data.reason || "Promo tidak valid", icon: "error", confirmButtonColor: "#ef4444" });
         setPromoDiscount(0);
         return;
       }
@@ -125,23 +125,23 @@ export default function CheckoutPage() {
       const raw = p.discountPct ? (subtotal * Number(p.discountPct)) / 100 : Number(p.discountAmount || 0);
       const applied = p.maxDiscount ? Math.min(raw, Number(p.maxDiscount)) : raw;
       if (p.minOrder && subtotal < Number(p.minOrder)) {
-        toast.error(`Minimum belanja Rp ${p.minOrder} untuk promo ini`);
+        Swal.fire({ title: "Minimum Belanja", text: `Minimum belanja ${formatPrice(Number(p.minOrder))} untuk promo ini.`, icon: "warning", confirmButtonColor: "#06b6d4" });
         setPromoDiscount(0);
         return;
       }
       setPromoDiscount(applied);
-      toast.success(`Promo diterapkan: -${formatPrice(applied)}`);
+      Swal.fire({ title: "Promo Diterapkan!", text: `Hemat ${formatPrice(applied)}`, icon: "success", timer: 1500, showConfirmButton: false });
     },
-    onError: () => toast.error("Promo tidak valid"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Promo tidak valid.", icon: "error", confirmButtonColor: "#ef4444" }),
   });
 
   const handleCheckout = async () => {
     if (!addressId) {
-      toast.error("Pilih alamat dulu");
+      Swal.fire({ title: "Pilih Alamat", text: "Pilih alamat pengiriman terlebih dahulu.", icon: "warning", confirmButtonColor: "#06b6d4" });
       return;
     }
     if (insufficient) {
-      toast.error("Saldo wallet tidak cukup. Top up dulu.");
+      Swal.fire({ title: "Saldo Tidak Cukup", text: "Saldo wallet tidak cukup. Top up dulu.", icon: "warning", confirmButtonColor: "#06b6d4" });
       return;
     }
     setSubmitting(true);
@@ -150,11 +150,11 @@ export default function CheckoutPage() {
       if (voucherCode && voucherDiscount > 0) payload.voucherCode = voucherCode;
       if (promoCode && promoDiscount > 0) payload.promoCode = promoCode;
       const res = await api.post("/orders/checkout", payload);
-      toast.success("Pesanan berhasil dibuat!");
+      await Swal.fire({ title: "Pesanan Berhasil!", text: "Pesananmu sedang dikemas oleh seller.", icon: "success", confirmButtonColor: "#06b6d4" });
       router.push(`/dashboard/buyer/orders/${res.data.order.id}`);
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } };
-      toast.error(e?.response?.data?.message || "Checkout gagal");
+      Swal.fire({ title: "Checkout Gagal", text: e?.response?.data?.message || "Checkout gagal, coba lagi.", icon: "error", confirmButtonColor: "#ef4444" });
     }
     setSubmitting(false);
   };

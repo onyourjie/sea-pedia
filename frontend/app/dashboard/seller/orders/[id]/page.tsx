@@ -1,10 +1,9 @@
 "use client";
 
-import { use } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Package, MapPin, User, Truck, CheckCircle2 } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface OrderDetail {
@@ -40,8 +39,8 @@ function formatDateTime(d: string) {
   return new Date(d).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export default function SellerOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function SellerOrderDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const qc = useQueryClient();
 
   const { data: order, isLoading } = useQuery<OrderDetail>({
@@ -56,10 +55,10 @@ export default function SellerOrderDetailPage({ params }: { params: Promise<{ id
       qc.invalidateQueries({ queryKey: ["seller-order-detail", id] });
       qc.invalidateQueries({ queryKey: ["seller-orders-list"] });
       qc.invalidateQueries({ queryKey: ["seller-orders-recent"] });
-      toast.success("Pesanan diproses. Driver akan dapat mengambil job.");
+      Swal.fire({ title: "Berhasil!", text: "Pesanan diproses. Driver akan dapat mengambil job.", icon: "success", confirmButtonColor: "#f97316" });
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal memproses pesanan");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal memproses pesanan", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 

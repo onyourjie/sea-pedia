@@ -114,6 +114,8 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
   const limit = 12;
 
   const promoParam = searchParams.get("promo") || "";
@@ -150,6 +152,22 @@ export default function ProductsPage() {
     setPage(1);
   };
 
+  const applyPriceFilter = () => {
+    setMinPrice(minPriceInput);
+    setMaxPrice(maxPriceInput);
+    setPage(1);
+  };
+
+  const resetFilters = () => {
+    setSearch("");
+    setSearchInput("");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinPriceInput("");
+    setMaxPriceInput("");
+    setPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -163,7 +181,7 @@ export default function ProductsPage() {
                 <SlidersHorizontal className="w-4 h-4 text-cyan-500" /> Filter
               </h3>
               <button
-                onClick={() => { setSearch(""); setSearchInput(""); setMinPrice(""); setMaxPrice(""); setPage(1); }}
+                onClick={resetFilters}
                 className="text-xs text-cyan-500 hover:text-cyan-600 font-medium"
               >
                 Reset
@@ -190,25 +208,36 @@ export default function ProductsPage() {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Harga</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-1.5">
-                  <span className="text-xs text-gray-500">Rp</span>
+                  <span className="text-xs text-gray-500">Min</span>
                   <input
                     type="number"
                     placeholder="0"
-                    value={minPrice}
-                    onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
+                    value={minPriceInput}
+                    onChange={(e) => setMinPriceInput(e.target.value)}
                     className="w-full text-xs outline-none bg-transparent"
                   />
                 </div>
                 <div className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-1.5">
-                  <span className="text-xs text-gray-500">Rp</span>
+                  <span className="text-xs text-gray-500">Max</span>
                   <input
                     type="number"
                     placeholder="10.000.000"
-                    value={maxPrice}
-                    onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
+                    value={maxPriceInput}
+                    onChange={(e) => setMaxPriceInput(e.target.value)}
                     className="w-full text-xs outline-none bg-transparent"
                   />
                 </div>
+                <button
+                  onClick={applyPriceFilter}
+                  className="w-full bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-semibold py-2 rounded-lg transition"
+                >
+                  Terapkan Filter
+                </button>
+                {(minPrice || maxPrice) && (
+                  <p className="text-[10px] text-cyan-600 text-center">
+                    Filter aktif: {minPrice ? `Rp ${Number(minPrice).toLocaleString("id-ID")}` : "0"} – {maxPrice ? `Rp ${Number(maxPrice).toLocaleString("id-ID")}` : "∞"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -229,20 +258,29 @@ export default function ProductsPage() {
             )}
           </nav>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div>
               <h1 className="text-xl font-bold text-gray-800">{search ? `Hasil: "${search}"` : "Semua Produk"}</h1>
               <p className="text-xs text-gray-500 mt-0.5">
                 {isLoading ? "Memuat..." : `Menampilkan ${products.length} dari ${total} produk`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <form onSubmit={handleSearch} className="flex items-center border border-gray-200 rounded-full px-3 py-1.5 bg-white gap-2 hover:border-cyan-300 transition">
+                <input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Cari produk..."
+                  className="text-xs outline-none bg-transparent w-32"
+                />
+                <button type="submit" className="text-xs text-cyan-500 font-semibold">Cari</button>
+              </form>
               <span className="text-xs text-gray-500 hidden sm:block">Urutkan:</span>
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-wrap">
                 {SORTS.map((s) => (
                   <button
                     key={s.value}
-                    onClick={() => setSort(s.value)}
+                    onClick={() => { setSort(s.value); setPage(1); }}
                     className={`text-xs px-3 py-1.5 rounded-full font-medium transition ${sort === s.value ? "bg-cyan-500 text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"}`}
                   >
                     {s.label}

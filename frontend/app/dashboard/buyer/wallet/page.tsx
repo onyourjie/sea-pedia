@@ -23,6 +23,7 @@ interface Transaction {
 
 const TX_LABEL: Record<string, { label: string; color: string; icon: typeof ArrowUpRight }> = {
   TOP_UP: { label: "Top Up", color: "text-green-600", icon: ArrowUpRight },
+  TOPUP: { label: "Top Up", color: "text-green-600", icon: ArrowUpRight },
   PAYMENT: { label: "Pembayaran", color: "text-red-500", icon: ArrowDownLeft },
   REFUND: { label: "Refund", color: "text-blue-500", icon: RefreshCw },
 };
@@ -30,6 +31,7 @@ const TX_LABEL: Record<string, { label: string; color: string; icon: typeof Arro
 export default function WalletPage() {
   const queryClient = useQueryClient();
   const [topUpAmount, setTopUpAmount] = useState(0);
+  const [filterType, setFilterType] = useState("");
 
   const { data: walletData } = useQuery({
     queryKey: ["buyer-wallet"],
@@ -37,15 +39,19 @@ export default function WalletPage() {
   });
 
   const { data: txData } = useQuery({
-    queryKey: ["wallet-transactions"],
-    queryFn: () => api.get("/wallet/transactions?limit=10").then((r) => r.data),
+    queryKey: ["wallet-transactions", filterType],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: "50" });
+      if (filterType) params.set("type", filterType);
+      return api.get(`/wallet/transactions?${params}`).then((r) => r.data);
+    },
   });
 
   const topUpMutation = useMutation({
     mutationFn: (amount: number) => api.post("/wallet/topup", { amount }),
     onSuccess: (_, amount) => {
       queryClient.invalidateQueries({ queryKey: ["buyer-wallet"] });
-      queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["wallet-transactions"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       setTopUpAmount(0);
       Swal.fire({
@@ -66,8 +72,8 @@ export default function WalletPage() {
     },
   });
 
-  const balance = walletData?.data?.balance ?? 0;
-  const transactions: Transaction[] = txData?.data || [];
+  const balance = Number(walletData?.balance ?? 0);
+  const transactions: Transaction[] = txData?.transactions || [];
 
   return (
     <div className="space-y-6">
@@ -174,11 +180,15 @@ export default function WalletPage() {
             <h2 className="font-bold text-gray-800">Riwayat Transaksi Wallet</h2>
           </div>
           <div className="flex items-center gap-2">
-            <select className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none text-gray-600">
-              <option>Semua Transaksi</option>
-              <option>Top Up</option>
-              <option>Pembayaran</option>
-              <option>Refund</option>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none text-gray-600"
+            >
+              <option value="">Semua Transaksi</option>
+              <option value="TOPUP">Top Up</option>
+              <option value="PAYMENT">Pembayaran</option>
+              <option value="REFUND">Refund</option>
             </select>
             <button className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition">
               <Search className="w-3.5 h-3.5 text-gray-400" />
@@ -206,7 +216,7 @@ export default function WalletPage() {
               {transactions.map((tx) => {
                 const info = TX_LABEL[tx.type] || { label: tx.type, color: "text-gray-600", icon: RefreshCw };
                 const Icon = info.icon;
-                const isCredit = tx.type === "TOP_UP" || tx.type === "REFUND";
+                const isCredit = tx.type === "TOP_UP" || tx.type === "TOPUP" || tx.type === "REFUND";
                 return (
                   <tr key={tx.id} className="hover:bg-gray-50/50 transition">
                     <td className="px-5 py-3.5 text-xs text-gray-500">

@@ -74,7 +74,7 @@ export function Navbar() {
                 {user.username}
               </Link>
               <button
-                onClick={() => { logout(); router.push("/"); }}
+                onClick={async () => { await logout(); router.push("/"); }}
                 className="hidden md:block text-sm text-gray-500 hover:text-gray-800 px-3 py-1.5 transition"
               >
                 Keluar
@@ -145,7 +145,7 @@ export function Navbar() {
               <>
                 <Link href={dashboardHref} className="text-sm font-medium py-2">Dashboard ({user.activeRole})</Link>
                 <Link href="/dashboard/buyer/cart" className="text-sm py-2">Keranjang</Link>
-                <button onClick={() => { logout(); router.push("/"); }} className="text-sm text-left text-red-500 py-2">Keluar</button>
+                <button onClick={async () => { await logout(); router.push("/"); }} className="text-sm text-left text-red-500 py-2">Keluar</button>
               </>
             ) : (
               <>

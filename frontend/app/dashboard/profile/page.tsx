@@ -23,16 +23,17 @@ function formatPrice(p: number) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, hasHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!token) router.replace("/login");
-  }, [token, router]);
+  }, [hasHydrated, token, router]);
 
-  const { data: walletData } = useQuery({
-    queryKey: ["profile-wallet"],
-    queryFn: () => api.get("/wallet").then((r) => r.data),
-    enabled: !!token && user?.activeRole === "BUYER",
+  const { data: profileData } = useQuery({
+    queryKey: ["profile-detail"],
+    queryFn: () => api.get("/users/profile").then((r) => r.data),
+    enabled: !!token,
   });
 
   const { data: report } = useQuery({
@@ -49,7 +50,7 @@ export default function ProfilePage() {
     retry: false,
   });
 
-  if (!token || !user) return null;
+  if (!hasHydrated || !token || !user) return null;
 
   const activeInfo = (user.activeRole && ROLE_INFO[user.activeRole]) || ROLE_INFO.BUYER;
 
@@ -61,7 +62,7 @@ export default function ProfilePage() {
             <Waves className="w-5 h-5" /> Seapedia
           </Link>
           <button
-            onClick={() => { logout(); router.push("/login"); }}
+            onClick={async () => { await logout(); router.push("/login"); }}
             className="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
           >
             <LogOut className="w-3.5 h-3.5" /> Keluar
@@ -155,7 +156,7 @@ export default function ProfilePage() {
             <FinancialCard
               icon={Wallet}
               label="Wallet (Buyer)"
-              value={user.roles.includes("BUYER") ? formatPrice(Number(walletData?.balance || 0)) : "—"}
+              value={user.roles.includes("BUYER") ? formatPrice(profileData?.walletBalance ?? 0) : "—"}
               available={user.roles.includes("BUYER")}
             />
             <FinancialCard

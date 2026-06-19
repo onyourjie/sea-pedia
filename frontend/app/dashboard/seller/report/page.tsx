@@ -2,12 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { TrendingUp, DollarSign, Package, Award } from "lucide-react";
+import { TrendingUp, DollarSign, Package, Award, Clock } from "lucide-react";
 import api from "@/lib/api";
 
 interface ReportData {
   totalOrders: number;
   totalIncome: number;
+  pendingOrders: number;
+  pendingIncome: number;
   orders: {
     id: string;
     status: string;
@@ -21,8 +23,18 @@ function formatPrice(p: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
 }
 
+function SkeletonCard() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 animate-pulse">
+      <div className="w-9 h-9 rounded-xl bg-gray-100 mb-3" />
+      <div className="h-3 bg-gray-100 rounded w-24 mb-2" />
+      <div className="h-6 bg-gray-100 rounded w-32" />
+    </div>
+  );
+}
+
 export default function SellerReportPage() {
-  const { data, isLoading } = useQuery<ReportData>({
+  const { data, isLoading, isError } = useQuery<ReportData>({
     queryKey: ["seller-income-report"],
     queryFn: () => api.get("/orders/seller/report").then((r) => r.data),
   });
@@ -31,7 +43,24 @@ export default function SellerReportPage() {
   const totalItems = completed.reduce((s, o) => s + o.items.reduce((x, i) => x + i.quantity, 0), 0);
   const avgOrder = completed.length > 0 ? (data?.totalIncome || 0) / completed.length : 0;
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat laporan...</p>;
+  if (isLoading) return (
+    <div className="space-y-6">
+      <div>
+        <div className="h-7 bg-gray-100 rounded w-48 animate-pulse mb-2" />
+        <div className="h-4 bg-gray-100 rounded w-64 animate-pulse" />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+      </div>
+    </div>
+  );
+
+  if (isError) return (
+    <div className="text-center py-16">
+      <p className="text-red-500 font-medium">Gagal memuat laporan</p>
+      <p className="text-sm text-gray-400 mt-1">Coba refresh halaman</p>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -66,10 +95,31 @@ export default function SellerReportPage() {
         })}
       </div>
 
+      {(data?.pendingOrders ?? 0) > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3"
+        >
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Pendapatan Tertunda</p>
+            <p className="text-xs text-amber-600 mt-0.5">
+              {data?.pendingOrders} pesanan sedang diproses — estimasi {formatPrice(data?.pendingIncome ?? 0)} akan masuk setelah selesai
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h2 className="font-bold text-gray-800 mb-3">Riwayat Pesanan Selesai</h2>
         {completed.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">Belum ada pesanan selesai</p>
+          <div className="text-center py-12">
+            <Package className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+            <p className="text-sm text-gray-400">Belum ada pesanan selesai</p>
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="text-xs text-gray-500 uppercase border-b border-gray-100">

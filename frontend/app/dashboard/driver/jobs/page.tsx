@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Briefcase, MapPin, Truck, Package, Store } from "lucide-react";
-import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface AvailableJob {
@@ -37,10 +37,10 @@ export default function DriverJobsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["driver-available-jobs"] });
       qc.invalidateQueries({ queryKey: ["driver-my-jobs"] });
-      toast.success("Job berhasil diambil! Cek tab Job Aktif.");
+      Swal.fire({ title: "Job Diambil!", text: "Cek tab Job Aktif untuk mulai pengiriman.", icon: "success", confirmButtonColor: "#16a34a" });
     },
     onError: (e: { response?: { data?: { message?: string } } }) => {
-      toast.error(e?.response?.data?.message || "Gagal mengambil job");
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal mengambil job", icon: "error", confirmButtonColor: "#ef4444" });
     },
   });
 
