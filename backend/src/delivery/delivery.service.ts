@@ -66,7 +66,6 @@ export class DeliveryService {
       include: { order: true },
     });
     if (!delivery) throw new NotFoundException('Delivery job not found');
-    if (delivery.driverId) throw new ConflictException('Job already taken by another driver');
     if (delivery.order.status !== OrderStatus.MENUNGGU_PENGIRIM)
       throw new BadRequestException('This job is not available for pickup');
 
@@ -77,20 +76,23 @@ export class DeliveryService {
     if (activeJob) throw new BadRequestException('You already have an active delivery job');
 
     return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.delivery.update({
-        where: { id: deliveryId },
+      // Atomic update: only succeeds if driverId is still null (race condition safe)
+      const result = await tx.delivery.updateMany({
+        where: { id: deliveryId, driverId: null },
         data: { driverId: driver.id, takenAt: new Date() },
       });
+      if (result.count === 0) throw new ConflictException('Job already taken by another driver');
+
       await tx.order.update({
         where: { id: delivery.orderId },
         data: {
           status: OrderStatus.SEDANG_DIKIRIM,
           statusHistory: {
-            create: { status: OrderStatus.SEDANG_DIKIRIM, note: `Driver ${driver.id} took the job` },
+            create: { status: OrderStatus.SEDANG_DIKIRIM, note: `Driver took the job` },
           },
         },
       });
-      return updated;
+      return { message: 'Job taken successfully', deliveryId };
     });
   }
 
@@ -126,6 +128,15 @@ export class DeliveryService {
         where: { id: driver.id },
         data: { earnings: { increment: earning } },
       });
+      await tx.driverEarningLog.create({
+        data: {
+          driverId: driver.id,
+          deliveryId,
+          orderId: delivery.orderId,
+          amount: earning,
+          deliveryFee: delivery.order.deliveryFee,
+        },
+      });
       return { message: 'Job completed', earning };
     });
   }
@@ -141,6 +152,7 @@ export class DeliveryService {
             address: true,
           },
         },
+        earningLog: true,
       },
       orderBy: { createdAt: 'desc' },
     });

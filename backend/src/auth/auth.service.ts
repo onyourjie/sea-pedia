@@ -4,12 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, LoginDto, SelectRoleDto } from './auth.dto';
 import { RoleType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private config: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -65,9 +67,13 @@ export class AuthService {
 
     const userRoles = user.roles.map((r) => r.role);
 
-    // If only one role, auto-select it
+    // If only one role, auto-select it and create session
     if (userRoles.length === 1) {
       const token = this.signToken(user.id, userRoles[0]);
+      const expiresAt = this.getExpiresAt();
+      await this.prisma.session.create({
+        data: { userId: user.id, activeRole: userRoles[0], expiresAt },
+      });
       return {
         accessToken: token,
         activeRole: userRoles[0],
@@ -93,7 +99,33 @@ export class AuthService {
       throw new BadRequestException('You do not own this role');
     }
     const token = this.signToken(userId, dto.role);
+    const expiresAt = this.getExpiresAt();
+    await this.prisma.session.create({
+      data: { userId, activeRole: dto.role, expiresAt },
+    });
     return { accessToken: token, activeRole: dto.role };
+  }
+
+  async logout(token: string) {
+    try {
+      const payload = this.jwt.verify(token) as { sub: string };
+      await this.prisma.session.deleteMany({ where: { userId: payload.sub } });
+    } catch {
+      // Token already invalid, nothing to do
+    }
+    return { message: 'Logged out successfully' };
+  }
+
+  async cleanExpiredSessions() {
+    await this.prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+  }
+
+  private getExpiresAt(): Date {
+    const raw = this.config.get<string>('JWT_EXPIRES_IN', '7d');
+    const days = parseInt(raw) || 7;
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + days);
+    return expiresAt;
   }
 
   private signToken(userId: string, activeRole: RoleType): string {

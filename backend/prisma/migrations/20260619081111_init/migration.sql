@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Promo" ADD COLUMN     "usageCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "usageLimit" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "WalletTx" ADD COLUMN     "balanceAfter" DECIMAL(15,2) NOT NULL DEFAULT 0;

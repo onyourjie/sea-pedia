@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request, Headers } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, SelectRoleDto } from './auth.dto';
@@ -25,6 +25,14 @@ export class AuthController {
   @ApiBearerAuth()
   selectRole(@CurrentUser() user: any, @Body() dto: SelectRoleDto) {
     return this.authService.selectRole(user.id, dto, user.roles);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  logout(@Headers('authorization') auth: string) {
+    const token = auth?.replace('Bearer ', '') ?? '';
+    return this.authService.logout(token);
   }
 
   @Get('me')

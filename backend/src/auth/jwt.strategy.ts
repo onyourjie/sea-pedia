@@ -18,7 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: { sub: string; activeRole: string; roles?: string[]; roleSelection?: boolean }) {
     if (payload.roleSelection) {
-      // Partial token used only for role selection
       return { id: payload.sub, roles: payload.roles, activeRole: null, roleSelection: true };
     }
 
@@ -27,6 +26,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       include: { roles: true },
     });
     if (!user) return null;
+
+    // Check that an active session exists (logout invalidates all sessions)
+    const session = await this.prisma.session.findFirst({
+      where: { userId: user.id, expiresAt: { gt: new Date() } },
+    });
+    if (!session) return null;
 
     return {
       id: user.id,
