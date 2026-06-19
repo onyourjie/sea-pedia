@@ -49,7 +49,7 @@ export default function AdminStoresPage() {
               {stores.map((s) => (
                 <tr key={s.id} className="border-t border-gray-100 hover:bg-gray-50">
                   <td className="px-4 py-3 font-semibold text-gray-800">{s.name}</td>
-                  <td className="px-4 py-3 text-gray-600 line-clamp-1 max-w-md">{s.description || "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 max-w-xs">{s.description || "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <span className="text-xs font-semibold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full">
                       {s._count.products}
