@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Star, ArrowRight, Store, Flame, Box, Sparkles } from "lucide-react";
+import { Star, ArrowRight, Store } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
@@ -20,12 +19,6 @@ interface Product {
   discount?: number;
   store?: { name: string };
 }
-
-const TABS = [
-  { label: "Pilihan", value: "", icon: Sparkles },
-  { label: "Terbaru", value: "newest", icon: Box },
-  { label: "Hot Deals", value: "hot", icon: Flame },
-];
 
 function ProductCard({ product }: { product: Product }) {
   return (
@@ -91,47 +84,19 @@ function ProductCardSkeleton() {
 }
 
 export function FeaturedProducts() {
-  const [activeTab, setActiveTab] = useState("");
-
   const { data, isLoading } = useQuery({
-    queryKey: ["featured-products", activeTab],
-    queryFn: () => {
-      let url = "/products?limit=8";
-      if (activeTab === "newest") url += "&sort=newest";
-      if (activeTab === "hot") url += "&sort=price_asc&promo=1";
-      return api.get(url).then((r: { data: { data: Product[] } }) => r.data);
-    },
+    queryKey: ["featured-products"],
+    queryFn: () => api.get("/products?limit=8").then((r: { data: { data: Product[] } }) => r.data),
   });
 
   const products = (data?.data || []) as Product[];
 
-  const viewAllHref = activeTab === "newest" ? "/products?sort=newest" : activeTab === "hot" ? "/products?promo=1" : "/products";
-
   return (
     <section className="max-w-7xl mx-auto px-4 py-10">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div className="mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-1">Produk Pilihan</h2>
           <p className="text-gray-500 text-sm">Temukan barang berkualitas dari seluruh penjual maritim terpercaya kami.</p>
-        </div>
-        <div className="flex gap-2">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition ${
-                  activeTab === tab.value
-                    ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/25"
-                    : "bg-white border border-gray-200 text-gray-600 hover:border-cyan-300"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
         </div>
       </div>
 
@@ -152,7 +117,7 @@ export function FeaturedProducts() {
 
       <div className="text-center mt-8">
         <Link
-          href={viewAllHref}
+          href="/products"
           className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-8 py-3 rounded-full transition shadow-lg shadow-cyan-500/20"
         >
           Jelajahi Semua Produk <ArrowRight className="w-4 h-4" />
