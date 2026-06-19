@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal, Star, ChevronLeft, ChevronRight, Waves } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { SlidersHorizontal, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
 interface Product {
   id: string;
@@ -104,16 +107,37 @@ function ProductCardSkeleton() {
 }
 
 export default function ProductsPage() {
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [sort, setSort] = useState("newest");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+  const [sort, setSort] = useState(searchParams.get("sort") || "newest");
   const [page, setPage] = useState(1);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const limit = 12;
 
+  const promoParam = searchParams.get("promo") || "";
+
+  useEffect(() => {
+    const s = searchParams.get("search") || "";
+    const so = searchParams.get("sort") || "newest";
+    setSearch(s);
+    setSearchInput(s);
+    setSort(so);
+    setPage(1);
+  }, [searchParams]);
+
   const { data, isLoading } = useQuery<ProductsResponse>({
-    queryKey: ["products", search, sort, page],
-    queryFn: () =>
-      api.get(`/products?page=${page}&limit=${limit}${search ? `&search=${search}` : ""}`).then((r) => r.data),
+    queryKey: ["products", search, sort, page, minPrice, maxPrice, promoParam],
+    queryFn: () => {
+      let url = `/products?page=${page}&limit=${limit}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (sort) url += `&sort=${sort}`;
+      if (minPrice) url += `&minPrice=${minPrice}`;
+      if (maxPrice) url += `&maxPrice=${maxPrice}`;
+      if (promoParam) url += `&promo=1`;
+      return api.get(url).then((r) => r.data);
+    },
   });
 
   const products = data?.data || [];
@@ -128,29 +152,7 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-1.5 text-cyan-500 font-bold text-lg shrink-0">
-            <Waves className="w-5 h-5" />
-            SEAPEDIA
-          </Link>
-          <form onSubmit={handleSearch} className="flex-1 max-w-xl relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Cari produk maritim..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 bg-gray-50"
-            />
-          </form>
-          <div className="flex items-center gap-2 ml-auto">
-            <Link href="/login" className="text-sm text-gray-600 hover:text-cyan-500 font-medium px-3 py-1.5">Masuk</Link>
-            <Link href="/register" className="text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-4 py-1.5 rounded-full transition">Daftar</Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
         {/* Sidebar filter */}
@@ -161,7 +163,7 @@ export default function ProductsPage() {
                 <SlidersHorizontal className="w-4 h-4 text-cyan-500" /> Filter
               </h3>
               <button
-                onClick={() => { setSearch(""); setSearchInput(""); setPage(1); }}
+                onClick={() => { setSearch(""); setSearchInput(""); setMinPrice(""); setMaxPrice(""); setPage(1); }}
                 className="text-xs text-cyan-500 hover:text-cyan-600 font-medium"
               >
                 Reset
@@ -189,11 +191,23 @@ export default function ProductsPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-1.5">
                   <span className="text-xs text-gray-500">Rp</span>
-                  <input type="number" placeholder="0" className="w-full text-xs outline-none bg-transparent" />
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={minPrice}
+                    onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
+                    className="w-full text-xs outline-none bg-transparent"
+                  />
                 </div>
                 <div className="flex items-center gap-1 border border-gray-200 rounded-lg px-3 py-1.5">
                   <span className="text-xs text-gray-500">Rp</span>
-                  <input type="number" placeholder="10.000.000" className="w-full text-xs outline-none bg-transparent" />
+                  <input
+                    type="number"
+                    placeholder="10.000.000"
+                    value={maxPrice}
+                    onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
+                    className="w-full text-xs outline-none bg-transparent"
+                  />
                 </div>
               </div>
             </div>
@@ -287,34 +301,7 @@ export default function ProductsPage() {
         </main>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
-          <div>
-            <div className="flex items-center gap-1.5 text-cyan-500 font-bold mb-3">
-              <Waves className="w-4 h-4" /> SEAPEDIA
-            </div>
-            <p className="text-xs text-gray-400 leading-relaxed">Marketplace kelautan terbesar di Indonesia.</p>
-          </div>
-          {[
-            { title: "Layanan Pelanggan", links: ["Bantuan", "Cara Pembelian", "Lacak Pesanan", "Pengembalian"] },
-            { title: "Jelajahi SEAPEDIA", links: ["Tentang Kami", "Karir", "Blog Kelautan", "Kontak Media"] },
-            { title: "Keamanan & Privasi", links: ["Syarat Layanan", "Kebijakan Privasi"] },
-          ].map((col) => (
-            <div key={col.title}>
-              <h4 className="font-semibold text-gray-700 mb-3 text-xs uppercase tracking-wider">{col.title}</h4>
-              <ul className="space-y-1.5">
-                {col.links.map((l) => (
-                  <li key={l}><a href="#" className="text-xs text-gray-400 hover:text-cyan-500 transition">{l}</a></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="max-w-7xl mx-auto px-4 mt-6 pt-6 border-t border-gray-100 text-center text-xs text-gray-400">
-          © 2026 SEAPEDIA. All rights reserved.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

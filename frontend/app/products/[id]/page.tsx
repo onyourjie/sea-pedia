@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { Star, ShoppingCart, Zap, Shield, ChevronRight, Waves, Heart, Share2, Minus, Plus } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Star, ShoppingCart, Zap, Shield, ChevronRight, Heart, Share2, Minus, Plus } from "lucide-react";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { useAuthStore } from "@/store/auth.store";
+import { Navbar } from "@/components/layout/navbar";
 
 interface Product {
   id: string;
@@ -25,11 +28,21 @@ function formatPrice(price: number) {
 
 const TABS = ["Deskripsi Produk", "Spesifikasi", "Ulasan Produk"];
 
+const FAVORITES_KEY = "seapedia_favorites";
+
+function getFavorites(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]"); } catch { return []; }
+}
+
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { token, user } = useAuthStore();
+  const qc = useQueryClient();
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(() => getFavorites().includes(id as string));
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["product", id],
@@ -39,28 +52,77 @@ export default function ProductDetailPage() {
 
   const { data: storeProducts } = useQuery<{ data: Product[] }>({
     queryKey: ["store-products", product?.store?.id],
-    queryFn: () =>
-      api.get(`/products?storeId=${product?.store?.id}&limit=6`).then((r) => r.data),
+    queryFn: () => api.get(`/products?storeId=${product?.store?.id}&limit=6`).then((r) => r.data),
     enabled: !!product?.store?.id,
   });
 
   const relatedProducts = storeProducts?.data?.filter((p) => p.id !== id).slice(0, 5) || [];
+  const discountedPrice = product?.discount ? product.price * (1 - product.discount / 100) : null;
 
-  const discountedPrice = product?.discount
-    ? product.price * (1 - product.discount / 100)
-    : null;
+  const toggleFavorite = () => {
+    const favs = getFavorites();
+    const productId = id as string;
+    let updated: string[];
+    if (favs.includes(productId)) {
+      updated = favs.filter((f) => f !== productId);
+      setIsFavorite(false);
+      Swal.fire({ title: "Dihapus dari Favorit", icon: "info", timer: 1200, showConfirmButton: false, toast: true, position: "top-end" });
+    } else {
+      updated = [...favs, productId];
+      setIsFavorite(true);
+      Swal.fire({ title: "Ditambahkan ke Favorit!", icon: "success", timer: 1200, showConfirmButton: false, toast: true, position: "top-end" });
+    }
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+  };
+
+  const addToCart = useMutation({
+    mutationFn: () => api.post("/cart/items", { productId: id, quantity: qty }).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["cart"] });
+      Swal.fire({ title: "Berhasil!", text: `${product?.name} ditambahkan ke keranjang!`, icon: "success", timer: 1500, showConfirmButton: false, toast: true, position: "top-end" });
+    },
+    onError: (e: { response?: { data?: { message?: string } } }) => {
+      Swal.fire({ title: "Gagal", text: e?.response?.data?.message || "Gagal menambah ke keranjang", icon: "error", confirmButtonColor: "#ef4444" });
+    },
+  });
 
   const handleAddToCart = () => {
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+    if (!token) {
+      Swal.fire({ title: "Belum Login", text: "Silakan login terlebih dahulu", icon: "warning", confirmButtonColor: "#06b6d4" }).then(() => router.push("/login"));
+      return;
+    }
+    if (user?.activeRole !== "BUYER") {
+      Swal.fire({ title: "Akses Ditolak", text: "Hanya pembeli yang bisa menambah ke keranjang", icon: "warning", confirmButtonColor: "#06b6d4" });
+      return;
+    }
+    addToCart.mutate();
+  };
+
+  const handleBuyNow = () => {
+    if (!token) {
+      Swal.fire({ title: "Belum Login", text: "Silakan login terlebih dahulu", icon: "warning", confirmButtonColor: "#06b6d4" }).then(() => router.push("/login"));
+      return;
+    }
+    if (user?.activeRole !== "BUYER") {
+      Swal.fire({ title: "Akses Ditolak", text: "Hanya pembeli yang bisa membeli produk", icon: "warning", confirmButtonColor: "#06b6d4" });
+      return;
+    }
+    addToCart.mutate(undefined, {
+      onSuccess: () => {
+        router.push("/dashboard/buyer/checkout");
+      },
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin" />
-          <p className="text-sm text-gray-400">Memuat produk...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin" />
+            <p className="text-sm text-gray-400">Memuat produk...</p>
+          </div>
         </div>
       </div>
     );
@@ -68,10 +130,13 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 mb-3">Produk tidak ditemukan</p>
-          <Link href="/products" className="text-cyan-500 hover:underline text-sm">Kembali ke produk</Link>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-gray-500 mb-3">Produk tidak ditemukan</p>
+            <Link href="/products" className="text-cyan-500 hover:underline text-sm">Kembali ke produk</Link>
+          </div>
         </div>
       </div>
     );
@@ -79,18 +144,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-1.5 text-cyan-500 font-bold text-lg shrink-0">
-            <Waves className="w-5 h-5" />
-            SEAPEDIA
-          </Link>
-          <div className="flex-1" />
-          <Link href="/login" className="text-sm text-gray-600 hover:text-cyan-500 font-medium px-3 py-1.5">Masuk</Link>
-          <Link href="/register" className="text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-4 py-1.5 rounded-full transition">Daftar</Link>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
@@ -110,27 +164,23 @@ export default function ProductDetailPage() {
                 src={product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80"}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80"; }}
               />
               <button className="absolute top-3 right-12 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition">
                 <Share2 className="w-4 h-4 text-gray-500" />
               </button>
-              <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition">
-                <Heart className="w-4 h-4 text-gray-500" />
+              <button
+                onClick={toggleFavorite}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition"
+              >
+                <Heart className={`w-4 h-4 transition ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-500 hover:text-red-500"}`} />
               </button>
-              {product.discount && (
-                <span className="absolute top-3 left-3 text-xs font-bold bg-orange-500 text-white px-2.5 py-1 rounded-full">
-                  Tertlaris
-                </span>
-              )}
             </div>
           </div>
 
           {/* Right: info */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
-              {product.discount && (
-                <span className="text-xs bg-cyan-100 text-cyan-700 font-semibold px-2 py-0.5 rounded-full">Terlaris</span>
-              )}
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className={`w-3.5 h-3.5 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"}`} />
@@ -184,12 +234,17 @@ export default function ProductDetailPage() {
             <div className="flex gap-3 mb-5">
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 flex items-center justify-center gap-2 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50 font-semibold py-3 rounded-xl text-sm transition ${addedToCart ? "bg-cyan-50" : ""}`}
+                disabled={addToCart.isPending || product.stock === 0}
+                className="flex-1 flex items-center justify-center gap-2 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50 disabled:opacity-60 font-semibold py-3 rounded-xl text-sm transition"
               >
                 <ShoppingCart className="w-4 h-4" />
-                {addedToCart ? "Ditambahkan!" : "Tambah ke Keranjang"}
+                {addToCart.isPending ? "Menambahkan..." : "Tambah ke Keranjang"}
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-orange-500/25">
+              <button
+                onClick={handleBuyNow}
+                disabled={addToCart.isPending || product.stock === 0}
+                className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-orange-500/25"
+              >
                 <Zap className="w-4 h-4" />
                 Beli Sekarang
               </button>
@@ -211,12 +266,13 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-white transition flex items-center gap-1">
-                    Chat
-                  </button>
-                  <button className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-white transition flex items-center gap-1">
+                  <button className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-white transition">Chat</button>
+                  <Link
+                    href={`/stores/${product.store.id}`}
+                    className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-white transition"
+                  >
                     Kunjungi Toko
-                  </button>
+                  </Link>
                 </div>
               </div>
             )}
@@ -252,23 +308,21 @@ export default function ProductDetailPage() {
                 {product.description || "Tidak ada deskripsi produk."}
               </div>
             )}
-            {activeTab === 1 && (
-              <div className="text-sm text-gray-500">Informasi spesifikasi belum tersedia.</div>
-            )}
-            {activeTab === 2 && (
-              <div className="text-sm text-gray-500">Belum ada ulasan untuk produk ini.</div>
-            )}
+            {activeTab === 1 && <div className="text-sm text-gray-500">Informasi spesifikasi belum tersedia.</div>}
+            {activeTab === 2 && <div className="text-sm text-gray-500">Belum ada ulasan untuk produk ini.</div>}
           </div>
         </div>
 
-        {/* Related products from same store */}
+        {/* Related products */}
         {relatedProducts.length > 0 && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">Produk Lain dari Toko Ini</h2>
-              <Link href="/products" className="text-sm text-cyan-500 hover:text-cyan-600 flex items-center gap-1">
-                Lihat Semua <ChevronRight className="w-4 h-4" />
-              </Link>
+              {product.store && (
+                <Link href={`/stores/${product.store.id}`} className="text-sm text-cyan-500 hover:text-cyan-600 flex items-center gap-1">
+                  Lihat Semua <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {relatedProducts.map((p, i) => (
@@ -285,15 +339,12 @@ export default function ProductDetailPage() {
                         src={p.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&q=80"}
                         alt={p.name}
                         className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&q=80"; }}
                       />
                     </div>
                     <div className="p-2.5">
                       <p className="text-xs text-gray-700 font-medium line-clamp-2 mb-1">{p.name}</p>
                       <p className="text-sm font-bold text-cyan-600">{formatPrice(p.price)}</p>
-                      <div className="flex items-center gap-0.5 mt-1">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-[10px] text-gray-400">4.8</span>
-                      </div>
                     </div>
                   </Link>
                 </motion.div>
@@ -302,35 +353,6 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
-          <div>
-            <div className="flex items-center gap-1.5 text-cyan-500 font-bold mb-3">
-              <Waves className="w-4 h-4" /> SEAPEDIA
-            </div>
-            <p className="text-xs text-gray-400 leading-relaxed">E-commerce terbaik untuk segala kebutuhan kelautan dan perlengkapan air Anda.</p>
-          </div>
-          {[
-            { title: "Layanan Pelanggan", links: ["Pusat Bantuan", "Cara Pembelian", "Pengiriman", "Pengembalian"] },
-            { title: "Tentang Kami", links: ["Karir", "Kebijakan Privasi", "Blog", "Kontak Media"] },
-            { title: "Ikuti Kami", links: [] },
-          ].map((col) => (
-            <div key={col.title}>
-              <h4 className="font-semibold text-gray-700 mb-3 text-xs uppercase tracking-wider">{col.title}</h4>
-              <ul className="space-y-1.5">
-                {col.links.map((l) => (
-                  <li key={l}><a href="#" className="text-xs text-gray-400 hover:text-cyan-500 transition">{l}</a></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="max-w-7xl mx-auto px-4 mt-6 pt-6 border-t border-gray-100 text-center text-xs text-gray-400">
-          © 2026 SEAPEDIA. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Package, Plus, Pencil, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 interface Product {
@@ -73,9 +74,9 @@ export default function SellerProductsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-products"] });
       qc.invalidateQueries({ queryKey: ["seller-my-store"] });
-      toast.success("Produk dihapus");
+      Swal.fire({ title: "Terhapus!", text: "Produk berhasil dihapus.", icon: "success", timer: 1500, showConfirmButton: false });
     },
-    onError: () => toast.error("Gagal menghapus produk"),
+    onError: () => Swal.fire({ title: "Gagal", text: "Gagal menghapus produk.", icon: "error" }),
   });
 
   const reset = () => {
@@ -261,8 +262,18 @@ export default function SellerProductsPage() {
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Hapus produk "${p.name}"?`)) remove.mutate(p.id);
+                        onClick={async () => {
+                          const result = await Swal.fire({
+                            title: "Hapus Produk?",
+                            text: `Hapus produk "${p.name}"?`,
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#ef4444",
+                            cancelButtonColor: "#6b7280",
+                            confirmButtonText: "Ya, Hapus",
+                            cancelButtonText: "Batal",
+                          });
+                          if (result.isConfirmed) remove.mutate(p.id);
                         }}
                         className="text-red-500 hover:text-red-600 p-1.5 rounded hover:bg-red-50"
                       >

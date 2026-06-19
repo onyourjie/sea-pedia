@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -41,8 +40,8 @@ function formatDateTime(d: string) {
   return new Date(d).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function OrderDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
 
   const { data: order, isLoading } = useQuery<OrderDetail>({
     queryKey: ["order-detail", id],

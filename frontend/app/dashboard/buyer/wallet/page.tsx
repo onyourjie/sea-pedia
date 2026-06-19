@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRight, ArrowDownLeft, RefreshCw, CreditCard, AlertCircle, Shield, Search } from "lucide-react";
+import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 function formatPrice(price: number) {
@@ -30,7 +30,6 @@ const TX_LABEL: Record<string, { label: string; color: string; icon: typeof Arro
 export default function WalletPage() {
   const queryClient = useQueryClient();
   const [topUpAmount, setTopUpAmount] = useState(0);
-  const [topUpSuccess, setTopUpSuccess] = useState(false);
 
   const { data: walletData } = useQuery({
     queryKey: ["buyer-wallet"],
@@ -44,12 +43,26 @@ export default function WalletPage() {
 
   const topUpMutation = useMutation({
     mutationFn: (amount: number) => api.post("/wallet/topup", { amount }),
-    onSuccess: () => {
+    onSuccess: (_, amount) => {
       queryClient.invalidateQueries({ queryKey: ["buyer-wallet"] });
       queryClient.invalidateQueries({ queryKey: ["wallet-transactions"] });
-      setTopUpSuccess(true);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
       setTopUpAmount(0);
-      setTimeout(() => setTopUpSuccess(false), 3000);
+      Swal.fire({
+        title: "Top Up Berhasil!",
+        text: `Saldo Anda berhasil ditambahkan sebesar ${formatPrice(amount)}.`,
+        icon: "success",
+        confirmButtonColor: "#06b6d4",
+        confirmButtonText: "OK",
+      });
+    },
+    onError: (e: { response?: { data?: { message?: string } } }) => {
+      Swal.fire({
+        title: "Gagal",
+        text: e?.response?.data?.message || "Top up gagal, coba lagi.",
+        icon: "error",
+        confirmButtonColor: "#ef4444",
+      });
     },
   });
 
@@ -120,16 +133,6 @@ export default function WalletPage() {
               />
             </div>
           </div>
-
-          {topUpSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-3 text-xs text-green-600 bg-green-50 border border-green-200 rounded-xl px-3 py-2 flex items-center gap-2"
-            >
-              <Shield className="w-3.5 h-3.5" /> Top up berhasil!
-            </motion.div>
-          )}
 
           <button
             onClick={() => topUpAmount > 0 && topUpMutation.mutate(topUpAmount)}
