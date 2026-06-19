@@ -58,7 +58,7 @@ export function Navbar() {
           {user ? (
             <>
               {/* Wishlist */}
-              <Link href="/products?wishlist=1" className="p-2 hover:bg-gray-100 rounded-full transition relative group">
+              <Link href="/products/wishlist" className="p-2 hover:bg-gray-100 rounded-full transition relative group">
                 <Heart className="w-5 h-5 text-gray-500 group-hover:text-red-500 transition" />
               </Link>
               {/* Cart */}
