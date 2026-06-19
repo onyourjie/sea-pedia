@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { MapPin, Truck, Tag, Wallet, CheckCircle2, Plus } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";

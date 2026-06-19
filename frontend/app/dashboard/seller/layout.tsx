@@ -15,7 +15,7 @@ const NAV = [
   { href: "/dashboard/seller/products", label: "Produk", icon: Package },
   { href: "/dashboard/seller/orders", label: "Pesanan Masuk", icon: ClipboardList },
   { href: "/dashboard/seller/report", label: "Laporan", icon: BarChart2 },
-  { href: "/dashboard/profile", label: "Profil", icon: User },
+  { href: "/dashboard/seller/profile", label: "Profil", icon: User },
 ];
 
 function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {

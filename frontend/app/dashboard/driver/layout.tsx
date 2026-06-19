@@ -14,7 +14,7 @@ const NAV = [
   { href: "/dashboard/driver/jobs", label: "Cari Job", icon: Briefcase },
   { href: "/dashboard/driver/active", label: "Job Aktif", icon: Truck },
   { href: "/dashboard/driver/history", label: "Riwayat", icon: History },
-  { href: "/dashboard/profile", label: "Profil", icon: User },
+  { href: "/dashboard/driver/profile", label: "Profil", icon: User },
 ];
 
 function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
