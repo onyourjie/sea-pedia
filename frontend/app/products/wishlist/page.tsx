@@ -11,6 +11,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
 const FAVORITES_KEY = "seapedia_favorites";
+const FAVORITES_CHANGED_EVENT = "seapedia:favorites-changed";
 
 interface Product {
   id: string;
@@ -34,6 +35,7 @@ function getFavoriteIds(): string[] {
 function removeFavorite(id: string) {
   const favs = getFavoriteIds().filter((f) => f !== id);
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+  window.dispatchEvent(new Event(FAVORITES_CHANGED_EVENT));
 }
 
 export default function WishlistPage() {

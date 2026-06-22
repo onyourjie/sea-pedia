@@ -29,6 +29,7 @@ function formatPrice(price: number) {
 const TABS = ["Deskripsi Produk", "Spesifikasi", "Ulasan Produk"];
 
 const FAVORITES_KEY = "seapedia_favorites";
+const FAVORITES_CHANGED_EVENT = "seapedia:favorites-changed";
 
 function getFavorites(): string[] {
   if (typeof window === "undefined") return [];
@@ -73,6 +74,7 @@ export default function ProductDetailPage() {
       Swal.fire({ title: "Ditambahkan ke Favorit!", icon: "success", timer: 1200, showConfirmButton: false, toast: true, position: "top-end" });
     }
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event(FAVORITES_CHANGED_EVENT));
   };
 
   const addToCart = useMutation({

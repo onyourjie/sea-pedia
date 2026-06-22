@@ -3,9 +3,38 @@
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
 import { ShoppingCart, Search, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
+
+const FAVORITES_KEY = "seapedia_favorites";
+const FAVORITES_CHANGED_EVENT = "seapedia:favorites-changed";
+
+interface CartSummary {
+  items: Array<{ quantity: number }>;
+}
+
+function getFavoriteCount() {
+  if (typeof window === "undefined") return 0;
+  try {
+    const favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    return Array.isArray(favorites) ? new Set(favorites).size : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+
+  return (
+    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white ring-2 ring-white">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
 
 const ROLE_DASHBOARD: Record<string, string> = {
   BUYER: "/dashboard/buyer",
@@ -18,11 +47,35 @@ export function Navbar() {
   const { user, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [favoriteCount, setFavoriteCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
   const dashboardHref = user?.activeRole ? (ROLE_DASHBOARD[user.activeRole] || "/dashboard") : "/dashboard";
   const showSearch = pathname !== "/products";
+
+  const { data: cart } = useQuery<CartSummary>({
+    queryKey: ["cart"],
+    queryFn: () => api.get("/cart").then((r) => r.data),
+    enabled: user?.activeRole === "BUYER",
+  });
+
+  const cartCount = user?.activeRole === "BUYER"
+    ? cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0
+    : 0;
+
+  useEffect(() => {
+    const updateFavoriteCount = () => setFavoriteCount(getFavoriteCount());
+
+    updateFavoriteCount();
+    window.addEventListener("storage", updateFavoriteCount);
+    window.addEventListener(FAVORITES_CHANGED_EVENT, updateFavoriteCount);
+
+    return () => {
+      window.removeEventListener("storage", updateFavoriteCount);
+      window.removeEventListener(FAVORITES_CHANGED_EVENT, updateFavoriteCount);
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,12 +113,14 @@ export function Navbar() {
           {user ? (
             <>
               {/* Wishlist */}
-              <Link href="/products/wishlist" className="p-2 hover:bg-gray-100 rounded-full transition relative group">
+              <Link href="/products/wishlist" aria-label={`Favorit, ${favoriteCount} produk`} className="p-2 hover:bg-gray-100 rounded-full transition relative group">
                 <Heart className="w-5 h-5 text-gray-500 group-hover:text-red-500 transition" />
+                <CountBadge count={favoriteCount} />
               </Link>
               {/* Cart */}
-              <Link href="/dashboard/buyer/cart" className="p-2 hover:bg-gray-100 rounded-full transition relative">
+              <Link href="/dashboard/buyer/cart" aria-label={`Keranjang, ${cartCount} barang`} className="p-2 hover:bg-gray-100 rounded-full transition relative">
                 <ShoppingCart className="w-5 h-5 text-gray-600" />
+                <CountBadge count={cartCount} />
               </Link>
               {/* Dashboard */}
               <Link
@@ -152,7 +207,8 @@ export function Navbar() {
             {user ? (
               <>
                 <Link href={dashboardHref} className="text-sm font-medium py-2">Dashboard ({user.activeRole})</Link>
-                <Link href="/dashboard/buyer/cart" className="text-sm py-2">Keranjang</Link>
+                <Link href="/products/wishlist" className="text-sm py-2">Favorit ({favoriteCount})</Link>
+                <Link href="/dashboard/buyer/cart" className="text-sm py-2">Keranjang ({cartCount})</Link>
                 <button onClick={async () => { await logout(); router.push("/"); }} className="text-sm text-left text-red-500 py-2">Keluar</button>
               </>
             ) : (
