@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
-import { ShoppingCart, Search, Menu, X, Waves, Heart, Flame, Tag, Box } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -113,6 +113,9 @@ export function Navbar() {
           <Link href="/products?promo=1" className="text-xs font-medium text-gray-600 hover:text-green-600 flex items-center gap-1.5 transition">
             <Tag className="w-3.5 h-3.5 text-green-500" /> Promo
           </Link>
+          <Link href="/faq" className="text-xs font-medium text-gray-600 hover:text-cyan-600 flex items-center gap-1.5 transition">
+            <HelpCircle className="w-3.5 h-3.5 text-cyan-500" /> FAQ
+          </Link>
           <div className="ml-auto flex items-center gap-1 text-xs text-gray-400">
             <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
             Layanan 24/7 tersedia
@@ -144,6 +147,7 @@ export function Navbar() {
               <Link href="/products?sort=newest" className="text-xs text-gray-600 flex items-center gap-1"><Box className="w-3 h-3 text-cyan-500" /> Baru</Link>
               <Link href="/products?promo=1" className="text-xs text-gray-600 flex items-center gap-1"><Flame className="w-3 h-3 text-orange-500" /> Hot Deals</Link>
               <Link href="/products?promo=1" className="text-xs text-gray-600 flex items-center gap-1"><Tag className="w-3 h-3 text-green-500" /> Promo</Link>
+              <Link href="/faq" className="text-xs text-gray-600 flex items-center gap-1"><HelpCircle className="w-3 h-3 text-cyan-500" /> FAQ</Link>
             </div>
             {user ? (
               <>

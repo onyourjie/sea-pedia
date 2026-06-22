@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRight, ArrowDownLeft, RefreshCw, CreditCard, AlertCircle, Shield, Search } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, RefreshCw, CreditCard, AlertCircle, Shield, Search, ExternalLink } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 
@@ -29,9 +30,48 @@ const TX_LABEL: Record<string, { label: string; color: string; icon: typeof Arro
 };
 
 export default function WalletPage() {
+  return (
+    <Suspense fallback={<div className="h-screen" />}>
+      <WalletPageInner />
+    </Suspense>
+  );
+}
+
+function WalletPageInner() {
   const queryClient = useQueryClient();
   const [topUpAmount, setTopUpAmount] = useState(0);
   const [filterType, setFilterType] = useState("");
+  const searchParams = useSearchParams();
+
+  // Handle redirect from Xendit invoice page
+  useEffect(() => {
+    const status = searchParams.get("topup");
+    if (status === "success") {
+      Swal.fire({
+        title: "Pembayaran Berhasil",
+        text: "Saldo akan masuk dalam beberapa detik setelah Xendit mengirim notifikasi.",
+        icon: "success",
+        confirmButtonColor: "#06b6d4",
+      });
+      const t = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ["buyer-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["wallet-transactions"], exact: false });
+      }, 3000);
+      const stop = setTimeout(() => clearInterval(t), 30_000);
+      return () => {
+        clearInterval(t);
+        clearTimeout(stop);
+      };
+    }
+    if (status === "failed") {
+      Swal.fire({
+        title: "Pembayaran Gagal / Dibatalkan",
+        text: "Top-up tidak diproses. Coba lagi kalau perlu.",
+        icon: "error",
+        confirmButtonColor: "#ef4444",
+      });
+    }
+  }, [searchParams, queryClient]);
 
   const { data: walletData } = useQuery({
     queryKey: ["buyer-wallet"],
@@ -66,6 +106,23 @@ export default function WalletPage() {
       Swal.fire({
         title: "Gagal",
         text: e?.response?.data?.message || "Top up gagal, coba lagi.",
+        icon: "error",
+        confirmButtonColor: "#ef4444",
+      });
+    },
+  });
+
+  const xenditMutation = useMutation({
+    mutationFn: (amount: number) =>
+      api.post("/wallet/topup/xendit", { amount }).then((r) => r.data),
+    onSuccess: (data: { invoiceUrl: string }) => {
+      // Redirect ke halaman invoice Xendit (hosted)
+      window.location.href = data.invoiceUrl;
+    },
+    onError: (e: { response?: { data?: { message?: string } } }) => {
+      Swal.fire({
+        title: "Gagal Membuat Invoice",
+        text: e?.response?.data?.message || "Tidak bisa connect ke Xendit, coba lagi.",
         icon: "error",
         confirmButtonColor: "#ef4444",
       });
@@ -140,13 +197,31 @@ export default function WalletPage() {
             </div>
           </div>
 
-          <button
-            onClick={() => topUpAmount > 0 && topUpMutation.mutate(topUpAmount)}
-            disabled={topUpAmount <= 0 || topUpMutation.isPending}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-cyan-500/20"
-          >
-            {topUpMutation.isPending ? "Memproses..." : "Konfirmasi Top Up"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => topUpAmount > 0 && topUpMutation.mutate(topUpAmount)}
+              disabled={topUpAmount <= 0 || topUpMutation.isPending || xenditMutation.isPending}
+              className="flex-1 border border-cyan-300 text-cyan-600 hover:bg-cyan-50 disabled:opacity-50 font-semibold py-3 rounded-xl text-sm transition"
+            >
+              {topUpMutation.isPending ? "Memproses..." : "Top Up Instan (Demo)"}
+            </button>
+            <button
+              onClick={() => topUpAmount >= 10_000 && xenditMutation.mutate(topUpAmount)}
+              disabled={topUpAmount < 10_000 || topUpMutation.isPending || xenditMutation.isPending}
+              className="flex-1 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1.5"
+            >
+              {xenditMutation.isPending ? (
+                "Membuat Invoice..."
+              ) : (
+                <>
+                  Bayar via Xendit <ExternalLink className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          </div>
+          {topUpAmount > 0 && topUpAmount < 10_000 && (
+            <p className="text-xs text-amber-600 mt-2">Minimum top-up Xendit Rp 10.000</p>
+          )}
         </div>
       </div>
 
