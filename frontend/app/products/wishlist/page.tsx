@@ -129,7 +129,7 @@ export default function WishlistPage() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden relative"
+                  className="group h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden relative"
                 >
                   <button
                     onClick={() => handleRemove(product)}
@@ -137,13 +137,17 @@ export default function WishlistPage() {
                   >
                     <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-500" />
                   </button>
-                  <Link href={`/products/${product.id}`}>
+                  <Link href={`/products/${product.id}`} className="flex h-full flex-col">
                     <div className="relative aspect-square bg-gray-50 overflow-hidden">
                       <img
                         src={product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80"}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80"; }}
+                        onError={(e) => {
+                          const image = e.currentTarget;
+                          image.onerror = null;
+                          image.src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80";
+                        }}
                       />
                       {product.discount && (
                         <span className="absolute top-2 left-2 text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded-full">
@@ -156,18 +160,20 @@ export default function WishlistPage() {
                         </div>
                       )}
                     </div>
-                    <div className="p-3">
-                      <p className="text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1.5">{product.name}</p>
+                    <div className="flex flex-1 flex-col p-3">
+                      <p className="min-h-10 text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1.5">{product.name}</p>
                       {discountedPrice ? (
-                        <div>
+                        <div className="min-h-11">
                           <p className="text-xs text-gray-400 line-through">{formatPrice(product.price)}</p>
                           <p className="text-base font-bold text-cyan-600">{formatPrice(discountedPrice)}</p>
                         </div>
                       ) : (
-                        <p className="text-base font-bold text-cyan-600">{formatPrice(product.price)}</p>
+                        <div className="min-h-11 flex items-end">
+                          <p className="text-base font-bold text-cyan-600">{formatPrice(product.price)}</p>
+                        </div>
                       )}
                       {product.store && (
-                        <p className="text-xs text-gray-400 mt-1 truncate">{product.store.name}</p>
+                        <p className="text-xs text-gray-400 mt-auto pt-1 truncate">{product.store.name}</p>
                       )}
                     </div>
                   </Link>
