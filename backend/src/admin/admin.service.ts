@@ -115,7 +115,8 @@ export class AdminService {
     const currentDate = now ?? (await this.getSystemDate()).currentDate;
     let processed = 0;
 
-    // Find orders that are still in transit (SEDANG_DIKEMAS or SEDANG_DIKIRIM or MENUNGGU_PENGIRIM)
+    // Only orders not yet completed and not already overdue are eligible.
+    // PESANAN_SELESAI is a terminal success state and is never reversed by SLA.
     const activeOrders = await this.prisma.order.findMany({
       where: {
         isOverdue: false,
@@ -124,7 +125,7 @@ export class AdminService {
       include: {
         items: true,
         buyer: { include: { wallet: true } },
-        delivery: true,
+        delivery: { include: { driver: true, earningLog: true } },
       },
     });
 
@@ -135,7 +136,10 @@ export class AdminService {
 
       if (currentDate >= deadline) {
         await this.prisma.$transaction(async (tx) => {
-          // Mark order as overdue and returned
+          // Idempotency: re-check inside the transaction in case another worker raced us.
+          const fresh = await tx.order.findUnique({ where: { id: order.id } });
+          if (!fresh || fresh.isOverdue || fresh.status === OrderStatus.PESANAN_SELESAI) return;
+
           await tx.order.update({
             where: { id: order.id },
             data: {
@@ -150,7 +154,6 @@ export class AdminService {
             },
           });
 
-          // Restore stock
           for (const item of order.items) {
             await tx.product.update({
               where: { id: item.productId },
@@ -158,9 +161,8 @@ export class AdminService {
             });
           }
 
-          // Refund buyer wallet
           if (order.buyer.wallet) {
-            await tx.wallet.update({
+            const updatedWallet = await tx.wallet.update({
               where: { id: order.buyer.wallet.id },
               data: { balance: { increment: order.total } },
             });
@@ -169,16 +171,59 @@ export class AdminService {
                 walletId: order.buyer.wallet.id,
                 type: 'REFUND',
                 amount: order.total,
+                balanceAfter: updatedWallet.balance,
                 description: `Auto-refund for overdue order ${order.id}`,
                 orderId: order.id,
               },
             });
           }
+
+          // Income reversal audit: seller income (and any driver earning that may
+          // already have been booked) is explicitly reversed for traceability.
+          // Status DIKEMBALIKAN already excludes the order from income reports,
+          // but spec L6 requires a visible reversal trace.
+          let reversedEarning = 0;
+          let driverIdForLog: string | null = null;
+          if (order.delivery?.earningLog && order.delivery.driverId) {
+            reversedEarning = Number(order.delivery.earningLog.amount);
+            driverIdForLog = order.delivery.driverId;
+            await tx.driver.update({
+              where: { id: order.delivery.driverId },
+              data: { earnings: { decrement: reversedEarning } },
+            });
+            await tx.driverEarningLog.delete({
+              where: { id: order.delivery.earningLog.id },
+            });
+          }
+
+          await tx.incomeReversalLog.create({
+            data: {
+              orderId: order.id,
+              storeId: order.storeId,
+              driverId: driverIdForLog,
+              reversedIncome: order.total,
+              reversedEarning,
+              reason: `SLA exceeded (${slaHours}h for ${order.deliveryMethod})`,
+            },
+          });
         });
         processed++;
       }
     }
 
     return processed;
+  }
+
+  async listIncomeReversals(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.incomeReversalLog.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.incomeReversalLog.count(),
+    ]);
+    return { data, total, page, limit };
   }
 }

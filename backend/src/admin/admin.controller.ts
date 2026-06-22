@@ -53,4 +53,9 @@ export class AdminController {
   processOverdue() {
     return this.adminService.processOverdueOrders();
   }
+
+  @Get('income-reversals')
+  listIncomeReversals(@Query('page') page = 1, @Query('limit') limit = 20) {
+    return this.adminService.listIncomeReversals(+page, +limit);
+  }
 }

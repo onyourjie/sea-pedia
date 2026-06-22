@@ -69,11 +69,11 @@ export class AuthService {
 
     // If only one role, auto-select it and create session
     if (userRoles.length === 1) {
-      const token = this.signToken(user.id, userRoles[0]);
       const expiresAt = this.getExpiresAt();
-      await this.prisma.session.create({
+      const session = await this.prisma.session.create({
         data: { userId: user.id, activeRole: userRoles[0], expiresAt },
       });
+      const token = this.signToken(user.id, userRoles[0], session.id);
       return {
         accessToken: token,
         activeRole: userRoles[0],
@@ -98,18 +98,21 @@ export class AuthService {
     if (!currentRoles.includes(dto.role)) {
       throw new BadRequestException('You do not own this role');
     }
-    const token = this.signToken(userId, dto.role);
     const expiresAt = this.getExpiresAt();
-    await this.prisma.session.create({
+    const session = await this.prisma.session.create({
       data: { userId, activeRole: dto.role, expiresAt },
     });
+    const token = this.signToken(userId, dto.role, session.id);
     return { accessToken: token, activeRole: dto.role };
   }
 
   async logout(token: string) {
     try {
-      const payload = this.jwt.verify(token) as { sub: string };
-      await this.prisma.session.deleteMany({ where: { userId: payload.sub } });
+      const payload = this.jwt.verify(token) as { sub: string; sid?: string };
+      // Per-device logout: only kill this session, leave other devices alone.
+      if (payload.sid) {
+        await this.prisma.session.deleteMany({ where: { id: payload.sid } });
+      }
     } catch {
       // Token already invalid, nothing to do
     }
@@ -128,7 +131,7 @@ export class AuthService {
     return expiresAt;
   }
 
-  private signToken(userId: string, activeRole: RoleType): string {
-    return this.jwt.sign({ sub: userId, activeRole });
+  private signToken(userId: string, activeRole: RoleType, sessionId: string): string {
+    return this.jwt.sign({ sub: userId, activeRole, sid: sessionId });
   }
 }

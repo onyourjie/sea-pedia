@@ -137,6 +137,8 @@ model WalletTx {
   balanceAfter Decimal      @default(0) @db.Decimal(15, 2)
   description  String?
   orderId      String?
+  externalId   String?      @unique
+  status       String?
   createdAt    DateTime     @default(now())
 
   wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
@@ -317,4 +319,15 @@ model SystemDate {
   id          Int      @id @default(1)
   currentDate DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model IncomeReversalLog {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  storeId         String
+  driverId        String?
+  reversedIncome  Decimal  @db.Decimal(15, 2)
+  reversedEarning Decimal  @default(0) @db.Decimal(15, 2)
+  reason          String
+  createdAt       DateTime @default(now())
 }

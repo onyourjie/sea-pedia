@@ -43,7 +43,9 @@ export class CartService {
       include: { store: true },
     });
     if (!product || !product.isActive) throw new NotFoundException('Product not found');
-    if (product.stock < dto.quantity) throw new BadRequestException('Insufficient stock');
+    if (product.stock <= 0) throw new BadRequestException('Product is out of stock');
+    if (product.stock < dto.quantity)
+      throw new BadRequestException(`Only ${product.stock} item(s) left in stock`);
 
     let cart = await this.prisma.cart.findUnique({ where: { buyerId } });
     if (!cart) {
@@ -67,7 +69,10 @@ export class CartService {
 
     if (existing) {
       const newQty = existing.quantity + dto.quantity;
-      if (product.stock < newQty) throw new BadRequestException('Insufficient stock');
+      if (product.stock < newQty)
+        throw new BadRequestException(
+          `Cart already has ${existing.quantity} of this item — only ${product.stock} available in stock`,
+        );
       await this.prisma.cartItem.update({
         where: { id: existing.id },
         data: { quantity: newQty },
@@ -91,7 +96,10 @@ export class CartService {
       include: { product: true },
     });
     if (!item) throw new NotFoundException('Item not in cart');
-    if (item.product.stock < dto.quantity) throw new BadRequestException('Insufficient stock');
+    if (!item.product.isActive)
+      throw new BadRequestException('Product is no longer available');
+    if (item.product.stock < dto.quantity)
+      throw new BadRequestException(`Only ${item.product.stock} item(s) left in stock`);
 
     await this.prisma.cartItem.update({ where: { id: item.id }, data: { quantity: dto.quantity } });
     return this.getCart(userId);
