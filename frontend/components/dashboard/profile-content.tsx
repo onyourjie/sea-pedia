@@ -16,6 +16,15 @@ const ROLE_INFO: Record<string, { label: string; icon: string; gradient: string;
   ADMIN: { label: "Admin", icon: "mdi:shield-crown-outline", gradient: "from-purple-500 to-violet-600", href: "/dashboard/admin" },
 };
 
+interface ProfileData {
+  id: string;
+  username: string;
+  email: string;
+  roles: string[];
+  walletBalance: number | null;
+  driverEarnings: number | null;
+}
+
 function formatPrice(price: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price);
 }
@@ -23,7 +32,7 @@ function formatPrice(price: number) {
 export default function ProfileContent() {
   const { user, token } = useAuthStore();
 
-  const { data: profileData } = useQuery({
+  const { data: profileData, isLoading: isProfileLoading } = useQuery<ProfileData>({
     queryKey: ["profile-detail"],
     queryFn: () => api.get("/users/profile").then((r) => r.data),
     enabled: !!token,
@@ -74,14 +83,16 @@ export default function ProfileContent() {
             <AtSign className="w-4 h-4 text-gray-400" />
             <div>
               <p className="text-xs text-gray-400">Username</p>
-              <p className="font-medium text-gray-800">{user.username}</p>
+              <p className="font-medium text-gray-800">{profileData?.username ?? user.username}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 py-2">
             <Mail className="w-4 h-4 text-gray-400" />
             <div>
               <p className="text-xs text-gray-400">Email</p>
-              <p className="font-medium text-gray-800">{user.email}</p>
+              <p className="font-medium text-gray-800">
+                {isProfileLoading ? "Memuat email..." : profileData?.email || "Email tidak tersedia"}
+              </p>
             </div>
           </div>
         </div>
