@@ -9,11 +9,41 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
-const ROLE_INFO: Record<string, { label: string; icon: string; gradient: string; href: string }> = {
-  BUYER: { label: "Pembeli", icon: "mdi:cart-outline", gradient: "from-cyan-400 to-blue-500", href: "/dashboard/buyer" },
-  SELLER: { label: "Penjual", icon: "mdi:store-outline", gradient: "from-orange-400 to-red-500", href: "/dashboard/seller" },
-  DRIVER: { label: "Driver", icon: "mdi:truck-delivery-outline", gradient: "from-green-400 to-emerald-500", href: "/dashboard/driver" },
-  ADMIN: { label: "Admin", icon: "mdi:shield-crown-outline", gradient: "from-purple-500 to-violet-600", href: "/dashboard/admin" },
+const ROLE_INFO: Record<string, {
+  label: string;
+  icon: string;
+  gradient: string;
+  href: string;
+  decorations: string[];
+}> = {
+  BUYER: {
+    label: "Pembeli",
+    icon: "mdi:cart-outline",
+    gradient: "from-cyan-400 via-sky-500 to-blue-600",
+    href: "/dashboard/buyer",
+    decorations: ["mdi:fish", "mdi:shopping-outline", "mdi:star-four-points"],
+  },
+  SELLER: {
+    label: "Penjual",
+    icon: "mdi:store-outline",
+    gradient: "from-orange-400 via-orange-500 to-red-500",
+    href: "/dashboard/seller",
+    decorations: ["mdi:fish", "mdi:package-variant-closed", "mdi:chart-line"],
+  },
+  DRIVER: {
+    label: "Driver",
+    icon: "mdi:truck-delivery-outline",
+    gradient: "from-emerald-400 via-green-500 to-teal-600",
+    href: "/dashboard/driver",
+    decorations: ["mdi:map-marker-path", "mdi:package-variant", "mdi:motion-outline"],
+  },
+  ADMIN: {
+    label: "Admin",
+    icon: "mdi:shield-crown-outline",
+    gradient: "from-purple-500 via-violet-500 to-indigo-600",
+    href: "/dashboard/admin",
+    decorations: ["mdi:account-group-outline", "mdi:chart-box-outline", "mdi:check-decagram-outline"],
+  },
 };
 
 interface ProfileData {
@@ -61,14 +91,44 @@ export default function ProfileContent() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-2xl p-6 text-white shadow-lg bg-gradient-to-br ${activeInfo.gradient}`}
+        className={`relative min-h-44 overflow-hidden rounded-[28px] p-6 sm:p-8 text-white shadow-lg bg-gradient-to-br ${activeInfo.gradient}`}
       >
-        <div className="flex items-center gap-4">
-          <DiceBearAvatar seed={user.username} className="h-16 w-16 ring-4 ring-white/30" />
-          <div>
-            <p className="text-xs opacity-90 mb-0.5">Halo,</p>
-            <h1 className="text-2xl font-bold">{user.username}</h1>
-            <p className="text-sm opacity-90 mt-0.5">Peran aktif: {activeInfo.label}</p>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 800 120"
+          preserveAspectRatio="none"
+          className="absolute inset-x-0 bottom-0 h-20 w-full text-white/10"
+        >
+          <path
+            fill="currentColor"
+            d="M0,65 C120,120 230,10 365,55 C500,100 590,25 800,70 L800,120 L0,120 Z"
+          />
+        </svg>
+
+        <div className="relative z-10 flex min-h-28 items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <DiceBearAvatar seed={user.username} className="h-16 w-16 sm:h-20 sm:w-20 ring-4 ring-white/30 shadow-md" />
+            <div>
+              <p className="text-sm opacity-90 mb-0.5">Halo,</p>
+              <h1 className="text-2xl sm:text-3xl font-bold">{user.username}</h1>
+              <p className="text-sm sm:text-base opacity-90 mt-1">Peran aktif: {activeInfo.label}</p>
+            </div>
+          </div>
+
+          <div className="relative hidden h-28 w-48 shrink-0 sm:block" aria-hidden="true">
+            <div className="absolute bottom-0 right-4 flex h-24 w-24 rotate-6 items-center justify-center rounded-[30px] bg-white/20 shadow-lg ring-1 ring-white/30 backdrop-blur-sm">
+              <Icon icon={activeInfo.icon} className="h-14 w-14 -rotate-6 text-white" />
+            </div>
+            <div className="absolute left-2 top-2 flex h-10 w-10 -rotate-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+              <Icon icon={activeInfo.decorations[0]} className="h-6 w-6 text-white" />
+            </div>
+            <div className="absolute left-12 bottom-1 flex h-9 w-9 rotate-12 items-center justify-center rounded-xl bg-white/15">
+              <Icon icon={activeInfo.decorations[1]} className="h-5 w-5 text-white/90" />
+            </div>
+            <Icon
+              icon={activeInfo.decorations[2]}
+              className="absolute right-0 top-0 h-7 w-7 rotate-12 text-white/70"
+            />
           </div>
         </div>
       </motion.div>
