@@ -8,6 +8,7 @@ import { ArrowLeft, MapPin, Package, Star, Store } from "lucide-react";
 import api from "@/lib/api";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&q=80";
 
@@ -181,9 +182,11 @@ export default function StoreDetailPage() {
           </Link>
 
           <div className="flex items-start gap-5">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-3xl font-bold backdrop-blur">
-              {store.name.charAt(0).toUpperCase()}
-            </div>
+            <DiceBearAvatar
+              seed={store.name}
+              type="store"
+              className="h-20 w-20 rounded-2xl ring-4 ring-white/30"
+            />
             <div className="flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold sm:text-3xl">{store.name}</h1>

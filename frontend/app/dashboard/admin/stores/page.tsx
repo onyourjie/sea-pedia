@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Store } from "lucide-react";
 import api from "@/lib/api";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 interface AdminStore {
   id: string;
@@ -48,7 +49,12 @@ export default function AdminStoresPage() {
             <tbody>
               {stores.map((s) => (
                 <tr key={s.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-semibold text-gray-800">{s.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <DiceBearAvatar seed={s.name} type="store" className="h-9 w-9 ring-2 ring-cyan-100" />
+                      <span className="font-semibold text-gray-800">{s.name}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-gray-600 max-w-xs">{s.description || "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <span className="text-xs font-semibold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full">

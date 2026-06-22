@@ -9,6 +9,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MapPin, BarChart2, User, LogOut, Waves, Menu, X,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const NAV = [
   { href: "/dashboard/buyer", label: "Dashboard", icon: LayoutDashboard },
@@ -87,9 +88,7 @@ export default function BuyerLayout({ children }: { children: React.ReactNode })
               <p className="text-sm font-semibold text-gray-800">{user?.username}</p>
               <p className="text-xs text-cyan-500">Peran Aktif: Buyer</p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-              {user?.username?.[0]?.toUpperCase()}
-            </div>
+            <DiceBearAvatar seed={user?.username || "buyer"} className="h-9 w-9 ring-2 ring-cyan-100" />
             <button
               onClick={() => router.push("/login")}
               className="text-xs border border-cyan-400 text-cyan-600 px-3 py-1.5 rounded-full hover:bg-cyan-50 transition font-medium"

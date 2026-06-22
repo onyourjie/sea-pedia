@@ -5,6 +5,7 @@ import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "@/lib/api";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 interface Review {
   id: string;
@@ -60,9 +61,7 @@ export function ReviewsSection() {
             className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                {review.reviewerName[0]}
-              </div>
+              <DiceBearAvatar seed={review.reviewerName} className="h-10 w-10 ring-2 ring-cyan-100" />
               <div>
                 <p className="font-semibold text-sm text-gray-800">{review.reviewerName}</p>
                 <div className="flex gap-0.5">

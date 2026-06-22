@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import api from "@/lib/api";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 interface AdminUser {
   id: string;
@@ -57,9 +58,7 @@ export default function AdminUsersPage() {
                 <tr key={u.id} className="border-t border-gray-100 hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
-                        {u.username[0]?.toUpperCase()}
-                      </div>
+                      <DiceBearAvatar seed={u.username} className="h-8 w-8 ring-2 ring-purple-100" />
                       <p className="font-medium text-gray-800">{u.username}</p>
                     </div>
                   </td>

@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import { Navbar } from "@/components/layout/navbar";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 interface Product {
   id: string;
@@ -256,9 +257,7 @@ export default function ProductDetailPage() {
             {product.store && (
               <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                    {product.store.name[0]}
-                  </div>
+                  <DiceBearAvatar seed={product.store.name} type="store" className="h-9 w-9 ring-2 ring-cyan-100" />
                   <div>
                     <div className="flex items-center gap-1.5">
                       <p className="text-sm font-semibold text-gray-800">{product.store.name}</p>

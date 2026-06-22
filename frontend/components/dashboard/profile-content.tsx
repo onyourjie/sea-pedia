@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const ROLE_INFO: Record<string, { label: string; icon: string; gradient: string; href: string }> = {
   BUYER: { label: "Pembeli", icon: "mdi:cart-outline", gradient: "from-cyan-400 to-blue-500", href: "/dashboard/buyer" },
@@ -54,9 +55,7 @@ export default function ProfileContent() {
         className={`rounded-2xl p-6 text-white shadow-lg bg-gradient-to-br ${activeInfo.gradient}`}
       >
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-2xl backdrop-blur-sm">
-            {user.username[0]?.toUpperCase()}
-          </div>
+          <DiceBearAvatar seed={user.username} className="h-16 w-16 ring-4 ring-white/30" />
           <div>
             <p className="text-xs opacity-90 mb-0.5">Halo,</p>
             <h1 className="text-2xl font-bold">{user.username}</h1>

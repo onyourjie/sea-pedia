@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Truck, Briefcase, History, User, LogOut, Waves, Menu, X,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const NAV = [
   { href: "/dashboard/driver", label: "Dashboard", icon: LayoutDashboard },
@@ -84,9 +85,7 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
               <p className="text-sm font-semibold text-gray-800">{user?.username}</p>
               <p className="text-xs text-green-600">Peran Aktif: Driver</p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm">
-              {user?.username?.[0]?.toUpperCase()}
-            </div>
+            <DiceBearAvatar seed={user?.username || "driver"} className="h-9 w-9 ring-2 ring-green-100" />
             <button
               onClick={() => router.push("/login")}
               className="text-xs border border-green-400 text-green-700 px-3 py-1.5 rounded-full hover:bg-green-50 transition font-medium"

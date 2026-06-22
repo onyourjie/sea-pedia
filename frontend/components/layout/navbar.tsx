@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const FAVORITES_KEY = "seapedia_favorites";
 const FAVORITES_CHANGED_EVENT = "seapedia:favorites-changed";
@@ -125,10 +126,11 @@ export function Navbar() {
               {/* Dashboard */}
               <Link
                 href={dashboardHref}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-50 text-cyan-700 text-sm font-medium hover:bg-cyan-100 transition"
+                aria-label={`Buka profil ${user.username}`}
+                title={user.username}
+                className="hidden md:flex items-center rounded-full p-1 hover:bg-cyan-50 transition"
               >
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                {user.username}
+                <DiceBearAvatar seed={user.username} className="h-9 w-9 ring-2 ring-cyan-100" />
               </Link>
               <button
                 onClick={async () => { await logout(); router.push("/"); }}

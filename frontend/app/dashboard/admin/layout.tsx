@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Users, Store as StoreIcon, Package, ClipboardList, Truck, Tag, Gift, AlertTriangle, LogOut, Waves,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
+import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 
 const NAV = [
   { href: "/dashboard/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -49,9 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="text-sm font-semibold text-gray-800">{user?.username}</p>
               <p className="text-xs text-purple-600">Peran Aktif: Admin</p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
-              {user?.username?.[0]?.toUpperCase()}
-            </div>
+            <DiceBearAvatar seed={user?.username || "admin"} className="h-9 w-9 ring-2 ring-purple-100" />
             <button
               onClick={() => router.push("/login")}
               className="text-xs border border-purple-400 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-50 transition font-medium"
