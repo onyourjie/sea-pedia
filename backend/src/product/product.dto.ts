@@ -1,4 +1,15 @@
-import { IsString, IsOptional, IsNumber, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+  MaxLength,
+  IsArray,
+  IsInt,
+  IsObject,
+  ArrayMaxSize,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -26,6 +37,28 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @ApiPropertyOptional({ type: [String], description: 'Additional product image URLs (carousel)' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  imageUrls?: string[];
+
+  @ApiPropertyOptional({ description: 'Discount percentage 0-90' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(90)
+  discount?: number;
+
+  @ApiPropertyOptional({
+    description: 'Free-form spec key/value map, e.g. {"Berat":"500g","Warna":"Hitam"}',
+    example: { Berat: '500g', Warna: 'Hitam' },
+  })
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, string>;
 }
 
 export class UpdateProductDto {
@@ -56,4 +89,23 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  imageUrls?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(90)
+  discount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsObject()
+  specifications?: Record<string, string>;
 }

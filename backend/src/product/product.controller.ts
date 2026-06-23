@@ -36,9 +36,19 @@ export class ProductController {
     );
   }
 
-  @Get(':productId')
-  getDetail(@Param('productId') productId: string) {
-    return this.productService.getPublicDetail(productId);
+  @Get('bestsellers')
+  listBestsellers(@Query('limit') limit = 10) {
+    return this.productService.listBestsellers({ limit: +limit });
+  }
+
+  @Get('hot-deals')
+  listHotDeals(@Query('limit') limit = 10) {
+    return this.productService.listHotDeals(+limit);
+  }
+
+  @Get('new-arrivals')
+  listNewArrivals(@Query('limit') limit = 10) {
+    return this.productService.listNewArrivals(+limit);
   }
 
   @Get('seller/list')
@@ -71,5 +81,19 @@ export class ProductController {
   @Roles(RoleType.SELLER)
   remove(@CurrentUser() user: any, @Param('productId') productId: string) {
     return this.productService.remove(user.id, productId);
+  }
+
+  @Get(':productId/reviews')
+  listReviews(
+    @Param('productId') productId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+  ) {
+    return this.productService.listProductReviews(productId, +page, +limit);
+  }
+
+  @Get(':productId')
+  getDetail(@Param('productId') productId: string) {
+    return this.productService.getPublicDetail(productId);
   }
 }

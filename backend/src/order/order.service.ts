@@ -215,7 +215,7 @@ export class OrderService {
       where: { id: orderId },
       include: {
         store: { select: { id: true, name: true } },
-        items: true,
+        items: { include: { review: true } },
         address: true,
         statusHistory: { orderBy: { createdAt: 'asc' } },
         voucher: true,
@@ -323,9 +323,20 @@ export class OrderService {
       include: { items: true, store: { select: { name: true } } },
       orderBy: { createdAt: 'desc' },
     });
-    const totalSpent = orders
-      .filter((o) => o.status === OrderStatus.PESANAN_SELESAI)
-      .reduce((sum, o) => sum + Number(o.total), 0);
-    return { totalOrders: orders.length, totalSpent, orders };
+    const completed = orders.filter((o) => o.status === OrderStatus.PESANAN_SELESAI);
+    const totalSpent = completed.reduce((sum, o) => sum + Number(o.total), 0);
+
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const completedThisMonth = completed.filter((o) => o.updatedAt >= monthStart).length;
+
+    return {
+      totalOrders: orders.length,
+      totalSpent,
+      completedOrders: completed.length,
+      completedThisMonth,
+      orders,
+    };
   }
 }

@@ -34,7 +34,8 @@ export class StoreService {
       include: { _count: { select: { products: true, orders: true } } },
     });
     if (!store) throw new NotFoundException('Store not found');
-    return store;
+    const rating = await this.computeStoreRating(store.id);
+    return { ...store, ...rating };
   }
 
   async getStoreById(storeId: string) {
@@ -46,7 +47,8 @@ export class StoreService {
       },
     });
     if (!store) throw new NotFoundException('Store not found');
-    return store;
+    const rating = await this.computeStoreRating(storeId);
+    return { ...store, ...rating };
   }
 
   async listStores(page = 1, limit = 20) {
@@ -60,6 +62,23 @@ export class StoreService {
       }),
       this.prisma.store.count(),
     ]);
-    return { data: stores, total, page, limit };
+    const enriched = await Promise.all(
+      stores.map(async (s) => ({ ...s, ...(await this.computeStoreRating(s.id)) })),
+    );
+    return { data: enriched, total, page, limit };
+  }
+
+  // Store rating = avg of every ProductReview attached to a product owned by the store.
+  // Spec: "rating toko hasilnya rata-rata dari review sang pembeli".
+  private async computeStoreRating(storeId: string) {
+    const agg = await this.prisma.productReview.aggregate({
+      where: { product: { storeId } },
+      _avg: { rating: true },
+      _count: { _all: true },
+    });
+    return {
+      ratingAverage: agg._avg.rating ?? 0,
+      reviewCount: agg._count._all,
+    };
   }
 }

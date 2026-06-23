@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { AppController } from './app.controller';
+import { AppController, StatsController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -19,6 +19,7 @@ import { DeliveryModule } from './delivery/delivery.module';
 import { AdminModule } from './admin/admin.module';
 import { ReviewModule } from './review/review.module';
 import { PaymentModule } from './payment/payment.module';
+import { ProductReviewModule } from './product-review/product-review.module';
 
 @Module({
   imports: [
@@ -42,8 +43,9 @@ import { PaymentModule } from './payment/payment.module';
     AdminModule,
     ReviewModule,
     PaymentModule,
+    ProductReviewModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StatsController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
