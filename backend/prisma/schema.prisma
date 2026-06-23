@@ -150,15 +150,17 @@ model WalletTx {
 }
 
 model Address {
-  id         String   @id @default(uuid())
-  buyerId    String
-  label      String
-  street     String
-  city       String
-  province   String
-  postalCode String
-  isDefault  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id             String   @id @default(uuid())
+  buyerId        String
+  label          String
+  recipientName  String
+  recipientPhone String
+  street         String
+  city           String
+  province       String
+  postalCode     String
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
 
   buyer  Buyer   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
   orders Order[]

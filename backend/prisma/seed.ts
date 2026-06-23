@@ -264,6 +264,8 @@ async function main() {
     data: {
       buyerId: buyer.id,
       label: 'Rumah',
+      recipientName: 'Buyer Demo',
+      recipientPhone: '081234567890',
       street: 'Jl. Sudirman No. 1',
       city: 'Jakarta',
       province: 'DKI Jakarta',
