@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRight, ArrowDownLeft, RefreshCw, CreditCard, AlertCircle, Shield, Search, ExternalLink } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, RefreshCw, CreditCard, Shield, ExternalLink } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 
@@ -146,17 +146,12 @@ function WalletPageInner() {
             <p className="text-xs font-semibold text-cyan-600 uppercase tracking-wider mb-1">Saldo Wallet Saat Ini</p>
             <p className="text-4xl font-bold text-gray-800 mb-1">{formatPrice(balance)}</p>
             <div className="flex items-center gap-1.5 text-xs text-cyan-600">
-              <Shield className="w-3.5 h-3.5" /> Terverifikasi &amp; Aman
+              <Shield className="w-3.5 h-3.5" /> Saldo dipotong otomatis saat checkout
             </div>
           </div>
-          <div className="flex gap-3 mt-4">
-            <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-1.5">
-              <ArrowUpRight className="w-4 h-4" /> Top Up Saldo
-            </button>
-            <button className="flex-1 border border-cyan-300 text-cyan-600 hover:bg-cyan-50 font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-1.5">
-              <ArrowDownLeft className="w-4 h-4" /> Tarik Saldo
-            </button>
-          </div>
+          <p className="text-xs text-gray-500 mt-4">
+            Top up via panel di samping. Saldo refund otomatis kalau pesananmu overdue.
+          </p>
         </div>
 
         {/* Top up panel */}
@@ -226,11 +221,11 @@ function WalletPageInner() {
       </div>
 
       {/* Info badges */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { icon: CreditCard, label: "Metode Pembayaran", value: "Terhubung ke 3 Bank" },
-          { icon: AlertCircle, label: "Batas Transaksi", value: "Hingga Rp 10.000.000" },
-          { icon: Shield, label: "Keamanan", value: "Autentikasi 2-Lapis Aktif" },
+          { icon: CreditCard, label: "Top Up Instan (Demo)", value: "Saldo langsung masuk" },
+          { icon: ExternalLink, label: "Top Up Xendit", value: "VA, e-wallet, QRIS, retail" },
+          { icon: RefreshCw, label: "Auto-refund", value: "Pesanan overdue dikembalikan" },
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -265,9 +260,6 @@ function WalletPageInner() {
               <option value="PAYMENT">Pembayaran</option>
               <option value="REFUND">Refund</option>
             </select>
-            <button className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition">
-              <Search className="w-3.5 h-3.5 text-gray-400" />
-            </button>
           </div>
         </div>
 
@@ -279,13 +271,12 @@ function WalletPageInner() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Jenis Transaksi</th>
                 <th className="text-right px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Nominal</th>
                 <th className="text-right px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Saldo Akhir</th>
-                <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-sm text-gray-400">Belum ada transaksi</td>
+                  <td colSpan={4} className="text-center py-10 text-sm text-gray-400">Belum ada transaksi</td>
                 </tr>
               )}
               {transactions.map((tx) => {
@@ -302,15 +293,13 @@ function WalletPageInner() {
                       <div className="flex items-center gap-2">
                         <Icon className={`w-3.5 h-3.5 ${info.color}`} />
                         <span className={`font-medium ${info.color}`}>{info.label}</span>
+                        {tx.note && <span className="text-xs text-gray-400">— {tx.note}</span>}
                       </div>
                     </td>
                     <td className={`px-5 py-3.5 text-right font-semibold text-sm ${isCredit ? "text-green-600" : "text-red-500"}`}>
                       {isCredit ? "+" : "–"} {formatPrice(Math.abs(tx.amount))}
                     </td>
                     <td className="px-5 py-3.5 text-right text-sm text-gray-600">{formatPrice(tx.balanceAfter)}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <button className="text-xs text-cyan-500 hover:text-cyan-600 font-medium">Detail</button>
-                    </td>
                   </tr>
                 );
               })}

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Package, Plus, Pencil, Trash2, X } from "lucide-react";
+import { Package, Plus, Pencil, Trash2, X, Image as ImageIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+
+interface SpecItem { key: string; value: string; }
 
 interface Product {
   id: string;
@@ -14,6 +16,9 @@ interface Product {
   price: string;
   stock: number;
   imageUrl?: string;
+  imageUrls?: string[];
+  discount?: number;
+  specifications?: Record<string, string> | null;
   isActive: boolean;
 }
 
@@ -23,12 +28,49 @@ interface FormState {
   price: number;
   stock: number;
   imageUrl: string;
+  imageUrls: string[];
+  discount: number;
+  specifications: SpecItem[];
 }
 
-const empty: FormState = { name: "", description: "", price: 0, stock: 0, imageUrl: "" };
+const empty: FormState = {
+  name: "",
+  description: "",
+  price: 0,
+  stock: 0,
+  imageUrl: "",
+  imageUrls: [],
+  discount: 0,
+  specifications: [{ key: "", value: "" }],
+};
 
 function formatPrice(p: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
+}
+
+function specsToList(specs: Record<string, string> | null | undefined): SpecItem[] {
+  if (!specs || typeof specs !== "object") return [{ key: "", value: "" }];
+  const list = Object.entries(specs).map(([key, value]) => ({ key, value: String(value) }));
+  return list.length > 0 ? list : [{ key: "", value: "" }];
+}
+
+function buildPayload(form: FormState) {
+  const specs: Record<string, string> = {};
+  for (const { key, value } of form.specifications) {
+    const k = key.trim();
+    const v = value.trim();
+    if (k) specs[k] = v;
+  }
+  return {
+    name: form.name.trim(),
+    description: form.description.trim(),
+    price: form.price,
+    stock: form.stock,
+    imageUrl: form.imageUrl.trim() || undefined,
+    imageUrls: form.imageUrls.map((u) => u.trim()).filter(Boolean),
+    discount: form.discount,
+    specifications: Object.keys(specs).length > 0 ? specs : undefined,
+  };
 }
 
 export default function SellerProductsPage() {
@@ -43,7 +85,7 @@ export default function SellerProductsPage() {
   });
 
   const create = useMutation({
-    mutationFn: (dto: FormState) => api.post("/products/seller", dto).then((r) => r.data),
+    mutationFn: (dto: FormState) => api.post("/products/seller", buildPayload(dto)).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-products"] });
       qc.invalidateQueries({ queryKey: ["seller-my-store"] });
@@ -57,7 +99,7 @@ export default function SellerProductsPage() {
 
   const update = useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: FormState }) =>
-      api.patch(`/products/seller/${id}`, dto).then((r) => r.data),
+      api.patch(`/products/seller/${id}`, buildPayload(dto)).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["seller-products"] });
       Swal.fire({ title: "Berhasil!", text: "Produk diperbarui.", icon: "success", timer: 1500, showConfirmButton: false });
@@ -91,6 +133,9 @@ export default function SellerProductsPage() {
       price: Number(p.price),
       stock: p.stock,
       imageUrl: p.imageUrl || "",
+      imageUrls: p.imageUrls || [],
+      discount: p.discount || 0,
+      specifications: specsToList(p.specifications),
     });
     setEditingId(p.id);
     setShowForm(true);
@@ -107,6 +152,42 @@ export default function SellerProductsPage() {
   };
 
   const products = data || [];
+
+  const updateImageUrl = (idx: number, value: string) => {
+    setForm((f) => {
+      const next = [...f.imageUrls];
+      next[idx] = value;
+      return { ...f, imageUrls: next };
+    });
+  };
+
+  const addImageUrl = () => {
+    if (form.imageUrls.length >= 8) return;
+    setForm((f) => ({ ...f, imageUrls: [...f.imageUrls, ""] }));
+  };
+
+  const removeImageUrl = (idx: number) => {
+    setForm((f) => ({ ...f, imageUrls: f.imageUrls.filter((_, i) => i !== idx) }));
+  };
+
+  const updateSpec = (idx: number, field: "key" | "value", value: string) => {
+    setForm((f) => {
+      const next = [...f.specifications];
+      next[idx] = { ...next[idx], [field]: value };
+      return { ...f, specifications: next };
+    });
+  };
+
+  const addSpec = () => {
+    setForm((f) => ({ ...f, specifications: [...f.specifications, { key: "", value: "" }] }));
+  };
+
+  const removeSpec = (idx: number) => {
+    setForm((f) => {
+      const next = f.specifications.filter((_, i) => i !== idx);
+      return { ...f, specifications: next.length === 0 ? [{ key: "", value: "" }] : next };
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -130,7 +211,7 @@ export default function SellerProductsPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-gray-800">{editingId ? "Edit Produk" : "Produk Baru"}</h2>
@@ -138,6 +219,7 @@ export default function SellerProductsPage() {
               <X className="w-4 h-4" />
             </button>
           </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-medium text-gray-700 mb-1.5">Nama Produk</label>
@@ -171,8 +253,21 @@ export default function SellerProductsPage() {
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">URL Gambar</label>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Diskon (%) <span className="text-gray-400 font-normal">— produk dengan diskon &gt; 0 muncul di Hot Deals</span>
+              </label>
+              <input
+                type="number"
+                value={form.discount}
+                onChange={(e) => setForm({ ...form, discount: Number(e.target.value) })}
+                min={0}
+                max={90}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Gambar Utama (URL)</label>
               <input
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
@@ -190,6 +285,85 @@ export default function SellerProductsPage() {
               />
             </div>
           </div>
+
+          {/* Multi-image */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5" /> Gambar Tambahan ({form.imageUrls.length}/8)
+              </label>
+              <button
+                type="button"
+                onClick={addImageUrl}
+                disabled={form.imageUrls.length >= 8}
+                className="text-xs text-orange-500 hover:text-orange-600 font-semibold disabled:opacity-40 flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" /> Tambah Gambar
+              </button>
+            </div>
+            <div className="space-y-2">
+              {form.imageUrls.map((url, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    value={url}
+                    onChange={(e) => updateImageUrl(idx, e.target.value)}
+                    placeholder={`Gambar ke-${idx + 2} (URL)`}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImageUrl(idx)}
+                    className="text-gray-400 hover:text-red-500 p-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              {form.imageUrls.length === 0 && (
+                <p className="text-xs text-gray-400 italic">Belum ada gambar tambahan. Carousel di halaman detail butuh minimal 2 gambar.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Spesifikasi */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-gray-700">Spesifikasi Produk</label>
+              <button
+                type="button"
+                onClick={addSpec}
+                className="text-xs text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" /> Tambah Baris
+              </button>
+            </div>
+            <div className="space-y-2">
+              {form.specifications.map((spec, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    value={spec.key}
+                    onChange={(e) => updateSpec(idx, "key", e.target.value)}
+                    placeholder="Nama (mis. Berat)"
+                    className="w-44 px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
+                  />
+                  <input
+                    value={spec.value}
+                    onChange={(e) => updateSpec(idx, "value", e.target.value)}
+                    placeholder="Nilai (mis. 500g)"
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSpec(idx)}
+                    className="text-gray-400 hover:text-red-500 p-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
@@ -224,6 +398,7 @@ export default function SellerProductsPage() {
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Produk</th>
                 <th className="text-right px-4 py-3 font-semibold">Harga</th>
+                <th className="text-right px-4 py-3 font-semibold">Diskon</th>
                 <th className="text-right px-4 py-3 font-semibold">Stok</th>
                 <th className="text-center px-4 py-3 font-semibold">Aksi</th>
               </tr>
@@ -247,6 +422,13 @@ export default function SellerProductsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
+                  <td className="px-4 py-3 text-right">
+                    {p.discount && p.discount > 0 ? (
+                      <span className="text-xs font-bold text-orange-600">{p.discount}%</span>
+                    ) : (
+                      <span className="text-xs text-gray-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.stock > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
                       {p.stock}

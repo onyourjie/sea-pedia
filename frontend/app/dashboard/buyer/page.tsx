@@ -20,6 +20,19 @@ interface Product {
   name: string;
   price: number;
   imageUrl?: string;
+  ratingAverage?: number;
+}
+
+interface PromoSummary {
+  id: string;
+  code: string;
+  description?: string;
+  discountAmount?: string | null;
+  discountPct?: string | null;
+  maxDiscount?: string | null;
+  expiresAt: string;
+  usageLimit: number;
+  usageCount: number;
 }
 
 function formatPrice(price: number) {
@@ -57,10 +70,33 @@ export default function BuyerDashboardPage() {
     queryFn: () => api.get("/orders/buyer/report").then((r) => r.data),
   });
 
+  const { data: promosData } = useQuery<PromoSummary[]>({
+    queryKey: ["active-promos-dash"],
+    queryFn: () => api.get("/promos").then((r) => r.data),
+  });
+
+  const activePromo = (promosData || []).find((p) => {
+    const notExpired = new Date(p.expiresAt) > new Date();
+    const hasQuota = p.usageLimit === 0 || p.usageCount < p.usageLimit;
+    return notExpired && hasQuota;
+  });
+
+  function describePromo(p: PromoSummary): string {
+    if (p.discountPct) {
+      const pct = Number(p.discountPct);
+      const max = p.maxDiscount ? ` maks ${formatPrice(Number(p.maxDiscount))}` : "";
+      return `Diskon ${pct}%${max}`;
+    }
+    if (p.discountAmount) {
+      return `Potongan ${formatPrice(Number(p.discountAmount))}`;
+    }
+    return p.description || `Pakai kode ${p.code}`;
+  }
+
   const walletBalance = walletData?.balance ?? walletData?.data?.balance ?? 0;
   const orders: Order[] = ordersData?.data || [];
   const products: Product[] = productsData?.data || [];
-  const report = reportData?.data;
+  const report = reportData;
 
   const stats = [
     {
@@ -179,31 +215,57 @@ export default function BuyerDashboardPage() {
           </div>
         </div>
 
-        {/* Promo banner */}
-        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-5 text-white flex flex-col justify-between shadow-lg shadow-cyan-500/20">
-          <div>
-            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-              <ArrowRight className="w-4 h-4 text-white" />
+        {/* Promo banner — only render if there is at least one currently-valid promo */}
+        {activePromo ? (
+          <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-5 text-white flex flex-col justify-between shadow-lg shadow-cyan-500/20">
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center mb-3">
+                <ArrowRight className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="font-bold text-lg leading-snug mb-2">{describePromo(activePromo)}</h3>
+              <p className="text-xs text-cyan-100 leading-relaxed">
+                Pakai kode <span className="font-bold text-white">{activePromo.code}</span> di checkout. Berlaku sampai{" "}
+                {new Date(activePromo.expiresAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}.
+              </p>
             </div>
-            <h3 className="font-bold text-lg leading-snug mb-2">Dapatkan Cashback s/d 50rb!</h3>
-            <p className="text-xs text-cyan-100 leading-relaxed">
-              Gunakan kode promo <span className="font-bold text-white">SEAOCT24</span> untuk setiap transaksi menggunakan Seapedia Wallet.
-            </p>
+            <Link
+              href="/dashboard/buyer/cart"
+              className="mt-4 w-full bg-white text-cyan-600 font-semibold text-sm py-2.5 rounded-xl hover:bg-cyan-50 transition text-center"
+            >
+              Pakai Sekarang
+            </Link>
           </div>
-          <button className="mt-4 w-full bg-white text-cyan-600 font-semibold text-sm py-2.5 rounded-xl hover:bg-cyan-50 transition">
-            Klaim Voucher Sekarang
-          </button>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-5 text-white flex flex-col justify-between shadow-lg shadow-cyan-500/20">
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center mb-3">
+                <ArrowRight className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="font-bold text-lg leading-snug mb-2">Belanja Hemat di SEAPEDIA</h3>
+              <p className="text-xs text-cyan-100 leading-relaxed">
+                Cek halaman Hot Deals untuk produk diskon terbaik dari seller terpercaya.
+              </p>
+            </div>
+            <Link
+              href="/products?deals=1"
+              className="mt-4 w-full bg-white text-cyan-600 font-semibold text-sm py-2.5 rounded-xl hover:bg-cyan-50 transition text-center"
+            >
+              Lihat Hot Deals
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Recommended products */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-gray-800">Rekomendasi Produk untuk Anda</h2>
-          <div className="flex gap-1">
-            <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition text-gray-400">‹</button>
-            <button className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition text-gray-400">›</button>
-          </div>
+          <Link
+            href="/products"
+            className="text-xs text-cyan-500 hover:text-cyan-600 flex items-center gap-1 font-medium"
+          >
+            Lihat Semua <ChevronRight className="w-3 h-3" />
+          </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {products.map((product, i) => (
@@ -226,7 +288,9 @@ export default function BuyerDashboardPage() {
                 <p className="text-sm font-bold text-cyan-600">{formatPrice(product.price)}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  <span className="text-[10px] text-gray-400">4.9</span>
+                  <span className="text-[10px] text-gray-400">
+                    {product.ratingAverage && product.ratingAverage > 0 ? product.ratingAverage.toFixed(1) : "Baru"}
+                  </span>
                 </div>
               </Link>
             </motion.div>

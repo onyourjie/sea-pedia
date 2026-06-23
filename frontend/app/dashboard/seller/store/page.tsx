@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Store, Save, Package, ClipboardList } from "lucide-react";
+import { Store, Save, Package, ClipboardList, Star } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 
@@ -12,6 +12,8 @@ interface MyStore {
   name: string;
   description?: string;
   _count: { products: number; orders: number };
+  ratingAverage?: number;
+  reviewCount?: number;
 }
 
 export default function SellerStorePage() {
@@ -82,7 +84,7 @@ export default function SellerStorePage() {
       </div>
 
       {store && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -105,6 +107,25 @@ export default function SellerStorePage() {
             </div>
             <p className="text-xs text-gray-500">Total Pesanan</p>
             <p className="text-xl font-bold text-gray-800">{store._count.orders}</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 col-span-2 md:col-span-1"
+          >
+            <div className="w-9 h-9 rounded-xl bg-yellow-100 flex items-center justify-center mb-3">
+              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+            </div>
+            <p className="text-xs text-gray-500">Rating Toko</p>
+            <p className="text-xl font-bold text-gray-800">
+              {store.ratingAverage && store.ratingAverage > 0
+                ? store.ratingAverage.toFixed(1)
+                : "—"}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              dari {store.reviewCount ?? 0} ulasan pembeli
+            </p>
           </motion.div>
         </div>
       )}
