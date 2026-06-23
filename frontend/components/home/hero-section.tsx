@@ -5,10 +5,31 @@ import Link from "next/link";
 import { ShoppingBag, Store, Search, Ship } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
+
+interface PublicStats {
+  activeProducts: number;
+  stores: number;
+  averageRating: number;
+  totalReviews: number;
+  completedOrders: number;
+}
+
+function formatStat(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  return `${n}`;
+}
 
 export function HeroSection() {
   const [searchVal, setSearchVal] = useState("");
   const router = useRouter();
+
+  const { data: stats } = useQuery<PublicStats>({
+    queryKey: ["public-stats"],
+    queryFn: () => api.get("/stats/public").then((r) => r.data),
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +39,15 @@ export function HeroSection() {
       router.push("/products");
     }
   };
+
+  const heroStats = [
+    { value: stats ? formatStat(stats.activeProducts) : "—", label: "Produk" },
+    { value: stats ? formatStat(stats.stores) : "—", label: "Toko" },
+    {
+      value: stats && stats.totalReviews > 0 ? stats.averageRating.toFixed(1) : "—",
+      label: stats && stats.totalReviews > 0 ? `Rating (${stats.totalReviews})` : "Rating",
+    },
+  ];
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-cyan-950 to-slate-900 min-h-[580px] flex items-center">
@@ -93,11 +123,7 @@ export function HeroSection() {
           </div>
 
           <div className="flex gap-8 mt-10">
-            {[
-              { value: "50K+", label: "Produk" },
-              { value: "12K+", label: "Seller" },
-              { value: "4.9", label: "Rating" },
-            ].map((stat) => (
+            {heroStats.map((stat) => (
               <div key={stat.label}>
                 <div className="text-2xl font-bold text-white">{stat.value}</div>
                 <div className="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</div>
@@ -121,19 +147,21 @@ export function HeroSection() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute -bottom-4 -left-8 bg-white rounded-2xl shadow-xl p-3 flex items-center gap-3"
-            >
-              <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
-                <Ship className="w-5 h-5 text-cyan-600" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-gray-800">Pesanan Terkirim!</div>
-                <div className="text-[10px] text-gray-400">Logistik kapal express</div>
-              </div>
-            </motion.div>
+            {stats && stats.completedOrders > 0 && (
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute -bottom-4 -left-8 bg-white rounded-2xl shadow-xl p-3 flex items-center gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                  <Ship className="w-5 h-5 text-cyan-600" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-800">{stats.completedOrders} Pesanan Selesai</div>
+                  <div className="text-[10px] text-gray-400">Tercatat di sistem</div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </div>

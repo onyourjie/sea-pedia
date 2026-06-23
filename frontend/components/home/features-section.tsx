@@ -8,19 +8,19 @@ const FEATURES = [
     icon: Store,
     color: "bg-cyan-50 text-cyan-600",
     title: "Multi-Seller Marketplace",
-    desc: "Ribuan pengguna dari nelayan, pedagang, dan distributor suku cadang berkumpul dalam satu platform.",
+    desc: "Setiap penjual punya toko dengan nama unik. Buyer bisa beli dari banyak seller di satu platform.",
   },
   {
     icon: Shield,
     color: "bg-emerald-50 text-emerald-600",
-    title: "Pembayaran Aman",
-    desc: "Sistem escrow memastikan dana Anda aman sampai barang diterima dalam kondisi baik.",
+    title: "Pembayaran Wallet & Xendit",
+    desc: "Top up via Xendit (VA, e-wallet, QRIS, retail). Saldo dipotong saat checkout, refund otomatis kalau pesanan overdue.",
   },
   {
     icon: Truck,
     color: "bg-blue-50 text-blue-600",
-    title: "Driver Terpercaya",
-    desc: "Jaringan driver berpengalaman yang siap mengantarkan barang besar maupun hasil laut segar.",
+    title: "Driver & SLA Otomatis",
+    desc: "Driver mengambil dan menyelesaikan job. SLA 4/24/72 jam per metode pengiriman, lewat itu dana otomatis kembali ke buyer.",
   },
 ];
 

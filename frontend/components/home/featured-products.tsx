@@ -18,6 +18,8 @@ interface Product {
   imageUrl?: string;
   discount?: number;
   store?: { name: string };
+  ratingAverage?: number;
+  reviewCount?: number;
 }
 
 function ProductCard({ product }: { product: Product }) {
@@ -65,7 +67,9 @@ function ProductCard({ product }: { product: Product }) {
           )}
           <div className="flex items-center gap-1 mt-auto pt-1.5">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs text-gray-500">4.9</span>
+            <span className="text-xs text-gray-500">
+              {product.ratingAverage && product.ratingAverage > 0 ? product.ratingAverage.toFixed(1) : "Baru"}
+            </span>
             <span className="text-gray-300 text-xs">·</span>
             <Store className="w-3 h-3 text-gray-400" />
             <span className="text-xs text-gray-400 truncate">{product.store?.name}</span>

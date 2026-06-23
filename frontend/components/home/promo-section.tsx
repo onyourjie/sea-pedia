@@ -10,19 +10,22 @@ interface Promo {
   id: string;
   code: string;
   description?: string;
-  discountType?: string;
-  discountValue?: number;
-  expiresAt?: string;
+  discountAmount?: string | null;
+  discountPct?: string | null;
+  maxDiscount?: string | null;
+  expiresAt: string;
+  usageLimit: number;
+  usageCount: number;
 }
 
 const STATIC_CARDS = [
   {
     icon: Flame,
     tag: "Hot Deals",
-    title: "Diskon s/d 50%",
-    desc: "Produk pilihan dengan harga terbaik hari ini",
+    title: "Diskon Produk Aktif",
+    desc: "Lihat produk dengan diskon terbesar dari seller terpercaya.",
     cta: "Lihat Deal",
-    href: "/products?promo=1",
+    href: "/products?deals=1",
     gradient: "from-orange-500 to-red-500",
     bg: "bg-orange-50",
     iconColor: "text-orange-500",
@@ -30,8 +33,8 @@ const STATIC_CARDS = [
   {
     icon: Box,
     tag: "Produk Baru",
-    title: "Baru Masuk Minggu Ini",
-    desc: "Temukan produk kelautan terbaru dari seller terpercaya",
+    title: "Baru Ditambahkan",
+    desc: "Temukan produk maritim terbaru yang baru saja masuk.",
     cta: "Lihat Baru",
     href: "/products?sort=newest",
     gradient: "from-purple-500 to-violet-500",
@@ -40,32 +43,50 @@ const STATIC_CARDS = [
   },
 ];
 
+function describePromoCard(p: Promo) {
+  if (p.discountPct) {
+    const pct = Number(p.discountPct);
+    const max = p.maxDiscount ? ` (maks Rp ${Number(p.maxDiscount).toLocaleString("id-ID")})` : "";
+    return `Diskon ${pct}%${max}`;
+  }
+  if (p.discountAmount) {
+    return `Potongan Rp ${Number(p.discountAmount).toLocaleString("id-ID")}`;
+  }
+  return p.description || `Pakai kode ${p.code}`;
+}
+
 export function PromoSection() {
   const { data } = useQuery({
     queryKey: ["active-promos"],
-    queryFn: () => api.get("/promos?limit=1").then((r: { data: { data?: Promo[]; promos?: Promo[] } }) => r.data),
+    queryFn: () => api.get("/promos").then((r: { data: Promo[] | { data?: Promo[] } }) => r.data),
   });
 
-  const promos: Promo[] = (data as { data?: Promo[]; promos?: Promo[] })?.data || (data as { data?: Promo[]; promos?: Promo[] })?.promos || [];
-  const firstPromo = promos[0];
+  const promos: Promo[] = Array.isArray(data) ? data : (data?.data || []);
+  const activePromo = promos.find((p) => {
+    const notExpired = new Date(p.expiresAt) > new Date();
+    const hasQuota = p.usageLimit === 0 || p.usageCount < p.usageLimit;
+    return notExpired && hasQuota;
+  });
 
-  const promoCard = {
-    icon: Tag,
-    tag: "Kode Promo",
-    title: firstPromo ? firstPromo.code : "SAVE10 & PROMO20",
-    desc: firstPromo?.description || "Gunakan kode voucher saat checkout untuk hemat lebih banyak",
-    cta: "Belanja Sekarang",
-    href: "/products",
-    gradient: "from-cyan-500 to-teal-500",
-    bg: "bg-cyan-50",
-    iconColor: "text-cyan-500",
-  };
+  const promoCard = activePromo
+    ? {
+        icon: Tag,
+        tag: "Kode Promo",
+        title: activePromo.code,
+        desc: describePromoCard(activePromo),
+        cta: "Belanja Sekarang",
+        href: "/products?promo=1",
+        gradient: "from-cyan-500 to-teal-500",
+        bg: "bg-cyan-50",
+        iconColor: "text-cyan-500",
+      }
+    : null;
 
-  const cards = [STATIC_CARDS[0], promoCard, STATIC_CARDS[1]];
+  const cards = promoCard ? [STATIC_CARDS[0], promoCard, STATIC_CARDS[1]] : STATIC_CARDS;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className={`grid gap-4 ${cards.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
         {cards.map((p, i) => {
           const Icon = p.icon;
           return (

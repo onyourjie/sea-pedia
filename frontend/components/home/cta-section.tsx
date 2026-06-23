@@ -21,7 +21,7 @@ export function CtaSection() {
             Siap Mengembangkan Bisnis Maritim Anda?
           </h2>
           <p className="text-cyan-50 mb-8 max-w-lg mx-auto text-sm leading-relaxed">
-            Bergabunglah dengan ribuan seller lainnya dan mulai jangkau pembeli dari Sabang sampai Merauke hanya dengan beberapa klik.
+            Daftar gratis, buat toko dengan nama unik, dan mulai jualan ke pembeli di seluruh Indonesia.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
