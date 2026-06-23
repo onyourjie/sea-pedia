@@ -1,13 +1,19 @@
-import { IsEmail, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RoleType } from '@prisma/client';
 
 export class RegisterDto {
-  @ApiProperty({ example: 'johndoe' })
+  @ApiProperty({ example: 'johndoe', minLength: 1 })
   @IsString()
   username: string;
 
-  @ApiProperty({ example: 'john@example.com' })
+  @ApiProperty({ example: 'john@example.com', format: 'email' })
   @IsEmail()
   email: string;
 
@@ -23,11 +29,14 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @ApiProperty({ example: 'johndoe' })
+  @ApiProperty({
+    example: 'johndoe',
+    description: 'Username akun yang terdaftar.',
+  })
   @IsString()
   username: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'password123', format: 'password' })
   @IsString()
   password: string;
 }

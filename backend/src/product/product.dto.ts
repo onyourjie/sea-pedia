@@ -13,7 +13,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'Sepatu Lari' })
+  @ApiProperty({ example: 'Sepatu Lari', maxLength: 200 })
   @IsString()
   @MaxLength(200)
   name: string;
@@ -23,12 +23,12 @@ export class CreateProductDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 150000 })
+  @ApiProperty({ example: 150000, minimum: 0 })
   @IsNumber()
   @Min(0)
   price: number;
 
-  @ApiProperty({ example: 50 })
+  @ApiProperty({ example: 50, minimum: 0 })
   @IsNumber()
   @Min(0)
   stock: number;
@@ -38,14 +38,21 @@ export class CreateProductDto {
   @IsString()
   imageUrl?: string;
 
-  @ApiPropertyOptional({ type: [String], description: 'Additional product image URLs (carousel)' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Additional product image URLs (carousel)',
+  })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(8)
   @IsString({ each: true })
   imageUrls?: string[];
 
-  @ApiPropertyOptional({ description: 'Discount percentage 0-90' })
+  @ApiPropertyOptional({
+    description: 'Discount percentage 0-90',
+    minimum: 0,
+    maximum: 90,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -53,7 +60,8 @@ export class CreateProductDto {
   discount?: number;
 
   @ApiPropertyOptional({
-    description: 'Free-form spec key/value map, e.g. {"Berat":"500g","Warna":"Hitam"}',
+    description:
+      'Free-form spec key/value map, e.g. {"Berat":"500g","Warna":"Hitam"}',
     example: { Berat: '500g', Warna: 'Hitam' },
   })
   @IsOptional()
@@ -62,7 +70,7 @@ export class CreateProductDto {
 }
 
 export class UpdateProductDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 200 })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -73,13 +81,13 @@ export class UpdateProductDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   price?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -97,7 +105,7 @@ export class UpdateProductDto {
   @IsString({ each: true })
   imageUrls?: string[];
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0, maximum: 90 })
   @IsOptional()
   @IsInt()
   @Min(0)

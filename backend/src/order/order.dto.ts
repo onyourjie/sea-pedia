@@ -7,7 +7,10 @@ export class CheckoutDto {
   @IsEnum(DeliveryMethod)
   deliveryMethod: DeliveryMethod;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID alamat pengiriman milik buyer.',
+    example: 'clx1234567890',
+  })
   @IsString()
   addressId: string;
 

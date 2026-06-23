@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsNumber, Min, IsDateString, IsInt } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  IsDateString,
+  IsInt,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateVoucherDto {
@@ -11,36 +18,39 @@ export class CreateVoucherDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Fixed discount amount' })
+  @ApiPropertyOptional({ description: 'Fixed discount amount', minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   discountAmount?: number;
 
-  @ApiPropertyOptional({ description: 'Percentage discount (0-100)' })
+  @ApiPropertyOptional({
+    description: 'Percentage discount.',
+    minimum: 0,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
   discountPct?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   maxDiscount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   minOrder?: number;
 
-  @ApiProperty({ example: 100 })
+  @ApiProperty({ example: 100, minimum: 1 })
   @IsInt()
   @Min(1)
   usageLimit: number;
 
-  @ApiProperty({ example: '2026-12-31T23:59:59Z' })
+  @ApiProperty({ example: '2026-12-31T23:59:59Z', format: 'date-time' })
   @IsDateString()
   expiresAt: string;
 }
@@ -55,31 +65,31 @@ export class CreatePromoDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   discountAmount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   discountPct?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   maxDiscount?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   minOrder?: number;
 
-  @ApiProperty({ example: '2026-12-31T23:59:59Z' })
+  @ApiProperty({ example: '2026-12-31T23:59:59Z', format: 'date-time' })
   @IsDateString()
   expiresAt: string;
 }
