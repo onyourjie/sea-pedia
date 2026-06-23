@@ -18,6 +18,8 @@ interface StoreDetail {
   description?: string;
   createdAt: string;
   _count?: { products: number };
+  ratingAverage?: number;
+  reviewCount?: number;
 }
 
 interface Product {
@@ -190,9 +192,6 @@ export default function StoreDetailPage() {
             <div className="flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold sm:text-3xl">{store.name}</h1>
-                <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold backdrop-blur">
-                  Official Store
-                </span>
               </div>
               <p className="max-w-2xl text-sm text-cyan-100 sm:text-base">
                 {store.description || "Toko produk maritim terpercaya di SEAPEDIA."}
@@ -202,7 +201,10 @@ export default function StoreDetailPage() {
                   <Package className="h-4 w-4" /> {productTotal} produk
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" /> 4.9 rating
+                  <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" />
+                  {store.ratingAverage && store.ratingAverage > 0
+                    ? `${store.ratingAverage.toFixed(1)} rating · ${store.reviewCount ?? 0} ulasan`
+                    : "Belum ada ulasan"}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <MapPin className="h-4 w-4" /> Indonesia

@@ -5,7 +5,16 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  SlidersHorizontal,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Tag,
+  Gift,
+  Copy,
+  Check,
+} from "lucide-react";
 import api from "@/lib/api";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -18,6 +27,8 @@ interface Product {
   imageUrl?: string;
   store?: { name: string };
   discount?: number;
+  ratingAverage?: number;
+  reviewCount?: number;
 }
 
 interface ProductsResponse {
@@ -25,6 +36,20 @@ interface ProductsResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+interface Offer {
+  id: string;
+  code: string;
+  description?: string;
+  discountAmount?: string | number | null;
+  discountPct?: string | number | null;
+  maxDiscount?: string | number | null;
+  minOrder?: string | number | null;
+  usageLimit: number;
+  usageCount: number;
+  expiresAt: string;
+  type: "voucher" | "promo";
 }
 
 function formatPrice(price: number) {
@@ -90,7 +115,9 @@ function ProductCard({ product }: { product: Product }) {
           )}
           <div className="flex items-center gap-1 mt-auto pt-1.5">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs text-gray-500">4.9</span>
+            <span className="text-xs text-gray-500">
+              {product.ratingAverage && product.ratingAverage > 0 ? product.ratingAverage.toFixed(1) : "Baru"}
+            </span>
             <span className="text-gray-300 text-xs">·</span>
             <span className="text-xs text-gray-400 truncate">{product.store?.name}</span>
           </div>
@@ -113,6 +140,88 @@ function ProductCardSkeleton() {
   );
 }
 
+function OfferCard({
+  offer,
+  copied,
+  onCopy,
+}: {
+  offer: Offer;
+  copied: boolean;
+  onCopy: (code: string) => void;
+}) {
+  const isVoucher = offer.type === "voucher";
+  const Icon = isVoucher ? Tag : Gift;
+  const accent = isVoucher ? "text-purple-600" : "text-orange-500";
+  const softBackground = isVoucher ? "bg-purple-50" : "bg-orange-50";
+  const button = isVoucher
+    ? "bg-purple-600 hover:bg-purple-700"
+    : "bg-orange-500 hover:bg-orange-600";
+
+  return (
+    <motion.article
+      whileHover={{ y: -3 }}
+      className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+    >
+      <div className={`absolute -right-8 -top-8 h-28 w-28 rounded-full ${softBackground}`} />
+      <div className="relative flex h-full flex-col">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${softBackground}`}>
+              <Icon className={`h-5 w-5 ${accent}`} />
+            </div>
+            <div>
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${accent}`}>
+                {isVoucher ? "Voucher" : "Promo"}
+              </span>
+              <h2 className="font-mono text-lg font-bold text-gray-800">{offer.code}</h2>
+            </div>
+          </div>
+        </div>
+
+        <p className="mb-4 min-h-10 text-sm leading-relaxed text-gray-600">
+          {offer.description || "Gunakan kode ini saat checkout untuk mendapatkan potongan harga."}
+        </p>
+
+        <div className="mb-5 space-y-1.5 text-xs text-gray-500">
+          <p>
+            Diskon:{" "}
+            <strong className="text-gray-700">
+              {offer.discountPct
+                ? `${Number(offer.discountPct)}%`
+                : offer.discountAmount
+                  ? formatPrice(Number(offer.discountAmount))
+                  : "-"}
+            </strong>
+            {offer.maxDiscount ? ` (maks. ${formatPrice(Number(offer.maxDiscount))})` : ""}
+          </p>
+          {offer.minOrder && Number(offer.minOrder) > 0 ? (
+            <p>Minimum belanja: {formatPrice(Number(offer.minOrder))}</p>
+          ) : (
+            <p>Tanpa minimum belanja</p>
+          )}
+          <p>
+            Berlaku sampai{" "}
+            {new Date(offer.expiresAt).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onCopy(offer.code)}
+          className={`mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold text-white transition ${button}`}
+        >
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {copied ? "Kode Tersalin" : "Salin Kode"}
+        </button>
+      </div>
+    </motion.article>
+  );
+}
+
 export default function ProductsPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-cyan-50/30 via-white to-orange-50/20" />}>
@@ -131,9 +240,11 @@ function ProductsPageInner() {
   const [maxPrice, setMaxPrice] = useState("");
   const [minPriceInput, setMinPriceInput] = useState("");
   const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [copiedCode, setCopiedCode] = useState("");
   const limit = 12;
 
-  const promoParam = searchParams.get("promo") || "";
+  const isOffersPage = searchParams.get("promo") === "1";
+  const isDealsPage = searchParams.get("deals") === "1";
 
   useEffect(() => {
     const s = searchParams.get("search") || "";
@@ -145,16 +256,45 @@ function ProductsPageInner() {
   }, [searchParams]);
 
   const { data, isLoading } = useQuery<ProductsResponse>({
-    queryKey: ["products", search, sort, page, minPrice, maxPrice, promoParam],
+    queryKey: ["products", search, sort, page, minPrice, maxPrice, isDealsPage],
     queryFn: () => {
       let url = `/products?page=${page}&limit=${limit}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
       if (minPrice) url += `&minPrice=${minPrice}`;
       if (maxPrice) url += `&maxPrice=${maxPrice}`;
-      if (promoParam) url += `&promo=1`;
+      if (isDealsPage) url += `&promo=1`;
       return api.get(url).then((r) => r.data);
     },
+    enabled: !isOffersPage,
+  });
+
+  const { data: offers = [], isLoading: offersLoading } = useQuery<Offer[]>({
+    queryKey: ["public-vouchers-promos"],
+    queryFn: async () => {
+      const [voucherResponse, promoResponse] = await Promise.all([
+        api.get("/vouchers"),
+        api.get("/promos"),
+      ]);
+      const vouchers = (Array.isArray(voucherResponse.data) ? voucherResponse.data : []).map(
+        (voucher) => ({ ...voucher, type: "voucher" as const }),
+      );
+      const promos = (Array.isArray(promoResponse.data) ? promoResponse.data : []).map(
+        (promo) => ({ ...promo, type: "promo" as const }),
+      );
+      const now = Date.now();
+
+      return [...vouchers, ...promos]
+        .filter((offer) => {
+          const hasQuota = offer.usageLimit === 0 || offer.usageCount < offer.usageLimit;
+          return new Date(offer.expiresAt).getTime() >= now && hasQuota;
+        })
+        .sort(
+          (a, b) =>
+            new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime(),
+        );
+    },
+    enabled: isOffersPage,
   });
 
   const products = data?.data || [];
@@ -183,13 +323,19 @@ function ProductsPageInner() {
     setPage(1);
   };
 
+  const copyOfferCode = async (code: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    window.setTimeout(() => setCopiedCode(""), 1800);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
         {/* Sidebar filter */}
-        <aside className="w-56 shrink-0 hidden md:block">
+        {!isOffersPage && <aside className="w-56 shrink-0 hidden md:block">
           <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sticky top-20">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
@@ -256,7 +402,7 @@ function ProductsPageInner() {
               </div>
             </div>
           </div>
-        </aside>
+        </aside>}
 
         {/* Main content */}
         <main className="flex-1 min-w-0">
@@ -264,8 +410,8 @@ function ProductsPageInner() {
           <nav className="text-xs text-gray-400 mb-3 flex items-center gap-1">
             <Link href="/" className="hover:text-cyan-500">Beranda</Link>
             <span>/</span>
-            <span className="text-gray-600">Produk</span>
-            {search && (
+            <span className="text-gray-600">{isOffersPage ? "Voucher & Promo" : "Produk"}</span>
+            {!isOffersPage && search && (
               <>
                 <span>/</span>
                 <span className="text-gray-600 capitalize">{search}</span>
@@ -275,12 +421,26 @@ function ProductsPageInner() {
 
           <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div>
-              <h1 className="text-xl font-bold text-gray-800">{search ? `Hasil: "${search}"` : "Semua Produk"}</h1>
+              <h1 className="text-xl font-bold text-gray-800">
+                {isOffersPage
+                  ? "Voucher & Promo"
+                  : search
+                    ? `Hasil: "${search}"`
+                    : isDealsPage
+                      ? "Hot Deals"
+                      : "Semua Produk"}
+              </h1>
               <p className="text-xs text-gray-500 mt-0.5">
-                {isLoading ? "Memuat..." : `Menampilkan ${products.length} dari ${total} produk`}
+                {isOffersPage
+                  ? offersLoading
+                    ? "Memuat..."
+                    : `${offers.length} penawaran aktif dari admin`
+                  : isLoading
+                    ? "Memuat..."
+                    : `Menampilkan ${products.length} dari ${total} produk`}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            {!isOffersPage && <div className="flex items-center gap-2 flex-wrap">
               <form onSubmit={handleSearch} className="flex items-center border border-gray-200 rounded-full px-3 py-1.5 bg-white gap-2 hover:border-cyan-300 transition">
                 <input
                   value={searchInput}
@@ -302,27 +462,61 @@ function ProductsPageInner() {
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {isLoading
-              ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-              : products.map((product, i) => (
+          {isOffersPage ? (
+            offersLoading ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-72 animate-pulse rounded-2xl border border-gray-100 bg-white" />
+                ))}
+              </div>
+            ) : offers.length === 0 ? (
+              <div className="rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm">
+                <Gift className="mx-auto mb-3 h-12 w-12 text-gray-300" />
+                <h2 className="font-semibold text-gray-700">Belum ada voucher atau promo aktif</h2>
+                <p className="mt-1 text-sm text-gray-400">Cek kembali nanti untuk penawaran terbaru.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {offers.map((offer, i) => (
                   <motion.div
-                    key={product.id}
+                    key={`${offer.type}-${offer.id}`}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
                     className="h-full"
                   >
-                    <ProductCard product={product} />
+                    <OfferCard
+                      offer={offer}
+                      copied={copiedCode === offer.code}
+                      onCopy={copyOfferCode}
+                    />
                   </motion.div>
                 ))}
-          </div>
+              </div>
+            )
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {isLoading
+                ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                : products.map((product, i) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      className="h-full"
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  ))}
+            </div>
+          )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {!isOffersPage && totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-8">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
