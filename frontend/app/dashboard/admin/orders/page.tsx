@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardList } from "lucide-react";
 import api from "@/lib/api";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface AdminOrder {
   id: string;
@@ -64,11 +65,12 @@ export default function AdminOrdersPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat...</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={6} /></div>
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Tidak ada pesanan</p>
+          <ClipboardList className="w-14 h-14 text-purple-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Tidak ada pesanan untuk filter ini</h3>
+          <p className="text-sm text-gray-500 mt-1">Coba pilih filter status lain di atas untuk melihat pesanan.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

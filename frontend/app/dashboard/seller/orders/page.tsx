@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ClipboardList, ChevronRight, Search } from "lucide-react";
 import api from "@/lib/api";
+import { SkeletonOrderCard } from "@/components/ui/skeleton";
 
 interface Order {
   id: string;
@@ -83,11 +84,17 @@ export default function SellerOrdersPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat...</p>
+        <SkeletonOrderCard count={3} />
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-700">Tidak ada pesanan</h3>
+          <ClipboardList className="w-14 h-14 text-orange-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada pesanan masuk</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">{filter === "Semua" ? "Pesanan dari pembeli akan muncul di sini setelah checkout." : "Tidak ada pesanan untuk filter ini."}</p>
+          {filter === "Semua" && (
+            <Link href="/dashboard/seller/products" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+              Kelola Produk
+            </Link>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

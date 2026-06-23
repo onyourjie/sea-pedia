@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Package, Plus, Pencil, Trash2, X, Image as ImageIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface SpecItem { key: string; value: string; }
 
@@ -384,12 +385,20 @@ export default function SellerProductsPage() {
       )}
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat produk...</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={5} /></div>
       ) : products.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-700">Belum ada produk</h3>
-          <p className="text-sm text-gray-400 mt-1">Tambahkan produk pertama Anda untuk mulai jualan.</p>
+          <Package className="w-14 h-14 text-orange-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada produk</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Tambahkan produk pertama untuk mulai jualan dan menerima pesanan.</p>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition"
+            >
+              <Plus className="w-4 h-4" /> Tambah Produk Pertama
+            </button>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

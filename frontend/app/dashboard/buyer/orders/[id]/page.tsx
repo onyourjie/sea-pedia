@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Package, MapPin, CreditCard, Truck, CheckCircle2, Box, Clock, RotateCcw, Star, MessageSquarePlus, X } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonDetail } from "@/components/ui/skeleton";
 
 interface OrderItem {
   id: string;
@@ -28,7 +29,7 @@ interface OrderDetail {
   deliveryMethod: string;
   createdAt: string;
   store: { id: string; name: string };
-  address?: { label: string; street: string; city: string; province: string; postalCode: string };
+  address?: { label: string; recipientName: string; recipientPhone: string; street: string; city: string; province: string; postalCode: string };
   items: OrderItem[];
   statusHistory: { id: string; status: string; note?: string; createdAt: string }[];
   voucher?: { code: string };
@@ -162,8 +163,17 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     },
   });
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat detail pesanan...</p>;
-  if (!order) return <p className="text-center text-gray-400 py-12">Pesanan tidak ditemukan.</p>;
+  if (isLoading) return <div className="py-2"><SkeletonDetail /></div>;
+  if (!order) return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+      <Package className="w-14 h-14 text-cyan-200 mx-auto mb-3" />
+      <h3 className="font-semibold text-gray-800">Pesanan tidak ditemukan</h3>
+      <p className="text-sm text-gray-500 mt-1 mb-4">Mungkin pesanan ini sudah dihapus atau bukan milikmu.</p>
+      <Link href="/dashboard/buyer/orders" className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+        <ChevronLeft className="w-4 h-4" /> Kembali ke Pesanan
+      </Link>
+    </div>
+  );
 
   const isCompleted = order.status === "PESANAN_SELESAI";
   const isReturned = order.status === "DIKEMBALIKAN";
@@ -300,6 +310,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 <h2 className="font-bold text-gray-800">Alamat Pengiriman</h2>
               </div>
               <p className="text-sm font-semibold text-gray-700">{order.address.label}</p>
+              <p className="text-sm text-gray-700 mt-1">{order.address.recipientName} <span className="text-cyan-600 font-mono ml-1">{order.address.recipientPhone}</span></p>
               <p className="text-sm text-gray-600 mt-1">{order.address.street}</p>
               <p className="text-sm text-gray-500">{order.address.city}, {order.address.province} {order.address.postalCode}</p>
               <p className="text-xs text-gray-500 mt-3">

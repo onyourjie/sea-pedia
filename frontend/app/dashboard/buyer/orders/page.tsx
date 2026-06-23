@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Package, ChevronRight, Search } from "lucide-react";
+import { Package, ChevronRight, Search, ShoppingBag } from "lucide-react";
 import api from "@/lib/api";
+import { SkeletonOrderCard } from "@/components/ui/skeleton";
 
 interface Order {
   id: string;
@@ -81,12 +82,15 @@ export default function BuyerOrdersPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat pesanan...</p>
+        <SkeletonOrderCard count={4} />
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-700">Belum ada pesanan</h3>
-          <p className="text-sm text-gray-400 mt-1">Mulai belanja dan pesananmu akan muncul di sini.</p>
+          <Package className="w-14 h-14 text-cyan-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada pesanan</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Yuk mulai belanja produk laut segar dari para Seller di Seapedia.</p>
+          <Link href="/products" className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+            <ShoppingBag className="w-4 h-4" /> Mulai Belanja
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">

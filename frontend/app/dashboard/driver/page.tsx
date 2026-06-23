@@ -109,7 +109,12 @@ export default function DriverDashboardPage() {
           </Link>
         </div>
         {!available?.data || available.data.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-6">Tidak ada job tersedia saat ini</p>
+          <div className="text-center py-6">
+            <p className="text-sm text-gray-400 mb-2">Tidak ada job tersedia saat ini</p>
+            <Link href="/dashboard/driver/jobs" className="text-xs text-green-600 hover:text-green-700 font-semibold">
+              Refresh halaman job →
+            </Link>
+          </div>
         ) : (
           <div className="space-y-3">
             {available.data.slice(0, 3).map((j) => (

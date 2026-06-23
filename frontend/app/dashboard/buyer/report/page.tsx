@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { TrendingUp, ShoppingBag, CreditCard, Package, Printer } from "lucide-react";
 import api from "@/lib/api";
+import { SkeletonCard, SkeletonTable } from "@/components/ui/skeleton";
 
 interface Order {
   id: string;
@@ -38,7 +39,20 @@ export default function BuyerReportPage() {
     day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat laporan...</p>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Laporan Belanja</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Ringkasan pengeluaran dan riwayat transaksi.</p>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard />
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={5} /></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

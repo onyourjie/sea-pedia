@@ -6,10 +6,13 @@ import { motion } from "framer-motion";
 import { MapPin, Plus, Pencil, Trash2, Star, X } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 interface Address {
   id: string;
   label: string;
+  recipientName: string;
+  recipientPhone: string;
   street: string;
   city: string;
   province: string;
@@ -19,6 +22,8 @@ interface Address {
 
 interface FormState {
   label: string;
+  recipientName: string;
+  recipientPhone: string;
   street: string;
   city: string;
   province: string;
@@ -26,7 +31,10 @@ interface FormState {
   isDefault: boolean;
 }
 
-const empty: FormState = { label: "", street: "", city: "", province: "", postalCode: "", isDefault: false };
+const empty: FormState = { label: "", recipientName: "", recipientPhone: "", street: "", city: "", province: "", postalCode: "", isDefault: false };
+
+const PHONE_REGEX = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
+const POSTAL_REGEX = /^\d{5}$/;
 
 export default function AddressesPage() {
   const qc = useQueryClient();
@@ -82,6 +90,8 @@ export default function AddressesPage() {
   const startEdit = (a: Address) => {
     setForm({
       label: a.label,
+      recipientName: a.recipientName,
+      recipientPhone: a.recipientPhone,
       street: a.street,
       city: a.city,
       province: a.province,
@@ -94,6 +104,14 @@ export default function AddressesPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!PHONE_REGEX.test(form.recipientPhone)) {
+      Swal.fire({ title: "Nomor HP tidak valid", text: "Gunakan format Indonesia, mis. 08123456789 atau +6281234567890", icon: "warning", confirmButtonColor: "#f59e0b" });
+      return;
+    }
+    if (!POSTAL_REGEX.test(form.postalCode)) {
+      Swal.fire({ title: "Kode pos tidak valid", text: "Kode pos harus 5 digit angka.", icon: "warning", confirmButtonColor: "#f59e0b" });
+      return;
+    }
     if (editingId) {
       update.mutate({ id: editingId, dto: form });
     } else {
@@ -135,7 +153,9 @@ export default function AddressesPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Label (mis. Rumah, Kantor)" value={form.label} onChange={(v) => setForm({ ...form, label: v })} required />
-            <Field label="Kode Pos" value={form.postalCode} onChange={(v) => setForm({ ...form, postalCode: v })} required />
+            <Field label="Nama Penerima" value={form.recipientName} onChange={(v) => setForm({ ...form, recipientName: v })} required />
+            <Field label="Nomor HP Penerima" value={form.recipientPhone} onChange={(v) => setForm({ ...form, recipientPhone: v })} required placeholder="08123456789" hint="Format Indonesia (mis. 08xx atau +62)" />
+            <Field label="Kode Pos" value={form.postalCode} onChange={(v) => setForm({ ...form, postalCode: v })} required placeholder="10110" />
             <div className="md:col-span-2">
               <Field label="Alamat Jalan" value={form.street} onChange={(v) => setForm({ ...form, street: v })} required />
             </div>
@@ -171,12 +191,20 @@ export default function AddressesPage() {
       )}
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat alamat...</p>
+        <SkeletonList count={2} />
       ) : addresses.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-700">Belum ada alamat tersimpan</h3>
-          <p className="text-sm text-gray-400 mt-1">Tambahkan alamat untuk memudahkan checkout.</p>
+          <MapPin className="w-14 h-14 text-cyan-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada alamat tersimpan</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Tambahkan alamat untuk memudahkan checkout dan pengiriman.</p>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition"
+            >
+              <Plus className="w-4 h-4" /> Tambah Alamat Pertama
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
@@ -196,6 +224,8 @@ export default function AddressesPage() {
                 <MapPin className="w-4 h-4 text-cyan-500" />
                 <p className="font-semibold text-gray-800">{a.label}</p>
               </div>
+              <p className="text-sm text-gray-700 font-medium">{a.recipientName}</p>
+              <p className="text-xs text-cyan-600 font-mono mb-2">{a.recipientPhone}</p>
               <p className="text-sm text-gray-600 leading-relaxed">{a.street}</p>
               <p className="text-sm text-gray-500 mt-1">{a.city}, {a.province} {a.postalCode}</p>
               <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
@@ -232,7 +262,7 @@ export default function AddressesPage() {
   );
 }
 
-function Field({ label, value, onChange, required }: { label: string; value: string; onChange: (v: string) => void; required?: boolean }) {
+function Field({ label, value, onChange, required, placeholder, hint }: { label: string; value: string; onChange: (v: string) => void; required?: boolean; placeholder?: string; hint?: string }) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-700 mb-1.5">{label}</label>
@@ -241,8 +271,10 @@ function Field({ label, value, onChange, required }: { label: string; value: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
+        placeholder={placeholder}
         className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-300 focus:border-cyan-400 bg-white transition"
       />
+      {hint && <p className="text-[11px] text-gray-400 mt-1">{hint}</p>}
     </div>
   );
 }

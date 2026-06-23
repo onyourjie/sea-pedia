@@ -44,6 +44,13 @@ const ROLE_DASHBOARD: Record<string, string> = {
   ADMIN: "/dashboard/admin",
 };
 
+const ROLE_BADGE: Record<string, { label: string; className: string; dot: string }> = {
+  BUYER: { label: "Buyer", className: "bg-cyan-50 text-cyan-700 ring-cyan-200", dot: "bg-cyan-500" },
+  SELLER: { label: "Seller", className: "bg-orange-50 text-orange-700 ring-orange-200", dot: "bg-orange-500" },
+  DRIVER: { label: "Driver", className: "bg-green-50 text-green-700 ring-green-200", dot: "bg-green-500" },
+  ADMIN: { label: "Admin", className: "bg-purple-50 text-purple-700 ring-purple-200", dot: "bg-purple-500" },
+};
+
 export function Navbar() {
   const { user, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -98,6 +105,18 @@ export function Navbar() {
                 <ShoppingCart className="w-5 h-5 text-gray-600" />
                 <CountBadge count={cartCount} />
               </Link>
+              {/* Active role badge */}
+              {user.activeRole && ROLE_BADGE[user.activeRole] && (
+                <Link
+                  href="/dashboard/profile"
+                  aria-label={`Peran aktif: ${ROLE_BADGE[user.activeRole].label}. Klik untuk ganti peran.`}
+                  title="Klik untuk ganti peran aktif"
+                  className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1 ml-1 ${ROLE_BADGE[user.activeRole].className} hover:opacity-80 transition`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${ROLE_BADGE[user.activeRole].dot}`} />
+                  {ROLE_BADGE[user.activeRole].label}
+                </Link>
+              )}
               {/* Dashboard */}
               <Link
                 href={dashboardHref}

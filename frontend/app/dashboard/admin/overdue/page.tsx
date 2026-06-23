@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle, FastForward, Calendar, RotateCcw } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface OverdueOrder {
   id: string;
@@ -133,12 +134,12 @@ export default function AdminOverduePage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h2 className="font-bold text-gray-800 mb-3">Pesanan Overdue ({orders.length})</h2>
         {isLoading ? (
-          <p className="text-center text-gray-400 py-8">Memuat...</p>
+          <SkeletonTable rows={4} />
         ) : orders.length === 0 ? (
-          <div className="text-center py-8">
-            <AlertTriangle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">Tidak ada pesanan overdue saat ini</p>
-            <p className="text-xs text-gray-400 mt-1">Sistem aman.</p>
+          <div className="text-center py-10">
+            <AlertTriangle className="w-12 h-12 text-green-300 mx-auto mb-3" />
+            <h3 className="font-semibold text-gray-800">Tidak ada pesanan overdue</h3>
+            <p className="text-xs text-gray-500 mt-1">Semua pesanan masih dalam SLA. Klik "Maju 1 Hari" untuk simulasi waktu.</p>
           </div>
         ) : (
           <div className="space-y-3">

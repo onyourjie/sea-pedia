@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Store, Save, Package, ClipboardList, Star } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonCard, SkeletonDetail } from "@/components/ui/skeleton";
 
 interface MyStore {
   id: string;
@@ -72,7 +73,20 @@ export default function SellerStorePage() {
     else create.mutate();
   };
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat...</p>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Toko Saya</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Memuat data toko…</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
+        </div>
+        <SkeletonDetail />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

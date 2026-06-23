@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Gift, Plus, X } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface Promo {
   id: string;
@@ -174,11 +175,18 @@ export default function AdminPromosPage() {
       )}
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat...</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={5} /></div>
       ) : promos.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <Gift className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Belum ada promo</p>
+          <Gift className="w-14 h-14 text-purple-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada promo dibuat</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Buat promo pertama untuk menarik Buyer ke marketplace.</p>
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition"
+          >
+            <Plus className="w-4 h-4" /> Buat Promo
+          </button>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">

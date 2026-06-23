@@ -2,8 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { History, CheckCircle2, DollarSign, TrendingUp, Printer } from "lucide-react";
+import { History, CheckCircle2, DollarSign, TrendingUp, Printer, Truck } from "lucide-react";
+import Link from "next/link";
 import api from "@/lib/api";
+import { SkeletonCard, SkeletonTable } from "@/components/ui/skeleton";
 
 interface Job {
   id: string;
@@ -41,7 +43,20 @@ export default function DriverHistoryPage() {
     day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat riwayat...</p>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Riwayat & Earnings</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Pantau total penghasilan dan job yang sudah diselesaikan.</p>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={5} /></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -92,9 +107,13 @@ export default function DriverHistoryPage() {
         <div className="print-card bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h2 className="font-bold text-gray-800 mb-3">Riwayat Job</h2>
         {all.length === 0 ? (
-          <div className="text-center py-8">
-            <History className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-400">Belum ada riwayat</p>
+          <div className="text-center py-10">
+            <History className="w-12 h-12 text-green-200 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-gray-700">Belum ada riwayat job</p>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Selesaikan job pengiriman untuk mengisi riwayat ini.</p>
+            <Link href="/dashboard/driver/jobs" className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition no-print">
+              <Truck className="w-3.5 h-3.5" /> Cari Job
+            </Link>
           </div>
         ) : (
           <table className="w-full text-sm">

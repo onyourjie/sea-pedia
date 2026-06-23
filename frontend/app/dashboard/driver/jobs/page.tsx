@@ -2,9 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Briefcase, MapPin, Truck, Package, Store } from "lucide-react";
+import { Briefcase, MapPin, Truck, Package, Store, RefreshCcw } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 interface AvailableJob {
   id: string;
@@ -15,7 +16,7 @@ interface AvailableJob {
     deliveryMethod: string;
     total: string;
     store: { id: string; name: string };
-    address: { label: string; street: string; city: string; province: string };
+    address: { label: string; recipientName: string; recipientPhone: string; street: string; city: string; province: string };
     items: { id: string; name: string; quantity: number }[];
   };
 }
@@ -54,12 +55,18 @@ export default function DriverJobsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat job...</p>
+        <SkeletonList count={4} />
       ) : jobs.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-700">Tidak ada job tersedia</h3>
-          <p className="text-sm text-gray-400 mt-1">Coba refresh atau cek lagi nanti.</p>
+          <Briefcase className="w-14 h-14 text-green-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada job tersedia</h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Job baru muncul setelah Seller memproses pesanan. Refresh untuk cek lagi.</p>
+          <button
+            onClick={() => qc.invalidateQueries({ queryKey: ["driver-available-jobs"] })}
+            className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition"
+          >
+            <RefreshCcw className="w-4 h-4" /> Refresh Job
+          </button>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
@@ -95,6 +102,7 @@ export default function DriverJobsPage() {
                     <div>
                       <p className="text-xs text-gray-400">Antar ke</p>
                       <p className="font-semibold text-gray-800">{j.order.address.label}</p>
+                      <p className="text-xs text-gray-700">{j.order.address.recipientName} <span className="text-orange-600 font-mono ml-1">{j.order.address.recipientPhone}</span></p>
                       <p className="text-xs text-gray-500">{j.order.address.street}, {j.order.address.city}, {j.order.address.province}</p>
                     </div>
                   </div>

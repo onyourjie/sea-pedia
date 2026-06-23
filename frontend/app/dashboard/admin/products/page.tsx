@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Package } from "lucide-react";
 import api from "@/lib/api";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface AdminProduct {
   id: string;
@@ -36,11 +37,12 @@ export default function AdminProductsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Memuat...</p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={6} /></div>
       ) : products.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Belum ada produk</p>
+          <Package className="w-14 h-14 text-purple-200 mx-auto mb-3" />
+          <h3 className="font-semibold text-gray-800">Belum ada produk di marketplace</h3>
+          <p className="text-sm text-gray-500 mt-1">Produk akan muncul setelah Seller membuat produk pertama.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

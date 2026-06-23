@@ -127,7 +127,12 @@ export default function SellerDashboardPage() {
           </Link>
         </div>
         {orders.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-6">Belum ada pesanan masuk</p>
+          <div className="text-center py-6">
+            <p className="text-sm text-gray-400 mb-2">Belum ada pesanan masuk</p>
+            <Link href="/dashboard/seller/products" className="text-xs text-orange-500 hover:text-orange-600 font-semibold">
+              Kelola produk →
+            </Link>
+          </div>
         ) : (
           <div className="space-y-3">
             {orders.map((o) => {

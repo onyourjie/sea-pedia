@@ -7,6 +7,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { MapPin, Truck, Tag, Wallet, CheckCircle2, Plus } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonDetail } from "@/components/ui/skeleton";
 
 interface Address {
   id: string;
@@ -158,7 +159,7 @@ export default function CheckoutPage() {
     setSubmitting(false);
   };
 
-  if (cartLoading) return <p className="text-center text-gray-400 py-12">Memuat...</p>;
+  if (cartLoading) return <div className="py-2"><SkeletonDetail /></div>;
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">

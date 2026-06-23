@@ -186,7 +186,12 @@ export default function BuyerDashboardPage() {
           </div>
           <div className="space-y-3">
             {orders.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-6">Belum ada pesanan</p>
+              <div className="text-center py-6">
+                <p className="text-sm text-gray-400 mb-2">Belum ada pesanan</p>
+                <Link href="/products" className="text-xs text-cyan-500 hover:text-cyan-600 font-semibold">
+                  Yuk mulai belanja →
+                </Link>
+              </div>
             )}
             {orders.map((order) => {
               const status = STATUS_LABEL[order.status] || { label: order.status, color: "text-gray-500 bg-gray-50" };

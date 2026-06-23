@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Package, MapPin, User, Truck, CheckCircle2 } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
+import { SkeletonDetail } from "@/components/ui/skeleton";
 
 interface OrderDetail {
   id: string;
@@ -17,7 +18,7 @@ interface OrderDetail {
   deliveryMethod: string;
   createdAt: string;
   buyer?: { user: { username: string; email: string } };
-  address?: { label: string; street: string; city: string; province: string; postalCode: string };
+  address?: { label: string; recipientName: string; recipientPhone: string; street: string; city: string; province: string; postalCode: string };
   items: { id: string; name: string; price: string; quantity: number }[];
   statusHistory: { id: string; status: string; note?: string; createdAt: string }[];
   delivery?: { driver?: { user: { username: string } } };
@@ -62,8 +63,17 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
     },
   });
 
-  if (isLoading) return <p className="text-center text-gray-400 py-12">Memuat...</p>;
-  if (!order) return <p className="text-center text-gray-400 py-12">Pesanan tidak ditemukan.</p>;
+  if (isLoading) return <div className="py-2"><SkeletonDetail /></div>;
+  if (!order) return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+      <Package className="w-14 h-14 text-orange-200 mx-auto mb-3" />
+      <h3 className="font-semibold text-gray-800">Pesanan tidak ditemukan</h3>
+      <p className="text-sm text-gray-500 mt-1 mb-4">Pesanan ini bukan milik tokomu atau sudah dihapus.</p>
+      <Link href="/dashboard/seller/orders" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+        <ChevronLeft className="w-4 h-4" /> Kembali ke Pesanan
+      </Link>
+    </div>
+  );
 
   const status = STATUS_LABEL[order.status] || { label: order.status, color: "bg-gray-50 text-gray-600" };
   const canProcess = order.status === "SEDANG_DIKEMAS";
@@ -130,14 +140,20 @@ export default function SellerOrderDetailPage({ params }: { params: { id: string
                   <MapPin className="w-3.5 h-3.5 text-orange-500" />
                   <p className="text-sm font-semibold text-gray-700">{order.address.label}</p>
                 </div>
+                <p className="text-sm text-gray-700 ml-5">{order.address.recipientName} <span className="text-orange-600 font-mono ml-1 text-xs">{order.address.recipientPhone}</span></p>
                 <p className="text-xs text-gray-500 ml-5">{order.address.street}, {order.address.city}, {order.address.province} {order.address.postalCode}</p>
               </div>
             )}
-            <div className="border-t border-gray-100 pt-3 text-xs text-gray-500">
-              Pengiriman: <strong className="text-gray-700">{order.deliveryMethod.replace("_", " ")}</strong>
-              {order.delivery?.driver && (
-                <p className="mt-1">Driver: <strong className="text-gray-700">{order.delivery.driver.user.username}</strong></p>
-              )}
+            <div className="border-t border-gray-100 pt-3 text-xs text-gray-500 space-y-1">
+              <p>Pengiriman: <strong className="text-gray-700">{order.deliveryMethod.replace("_", " ")}</strong></p>
+              {order.delivery?.driver ? (
+                <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-blue-50 rounded-lg">
+                  <Truck className="w-3.5 h-3.5 text-blue-600" />
+                  <p className="text-blue-700">Driver: <strong>{order.delivery.driver.user.username}</strong></p>
+                </div>
+              ) : order.status === "MENUNGGU_PENGIRIM" ? (
+                <p className="mt-2 text-yellow-700 italic">Menunggu driver mengambil job…</p>
+              ) : null}
             </div>
           </div>
 
