@@ -55,7 +55,19 @@ async function main() {
         description: 'Masker selam premium dengan lensa tempered ultra-clear untuk pandangan bawah air tajam tanpa distorsi. Teknologi Trufit Generasi Kedua dengan silikon ganda.',
         price: 1250000,
         stock: 25,
+        discount: 15,
         imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
+        imageUrls: [
+          'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
+          'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+          'https://images.unsplash.com/photo-1559827291-d8d49a55fb2f?w=800',
+        ],
+        specifications: {
+          Material: 'Silikon Hipoalergenik',
+          Lensa: 'Tempered Glass',
+          Berat: '180g',
+          Garansi: '1 Tahun',
+        },
       },
       {
         storeId: store.id,
@@ -63,7 +75,17 @@ async function main() {
         description: 'Fin selam Cressi dengan desain ergonomis untuk efisiensi tendangan maksimal. Warna kuning high visibility untuk keamanan di laut.',
         price: 850000,
         stock: 40,
+        discount: 25,
         imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
+        imageUrls: [
+          'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+          'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=800',
+        ],
+        specifications: {
+          Ukuran: 'M (40-42)',
+          Material: 'Polypropylene',
+          Warna: 'Kuning Fluoresen',
+        },
       },
       {
         storeId: store.id,
@@ -71,7 +93,17 @@ async function main() {
         description: 'BCD profesional dengan sistem integrasi pemberat, bahan durable untuk kondisi laut keras. Cocok untuk penyelam profesional maupun rekreasi.',
         price: 6500000,
         stock: 15,
+        discount: 10,
         imageUrl: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400',
+        imageUrls: [
+          'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800',
+          'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=800',
+        ],
+        specifications: {
+          Kapasitas: 'Maks 18kg pemberat',
+          Material: 'Cordura 1000D',
+          Bladder: '20 liter',
+        },
       },
       {
         storeId: store.id,
@@ -79,7 +111,13 @@ async function main() {
         description: 'Set regulator premium Apeks dengan teknologi terbaru untuk pernapasan mudah di kedalaman. Termasuk dive computer DST.',
         price: 9850000,
         stock: 10,
+        discount: 8,
         imageUrl: 'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=400',
+        specifications: {
+          Tahap: 'Balanced Diaphragm',
+          'Maks Kedalaman': '60m',
+          Sertifikasi: 'CE EN250',
+        },
       },
       {
         storeId: store.id,
@@ -88,6 +126,11 @@ async function main() {
         price: 2100000,
         stock: 20,
         imageUrl: 'https://images.unsplash.com/photo-1601760562234-9814eea6db4d?w=400',
+        specifications: {
+          Ketebalan: '3mm',
+          Tipe: 'Full Body',
+          Resleting: 'YKK',
+        },
       },
       {
         storeId: store.id,
@@ -95,6 +138,7 @@ async function main() {
         description: 'Senter selam profesional 1200 lumens dengan sudut sinar lebar. Tahan air hingga 100 meter, baterai lithium tahan lama.',
         price: 1850000,
         stock: 30,
+        discount: 20,
         imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
       },
     ],
