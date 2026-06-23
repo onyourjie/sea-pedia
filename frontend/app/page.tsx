@@ -2,11 +2,15 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/home/hero-section";
 import { CategorySection } from "@/components/home/category-section";
-import { FeaturedProducts } from "@/components/home/featured-products";
 import { PromoSection } from "@/components/home/promo-section";
 import { FeaturesSection } from "@/components/home/features-section";
 import { ReviewsSection } from "@/components/home/reviews-section";
 import { CtaSection } from "@/components/home/cta-section";
+import {
+  HotDealsSection,
+  BestsellersSection,
+  NewArrivalsSection,
+} from "@/components/home/product-sections";
 
 export default function Home() {
   return (
@@ -16,7 +20,9 @@ export default function Home() {
         <HeroSection />
         <CategorySection />
         <PromoSection />
-        <FeaturedProducts />
+        <HotDealsSection />
+        <BestsellersSection />
+        <NewArrivalsSection />
         <FeaturesSection />
         <ReviewsSection />
         <CtaSection />

@@ -11,6 +11,8 @@ interface AdminProduct {
   stock: number;
   isActive: boolean;
   imageUrl?: string;
+  imageUrls?: string[];
+  discount?: number;
   store: { name: string };
 }
 
@@ -48,35 +50,48 @@ export default function AdminProductsPage() {
                 <th className="text-left px-4 py-3 font-semibold">Produk</th>
                 <th className="text-left px-4 py-3 font-semibold">Toko</th>
                 <th className="text-right px-4 py-3 font-semibold">Harga</th>
+                <th className="text-right px-4 py-3 font-semibold">Diskon</th>
+                <th className="text-right px-4 py-3 font-semibold">Gambar</th>
                 <th className="text-right px-4 py-3 font-semibold">Stok</th>
                 <th className="text-right px-4 py-3 font-semibold">Status</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                        <img
-                          src={p.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=120"}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
-                        />
+              {products.map((p) => {
+                const galleryCount = (p.imageUrls?.length ?? 0) + (p.imageUrl ? 1 : 0);
+                return (
+                  <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                          <img
+                            src={p.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=120"}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>
                       </div>
-                      <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{p.store.name}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
-                  <td className="px-4 py-3 text-right text-gray-700">{p.stock}</td>
-                  <td className="px-4 py-3 text-right">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
-                      {p.isActive ? "Aktif" : "Nonaktif"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{p.store.name}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
+                    <td className="px-4 py-3 text-right">
+                      {p.discount && p.discount > 0 ? (
+                        <span className="text-xs font-bold text-orange-600">{p.discount}%</span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right text-xs text-gray-500">{galleryCount} foto</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{p.stock}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
+                        {p.isActive ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
