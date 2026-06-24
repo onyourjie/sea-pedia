@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "SEAPEDIA — Marketplace Maritim Indonesia",
   description: "Platform maritim multi-role untuk nelayan, pedagang, dan pecinta laut di seluruh Nusantara.",
+  icons: {
+    icon: "/waves.svg",
+    shortcut: "/waves.svg",
+    apple: "/waves.svg",
+  },
 };
 
 export default function RootLayout({
