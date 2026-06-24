@@ -139,7 +139,7 @@ export default function AdminOverduePage() {
           <div className="text-center py-10">
             <AlertTriangle className="w-12 h-12 text-green-300 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-800">Tidak ada pesanan overdue</h3>
-            <p className="text-xs text-gray-500 mt-1">Semua pesanan masih dalam SLA. Klik "Maju 1 Hari" untuk simulasi waktu.</p>
+            <p className="text-xs text-gray-500 mt-1">Semua pesanan masih dalam SLA. Klik &quot;Maju 1 Hari&quot; untuk simulasi waktu.</p>
           </div>
         ) : (
           <div className="space-y-3">

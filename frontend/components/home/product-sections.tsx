@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Star, Flame, TrendingUp, Box, ArrowRight, LucideIcon, BoxIcon } from "lucide-react";
+import { Star, Flame, TrendingUp, ArrowRight, LucideIcon, BoxIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
