@@ -71,7 +71,7 @@ export default function AdminOverduePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Overdue & Time Simulation</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Overdue &amp; Time Simulation</h1>
         <p className="text-sm text-gray-500 mt-0.5">Kelola pesanan yang melewati SLA dan simulasikan waktu untuk demo.</p>
       </div>
 
@@ -79,13 +79,13 @@ export default function AdminOverduePage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl p-5 text-white shadow-lg"
+          className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl p-4 sm:p-5 text-white shadow-lg"
         >
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4" />
             <p className="text-xs text-purple-100">Tanggal Sistem Saat Ini</p>
           </div>
-          <p className="text-2xl font-bold mb-3">
+          <p className="text-xl sm:text-2xl font-bold mb-3 break-words">
             {sys?.currentDate ? new Date(sys.currentDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "Memuat..."}
           </p>
           <button
@@ -102,7 +102,7 @@ export default function AdminOverduePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5"
         >
           <div className="flex items-center gap-2 mb-2">
             <RotateCcw className="w-4 h-4 text-red-500" />
@@ -124,14 +124,14 @@ export default function AdminOverduePage() {
 
       <div className="bg-cyan-50 border border-cyan-100 rounded-xl p-4">
         <p className="text-sm text-cyan-800 font-semibold mb-1">SLA per Metode Pengiriman</p>
-        <div className="grid grid-cols-3 gap-3 mt-2 text-xs text-cyan-700">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 mt-2 text-xs text-cyan-700">
           <p><strong>Instant:</strong> {SLA_LABEL.INSTANT}</p>
           <p><strong>Next Day:</strong> {SLA_LABEL.NEXT_DAY}</p>
           <p><strong>Regular:</strong> {SLA_LABEL.REGULAR}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
         <h2 className="font-bold text-gray-800 mb-3">Pesanan Overdue ({orders.length})</h2>
         {isLoading ? (
           <SkeletonTable rows={4} />
@@ -146,7 +146,7 @@ export default function AdminOverduePage() {
             {orders.map((o) => {
               const refunded = o.statusHistory.find((h) => h.status === "DIKEMBALIKAN");
               return (
-                <div key={o.id} className="border border-red-100 bg-red-50/30 rounded-xl p-4">
+                <div key={o.id} className="border border-red-100 bg-red-50/30 rounded-xl p-3 sm:p-4">
                   <div className="flex items-start justify-between flex-wrap gap-2">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -163,7 +163,7 @@ export default function AdminOverduePage() {
                         <p className="text-xs text-red-600 mt-1 italic">{refunded.note}</p>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       <p className="text-xs text-gray-400">Total Refund</p>
                       <p className="text-sm font-bold text-red-600">{formatPrice(Number(o.total))}</p>
                       <p className="text-[10px] text-gray-400 mt-0.5">

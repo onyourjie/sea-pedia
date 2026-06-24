@@ -78,7 +78,7 @@ export default function DriverJobsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export default function DriverJobsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-gray-100">
                   <div>
                     <p className="text-xs text-gray-400">Earnings</p>
                     <p className="text-lg font-bold text-green-600">{formatPrice(earning)}</p>
@@ -120,7 +120,7 @@ export default function DriverJobsPage() {
                   <button
                     onClick={() => takeJob.mutate(j.id)}
                     disabled={takeJob.isPending}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-md shadow-green-600/20"
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-xl transition shadow-md shadow-green-600/20 shrink-0"
                   >
                     Ambil Job
                   </button>

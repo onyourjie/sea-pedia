@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ClipboardList, ChevronRight, Search } from "lucide-react";
+import { ClipboardList, ChevronRight, Search, Eye } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonOrderCard } from "@/components/ui/skeleton";
 
@@ -106,7 +106,7 @@ export default function SellerOrdersPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5"
               >
                 <div className="flex items-start justify-between flex-wrap gap-3">
                   <div>
@@ -129,9 +129,13 @@ export default function SellerOrdersPage() {
                 <div className="flex justify-end pt-3 mt-3 border-t border-gray-100">
                   <Link
                     href={`/dashboard/seller/orders/${o.id}`}
-                    className="text-xs font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1"
+                    aria-label={`Lihat detail pesanan ${o.id.slice(0, 8)}`}
+                    title="Lihat detail"
+                    className="font-semibold text-orange-500 hover:text-orange-600 inline-flex items-center justify-center gap-1 rounded-lg p-2 hover:bg-orange-50"
                   >
-                    Lihat Detail <ChevronRight className="w-3.5 h-3.5" />
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">Lihat Detail</span>
+                    <ChevronRight className="hidden sm:block w-3.5 h-3.5" />
                   </Link>
                 </div>
               </motion.div>

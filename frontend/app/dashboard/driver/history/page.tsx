@@ -50,7 +50,7 @@ export default function DriverHistoryPage() {
           <h1 className="text-2xl font-bold text-gray-800">Riwayat & Earnings</h1>
           <p className="text-sm text-gray-500 mt-0.5">Pantau total penghasilan dan job yang sudah diselesaikan.</p>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <SkeletonCard /><SkeletonCard /><SkeletonCard />
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"><SkeletonTable rows={5} /></div>
@@ -60,16 +60,16 @@ export default function DriverHistoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 no-print">
+      <div className="flex items-start justify-between gap-3 no-print">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Riwayat & Earnings</h1>
           <p className="text-sm text-gray-500 mt-0.5">Pantau total penghasilan dan job yang sudah diselesaikan.</p>
         </div>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 transition"
+          className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 transition shrink-0"
         >
-          <Printer className="w-4 h-4" /> Cetak / Simpan PDF
+          <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Cetak / Simpan PDF</span>
         </button>
       </div>
 
@@ -79,7 +79,7 @@ export default function DriverHistoryPage() {
           <p className="text-sm text-gray-500 mt-1">Dicetak pada {generatedAt}</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { icon: DollarSign, label: "Total Earnings", value: formatPrice(totalEarnings), iconBg: "bg-green-100", iconColor: "text-green-600" },
             { icon: CheckCircle2, label: "Job Selesai", value: `${completed.length}`, iconBg: "bg-cyan-100", iconColor: "text-cyan-600" },
@@ -116,7 +116,7 @@ export default function DriverHistoryPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="text-xs text-gray-500 uppercase border-b border-gray-100">
               <tr>
                 <th className="text-left py-2 font-semibold">Order</th>
@@ -133,18 +133,18 @@ export default function DriverHistoryPage() {
                 const isCompleted = j.order.status === "PESANAN_SELESAI";
                 return (
                   <tr key={j.id} className="border-b border-gray-50 last:border-0">
-                    <td className="py-3 text-xs font-mono text-gray-500">#{j.order.id.slice(0, 8)}</td>
-                    <td className="py-3 text-gray-700">{j.order.store.name}</td>
-                    <td className="py-3 text-gray-600">{j.order.address.city}</td>
-                    <td className="py-3 text-gray-500 text-xs">
+                    <td data-label="Order" className="py-3 text-xs font-mono text-gray-500">#{j.order.id.slice(0, 8)}</td>
+                    <td data-label="Toko" className="py-3 text-gray-700">{j.order.store.name}</td>
+                    <td data-label="Tujuan" className="py-3 text-gray-600">{j.order.address.city}</td>
+                    <td data-label="Tanggal" className="py-3 text-gray-500 text-xs">
                       {j.completedAt ? formatDate(j.completedAt) : j.takenAt ? formatDate(j.takenAt) : "-"}
                     </td>
-                    <td className="py-3 text-right">
+                    <td data-label="Status" className="py-3 text-right">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isCompleted ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-600"}`}>
                         {isCompleted ? "Selesai" : "Dikirim"}
                       </span>
                     </td>
-                    <td className="py-3 text-right font-semibold text-green-600">
+                    <td data-label="Earning" className="py-3 text-right font-semibold text-green-600">
                       {earning > 0 ? formatPrice(earning) : "-"}
                     </td>
                   </tr>

@@ -123,17 +123,17 @@ export default function AddressesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-gray-800">Alamat Pengiriman</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kelola alamat pengiriman pesananmu.</p>
         </div>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+            className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-xl transition flex items-center gap-2 shrink-0"
           >
-            <Plus className="w-4 h-4" /> Tambah Alamat
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Tambah Alamat</span><span className="sm:hidden">Tambah</span>
           </button>
         )}
       </div>
@@ -143,7 +143,7 @@ export default function AddressesPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-4"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-gray-800">{editingId ? "Edit Alamat" : "Alamat Baru"}</h2>
@@ -171,7 +171,7 @@ export default function AddressesPage() {
             />
             Jadikan alamat utama
           </label>
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <button
               type="submit"
               disabled={create.isPending || update.isPending}
@@ -213,7 +213,7 @@ export default function AddressesPage() {
               key={a.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative"
+              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 relative"
             >
               {a.isDefault && (
                 <span className="absolute top-4 right-4 text-[10px] font-semibold bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full flex items-center gap-1">

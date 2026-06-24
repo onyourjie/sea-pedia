@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Username</th>
@@ -58,14 +58,14 @@ export default function AdminUsersPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
+                  <td data-label="Pengguna" className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <DiceBearAvatar seed={u.username} className="h-8 w-8 ring-2 ring-purple-100" />
                       <p className="font-medium text-gray-800">{u.username}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                  <td className="px-4 py-3">
+                  <td data-label="Email" className="px-4 py-3 text-gray-600">{u.email}</td>
+                  <td data-label="Roles" className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {u.roles.map((r) => (
                         <span key={r.role} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ROLE_COLOR[r.role] || "bg-gray-100 text-gray-600"}`}>
@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-gray-500">
+                  <td data-label="Terdaftar" className="px-4 py-3 text-right text-xs text-gray-500">
                     {new Date(u.createdAt).toLocaleDateString("id-ID")}
                   </td>
                 </tr>

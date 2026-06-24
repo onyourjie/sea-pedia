@@ -67,16 +67,16 @@ export default function SellerReportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 no-print">
+      <div className="flex items-start justify-between gap-3 no-print">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Laporan Pendapatan</h1>
           <p className="text-sm text-gray-500 mt-0.5">Ringkasan transaksi yang sudah selesai.</p>
         </div>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 transition"
+          className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 transition shrink-0"
         >
-          <Printer className="w-4 h-4" /> Cetak / Simpan PDF
+          <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Cetak / Simpan PDF</span>
         </button>
       </div>
 
@@ -138,7 +138,7 @@ export default function SellerReportPage() {
               <p className="text-sm text-gray-400">Belum ada pesanan selesai</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="dashboard-responsive-table">
               <thead className="text-xs text-gray-500 uppercase border-b border-gray-100">
                 <tr>
                   <th className="text-left py-2 font-semibold">ID</th>
@@ -150,10 +150,10 @@ export default function SellerReportPage() {
               <tbody>
                 {completed.map((o) => (
                   <tr key={o.id} className="border-b border-gray-50 last:border-0">
-                    <td className="py-3 text-xs font-mono text-gray-500">#{o.id.slice(0, 8)}</td>
-                    <td className="py-3 text-gray-600">{new Date(o.createdAt).toLocaleDateString("id-ID")}</td>
-                    <td className="py-3 text-right text-gray-600">{o.items.reduce((x, i) => x + i.quantity, 0)} item</td>
-                    <td className="py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(o.total))}</td>
+                    <td data-label="ID" className="py-3 text-xs font-mono text-gray-500">#{o.id.slice(0, 8)}</td>
+                    <td data-label="Tanggal" className="py-3 text-gray-600">{new Date(o.createdAt).toLocaleDateString("id-ID")}</td>
+                    <td data-label="Item" className="py-3 text-right text-gray-600">{o.items.reduce((x, i) => x + i.quantity, 0)} item</td>
+                    <td data-label="Total" className="py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(o.total))}</td>
                   </tr>
                 ))}
               </tbody>

@@ -87,8 +87,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               aria-label="Buka menu admin"
@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="hidden sm:inline">Seapedia Admin</span>
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-gray-800">{user?.username}</p>
               <p className="text-xs text-purple-600">Peran Aktif: Admin</p>
@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <DiceBearAvatar seed={user?.username || "admin"} className="h-9 w-9 ring-2 ring-purple-100" />
             <button
               onClick={() => router.push("/login")}
-              className="text-xs border border-purple-400 text-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-50 transition font-medium"
+              className="text-xs border border-purple-400 text-purple-700 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-purple-50 transition font-medium whitespace-nowrap"
             >
               Ganti Peran
             </button>
@@ -161,7 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      <div className="flex flex-1 max-w-7xl mx-auto w-full px-4 py-6 gap-6">
+      <div className="flex flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6 gap-6">
         <aside className="w-52 shrink-0 hidden md:flex flex-col justify-between">
           <SidebarContent pathname={pathname} />
         </aside>

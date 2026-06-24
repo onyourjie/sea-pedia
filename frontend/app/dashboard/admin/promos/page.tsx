@@ -91,17 +91,17 @@ export default function AdminPromosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-gray-800">Promo</h1>
           <p className="text-sm text-gray-500 mt-0.5">{promos.length} promo aktif di sistem.</p>
         </div>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+            className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-xl transition flex items-center gap-2 shrink-0"
           >
-            <Plus className="w-4 h-4" /> Buat Promo
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Buat Promo</span><span className="sm:hidden">Buat</span>
           </button>
         )}
       </div>
@@ -111,7 +111,7 @@ export default function AdminPromosPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-4"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-gray-800">Promo Baru</h2>

@@ -35,6 +35,90 @@
   }
 }
 
+@layer components {
+  .dashboard-responsive-table {
+    @apply w-full text-sm;
+  }
+
+  @media (max-width: 639px) {
+    .dashboard-responsive-table thead {
+      @apply hidden;
+    }
+
+    .dashboard-responsive-table,
+    .dashboard-responsive-table tbody,
+    .dashboard-responsive-table tfoot,
+    .dashboard-responsive-table tr,
+    .dashboard-responsive-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .dashboard-responsive-table tbody {
+      @apply space-y-3;
+    }
+
+    .dashboard-responsive-table tbody tr {
+      @apply rounded-xl border border-gray-100 bg-white p-3 shadow-sm;
+    }
+
+    .dashboard-responsive-table tbody td {
+      @apply border-0 px-0 py-2 text-left;
+      display: grid;
+      grid-template-columns: 7rem minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: center;
+      max-width: none;
+      overflow-wrap: anywhere;
+    }
+
+    .dashboard-responsive-table tbody td::before {
+      content: attr(data-label);
+      @apply text-[10px] font-semibold uppercase tracking-wide text-gray-400;
+    }
+
+    .dashboard-responsive-table tbody td > * {
+      min-width: 0;
+      justify-self: start;
+      text-align: left;
+    }
+
+    .dashboard-responsive-table tbody td[data-label="Produk"] {
+      grid-template-columns: 1fr;
+      @apply border-b border-gray-100 pb-3;
+    }
+
+    .dashboard-responsive-table tbody td[data-label="Produk"]::before {
+      display: none;
+    }
+
+    .dashboard-responsive-table tbody td[data-label="Aksi"] {
+      @apply mt-1 border-t border-gray-100 pt-3;
+    }
+
+    .dashboard-responsive-table tbody td[colspan] {
+      display: block;
+      @apply py-8 text-center;
+    }
+
+    .dashboard-responsive-table tbody td[colspan]::before {
+      display: none;
+    }
+
+    .dashboard-responsive-table tfoot {
+      @apply mt-3 rounded-xl bg-gray-50 p-3;
+    }
+
+    .dashboard-responsive-table tfoot tr {
+      @apply flex items-center justify-between gap-3;
+    }
+
+    .dashboard-responsive-table tfoot td {
+      @apply block w-auto p-0 text-left;
+    }
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -60,9 +144,27 @@
   }
   .print-area table {
     page-break-inside: auto;
+    display: table;
   }
   .print-area tr {
     page-break-inside: avoid;
+    display: table-row;
+  }
+  .print-area thead {
+    display: table-header-group;
+  }
+  .print-area tbody {
+    display: table-row-group;
+  }
+  .print-area tfoot {
+    display: table-footer-group;
+  }
+  .print-area td,
+  .print-area th {
+    display: table-cell;
+  }
+  .print-area td::before {
+    display: none !important;
   }
   @page {
     margin: 1.5cm;

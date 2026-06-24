@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">ID</th>
@@ -89,12 +89,12 @@ export default function AdminOrdersPage() {
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-xs font-mono text-gray-500">#{o.id.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-gray-700">{o.buyer.user.username}</td>
-                  <td className="px-4 py-3 text-gray-700">{o.store.name}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{o.deliveryMethod.replace("_", " ")}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(o.total))}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td data-label="ID" className="px-4 py-3 text-xs font-mono text-gray-500">#{o.id.slice(0, 8)}</td>
+                  <td data-label="Pembeli" className="px-4 py-3 text-gray-700">{o.buyer.user.username}</td>
+                  <td data-label="Toko" className="px-4 py-3 text-gray-700">{o.store.name}</td>
+                  <td data-label="Pengiriman" className="px-4 py-3 text-gray-600 text-xs">{o.deliveryMethod.replace("_", " ")}</td>
+                  <td data-label="Total" className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(o.total))}</td>
+                  <td data-label="Status" className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       {o.isOverdue && (
                         <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
@@ -106,7 +106,7 @@ export default function AdminOrdersPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-gray-500">
+                  <td data-label="Tanggal" className="px-4 py-3 text-right text-xs text-gray-500">
                     {new Date(o.createdAt).toLocaleDateString("id-ID")}
                   </td>
                 </tr>

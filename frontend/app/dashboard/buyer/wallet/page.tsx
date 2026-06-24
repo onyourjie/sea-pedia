@@ -244,7 +244,7 @@ function WalletPageInner() {
 
       {/* Transaction history */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between p-5 border-b border-gray-50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-gray-50">
           <div className="flex items-center gap-2">
             <RefreshCw className="w-4 h-4 text-cyan-500" />
             <h2 className="font-bold text-gray-800">Riwayat Transaksi Wallet</h2>
@@ -263,8 +263,8 @@ function WalletPageInner() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div>
+          <table className="dashboard-responsive-table">
             <thead>
               <tr className="border-b border-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal &amp; Waktu</th>
@@ -285,21 +285,21 @@ function WalletPageInner() {
                 const isCredit = tx.type === "TOP_UP" || tx.type === "TOPUP" || tx.type === "REFUND";
                 return (
                   <tr key={tx.id} className="hover:bg-gray-50/50 transition">
-                    <td className="px-5 py-3.5 text-xs text-gray-500">
+                    <td data-label="Waktu" className="px-5 py-3.5 text-xs text-gray-500">
                       {new Date(tx.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })},{" "}
                       {new Date(tx.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td data-label="Transaksi" className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <Icon className={`w-3.5 h-3.5 ${info.color}`} />
                         <span className={`font-medium ${info.color}`}>{info.label}</span>
                         {tx.note && <span className="text-xs text-gray-400">— {tx.note}</span>}
                       </div>
                     </td>
-                    <td className={`px-5 py-3.5 text-right font-semibold text-sm ${isCredit ? "text-green-600" : "text-red-500"}`}>
+                    <td data-label="Nominal" className={`px-5 py-3.5 text-right font-semibold text-sm ${isCredit ? "text-green-600" : "text-red-500"}`}>
                       {isCredit ? "+" : "–"} {formatPrice(Math.abs(tx.amount))}
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm text-gray-600">{formatPrice(tx.balanceAfter)}</td>
+                    <td data-label="Saldo Akhir" className="px-5 py-3.5 text-right text-sm text-gray-600">{formatPrice(tx.balanceAfter)}</td>
                   </tr>
                 );
               })}

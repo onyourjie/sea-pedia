@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Package } from "lucide-react";
+import { Eye, Package } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonTable } from "@/components/ui/skeleton";
 
@@ -46,7 +47,7 @@ export default function AdminProductsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Produk</th>
@@ -56,6 +57,7 @@ export default function AdminProductsPage() {
                 <th className="text-right px-4 py-3 font-semibold">Gambar</th>
                 <th className="text-right px-4 py-3 font-semibold">Stok</th>
                 <th className="text-right px-4 py-3 font-semibold">Status</th>
+                <th className="text-center px-4 py-3 font-semibold">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -63,7 +65,7 @@ export default function AdminProductsPage() {
                 const galleryCount = (p.imageUrls?.length ?? 0) + (p.imageUrl ? 1 : 0);
                 return (
                   <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3">
+                    <td data-label="Produk" className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                           <img
@@ -75,21 +77,31 @@ export default function AdminProductsPage() {
                         <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{p.store.name}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td data-label="Toko" className="px-4 py-3 text-gray-600">{p.store.name}</td>
+                    <td data-label="Harga" className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
+                    <td data-label="Diskon" className="px-4 py-3 text-right">
                       {p.discount && p.discount > 0 ? (
                         <span className="text-xs font-bold text-orange-600">{p.discount}%</span>
                       ) : (
                         <span className="text-xs text-gray-300">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right text-xs text-gray-500">{galleryCount} foto</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{p.stock}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td data-label="Gambar" className="px-4 py-3 text-right text-xs text-gray-500">{galleryCount} foto</td>
+                    <td data-label="Stok" className="px-4 py-3 text-right text-gray-700">{p.stock}</td>
+                    <td data-label="Status" className="px-4 py-3 text-right">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
                         {p.isActive ? "Aktif" : "Nonaktif"}
                       </span>
+                    </td>
+                    <td data-label="Aksi" className="px-4 py-3 text-center">
+                      <Link
+                        href={`/products/${p.id}`}
+                        aria-label={`Lihat detail ${p.name}`}
+                        title="Lihat detail produk"
+                        className="inline-flex items-center justify-center text-purple-600 hover:text-purple-700 p-2 rounded-lg hover:bg-purple-50"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
                     </td>
                   </tr>
                 );

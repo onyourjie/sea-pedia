@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
               <Calendar className="w-4 h-4" />
               <p className="text-xs text-purple-100">Tanggal Sistem (untuk SLA & overdue)</p>
             </div>
-            <p className="text-2xl font-bold">
+            <p className="text-xl sm:text-2xl font-bold break-words">
               {sys?.currentDate
                 ? new Date(sys.currentDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
                 : "Memuat..."}
@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
           </div>
           <Link
             href="/dashboard/admin/overdue"
-            className="bg-white text-purple-600 text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-purple-50 transition flex items-center gap-2"
+            className="bg-white text-purple-600 text-xs font-semibold px-3 sm:px-4 py-2.5 rounded-xl sm:rounded-full hover:bg-purple-50 transition flex items-center gap-2"
           >
             <FastForward className="w-3.5 h-3.5" /> Kelola Overdue & Time
           </Link>

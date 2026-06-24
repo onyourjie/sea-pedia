@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Package, ChevronRight, Search, ShoppingBag } from "lucide-react";
+import { Package, ChevronRight, Search, ShoppingBag, Eye } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonOrderCard } from "@/components/ui/skeleton";
 
@@ -102,7 +102,7 @@ export default function BuyerOrdersPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5"
               >
                 <div className="flex items-start justify-between flex-wrap gap-3">
                   <div className="flex-1 min-w-0">
@@ -122,13 +122,17 @@ export default function BuyerOrdersPage() {
                     <p className="text-lg font-bold text-cyan-600">{formatPrice(Number(o.total))}</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500">Pengiriman: <strong>{o.deliveryMethod.replace("_", " ")}</strong></p>
+                <div className="flex items-center justify-between gap-3 pt-3 mt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 min-w-0">Pengiriman: <strong>{o.deliveryMethod.replace("_", " ")}</strong></p>
                   <Link
                     href={`/dashboard/buyer/orders/${o.id}`}
-                    className="text-xs font-semibold text-cyan-500 hover:text-cyan-600 flex items-center gap-1"
+                    aria-label={`Lihat detail pesanan ${o.id.slice(0, 8)}`}
+                    title="Lihat detail"
+                    className="font-semibold text-cyan-500 hover:text-cyan-600 inline-flex items-center justify-center gap-1 rounded-lg p-2 hover:bg-cyan-50 shrink-0"
                   >
-                    Lihat Detail <ChevronRight className="w-3.5 h-3.5" />
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">Lihat Detail</span>
+                    <ChevronRight className="hidden sm:block w-3.5 h-3.5" />
                   </Link>
                 </div>
               </motion.div>

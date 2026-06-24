@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Package, ClipboardList, DollarSign, TrendingUp, Plus, ChevronRight, Store } from "lucide-react";
+import { Package, ClipboardList, DollarSign, TrendingUp, Plus, ChevronRight, Store, Eye } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -141,16 +141,19 @@ export default function SellerDashboardPage() {
                 <Link
                   key={o.id}
                   href={`/dashboard/seller/orders/${o.id}`}
-                  className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition"
+                  className="flex items-center justify-between gap-3 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-gray-400 font-mono">#{o.id.slice(0, 8)}</p>
                     <p className="text-sm font-medium text-gray-800">{o.buyer?.user.username}</p>
                     <p className="text-xs text-gray-400">{new Date(o.createdAt).toLocaleDateString("id-ID")}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>{status.label}</span>
-                    <p className="text-sm font-bold text-gray-800">{formatPrice(Number(o.total))}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`hidden sm:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>{status.label}</span>
+                    <p className="hidden sm:block text-sm font-bold text-gray-800">{formatPrice(Number(o.total))}</p>
+                    <span aria-label="Lihat detail" title="Lihat detail" className="text-orange-500 p-2 rounded-lg bg-orange-50">
+                      <Eye className="w-4 h-4" />
+                    </span>
                   </div>
                 </Link>
               );

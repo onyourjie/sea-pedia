@@ -39,7 +39,7 @@ export default function AdminStoresPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Nama Toko</th>
@@ -51,19 +51,19 @@ export default function AdminStoresPage() {
             <tbody>
               {stores.map((s) => (
                 <tr key={s.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
+                  <td data-label="Toko" className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <DiceBearAvatar seed={s.name} type="store" className="h-9 w-9 ring-2 ring-cyan-100" />
                       <span className="font-semibold text-gray-800">{s.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 max-w-xs">{s.description || "—"}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td data-label="Deskripsi" className="px-4 py-3 text-gray-600 max-w-xs">{s.description || "—"}</td>
+                  <td data-label="Jumlah Produk" className="px-4 py-3 text-right">
                     <span className="text-xs font-semibold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full">
                       {s._count.products}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-gray-500">
+                  <td data-label="Dibuat" className="px-4 py-3 text-right text-xs text-gray-500">
                     {new Date(s.createdAt).toLocaleDateString("id-ID")}
                   </td>
                 </tr>

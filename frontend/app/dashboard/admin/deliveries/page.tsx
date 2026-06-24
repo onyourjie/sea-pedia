@@ -51,7 +51,7 @@ export default function AdminDeliveriesPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">ID</th>
@@ -66,19 +66,19 @@ export default function AdminDeliveriesPage() {
             <tbody>
               {deliveries.map((d) => (
                 <tr key={d.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-xs font-mono text-gray-500">#{d.id.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-gray-700">{d.driver?.user.username || <span className="text-gray-400 italic">Belum diambil</span>}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{d.order.deliveryMethod.replace("_", " ")}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(d.order.total))}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td data-label="ID" className="px-4 py-3 text-xs font-mono text-gray-500">#{d.id.slice(0, 8)}</td>
+                  <td data-label="Driver" className="px-4 py-3 text-gray-700">{d.driver?.user.username || <span className="text-gray-400 italic">Belum diambil</span>}</td>
+                  <td data-label="Metode" className="px-4 py-3 text-gray-600 text-xs">{d.order.deliveryMethod.replace("_", " ")}</td>
+                  <td data-label="Nilai Order" className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(d.order.total))}</td>
+                  <td data-label="Status" className="px-4 py-3 text-right">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_COLOR[d.order.status] || "bg-gray-50 text-gray-600"}`}>
                       {d.order.status.replace(/_/g, " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-gray-500">
+                  <td data-label="Diambil" className="px-4 py-3 text-right text-xs text-gray-500">
                     {d.takenAt ? new Date(d.takenAt).toLocaleDateString("id-ID") : "-"}
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-gray-500">
+                  <td data-label="Selesai" className="px-4 py-3 text-right text-xs text-gray-500">
                     {d.completedAt ? new Date(d.completedAt).toLocaleDateString("id-ID") : "-"}
                   </td>
                 </tr>

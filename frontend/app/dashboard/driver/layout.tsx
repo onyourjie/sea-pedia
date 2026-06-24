@@ -71,16 +71,16 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 transition" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
-            <Link href="/" className="flex items-center gap-1.5 text-green-600 font-bold text-lg">
-              <Waves className="w-5 h-5" /> Seapedia Driver
+            <Link href="/" className="flex items-center gap-1.5 text-green-600 font-bold text-base sm:text-lg min-w-0">
+              <Waves className="w-5 h-5 shrink-0" /> <span className="truncate">Seapedia Driver</span>
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-gray-800">{user?.username}</p>
               <p className="text-xs text-green-600">Peran Aktif: Driver</p>
@@ -88,7 +88,7 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
             <DiceBearAvatar seed={user?.username || "driver"} className="h-9 w-9 ring-2 ring-green-100" />
             <button
               onClick={() => router.push("/login")}
-              className="text-xs border border-green-400 text-green-700 px-3 py-1.5 rounded-full hover:bg-green-50 transition font-medium"
+              className="text-xs border border-green-400 text-green-700 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-green-50 transition font-medium whitespace-nowrap"
             >
               Ganti Peran
             </button>
@@ -125,7 +125,7 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
         )}
       </AnimatePresence>
 
-      <div className="flex flex-1 max-w-7xl mx-auto w-full px-4 py-6 gap-6">
+      <div className="flex flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6 gap-6">
         <aside className="w-48 shrink-0 hidden md:flex flex-col justify-between">
           <SidebarContent pathname={pathname} />
         </aside>
@@ -133,7 +133,7 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
       </div>
 
       <footer className="bg-white border-t border-gray-100 py-4">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs text-gray-400">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
           <div className="flex items-center gap-1.5">
             <Waves className="w-3.5 h-3.5 text-green-500" /> Seapedia Driver
           </div>

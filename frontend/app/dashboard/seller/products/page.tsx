@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Package, Plus, Pencil, Trash2, X, Image as ImageIcon } from "lucide-react";
+import { Package, Plus, Pencil, Trash2, X, Image as ImageIcon, Eye } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 import { SkeletonTable } from "@/components/ui/skeleton";
@@ -192,17 +193,17 @@ export default function SellerProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-gray-800">Produk</h1>
           <p className="text-sm text-gray-500 mt-0.5">{products.length} produk terdaftar</p>
         </div>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+            className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-xl transition flex items-center gap-2 shrink-0"
           >
-            <Plus className="w-4 h-4" /> Tambah Produk
+            <Plus className="w-4 h-4 shrink-0" /> <span className="hidden sm:inline">Tambah Produk</span><span className="sm:hidden">Tambah</span>
           </button>
         )}
       </div>
@@ -212,7 +213,7 @@ export default function SellerProductsPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-5"
         >
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-gray-800">{editingId ? "Edit Produk" : "Produk Baru"}</h2>
@@ -340,12 +341,12 @@ export default function SellerProductsPage() {
             </div>
             <div className="space-y-2">
               {form.specifications.map((spec, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div key={idx} className="grid grid-cols-1 sm:grid-cols-[11rem_minmax(0,1fr)_auto] gap-2">
                   <input
                     value={spec.key}
                     onChange={(e) => updateSpec(idx, "key", e.target.value)}
                     placeholder="Nama (mis. Berat)"
-                    className="w-44 px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
                   />
                   <input
                     value={spec.value}
@@ -365,7 +366,7 @@ export default function SellerProductsPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <button
               type="submit"
               disabled={create.isPending || update.isPending}
@@ -402,7 +403,7 @@ export default function SellerProductsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="dashboard-responsive-table">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Produk</th>
@@ -415,7 +416,7 @@ export default function SellerProductsPage() {
             <tbody>
               {products.map((p) => (
                 <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3">
+                  <td data-label="Produk" className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                         <img
@@ -430,23 +431,33 @@ export default function SellerProductsPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td data-label="Harga" className="px-4 py-3 text-right font-semibold text-cyan-600">{formatPrice(Number(p.price))}</td>
+                  <td data-label="Diskon" className="px-4 py-3 text-right">
                     {p.discount && p.discount > 0 ? (
                       <span className="text-xs font-bold text-orange-600">{p.discount}%</span>
                     ) : (
                       <span className="text-xs text-gray-300">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td data-label="Stok" className="px-4 py-3 text-right">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.stock > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
                       {p.stock}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="Aksi" className="px-4 py-3">
                     <div className="flex items-center justify-center gap-2">
+                      <Link
+                        href={`/products/${p.id}`}
+                        aria-label={`Lihat detail ${p.name}`}
+                        title="Lihat detail produk"
+                        className="text-orange-500 hover:text-orange-600 p-1.5 rounded hover:bg-orange-50"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
                       <button
                         onClick={() => startEdit(p)}
+                        aria-label={`Edit ${p.name}`}
+                        title="Edit produk"
                         className="text-cyan-500 hover:text-cyan-600 p-1.5 rounded hover:bg-cyan-50"
                       >
                         <Pencil className="w-4 h-4" />
@@ -466,6 +477,8 @@ export default function SellerProductsPage() {
                           if (result.isConfirmed) remove.mutate(p.id);
                         }}
                         className="text-red-500 hover:text-red-600 p-1.5 rounded hover:bg-red-50"
+                        aria-label={`Hapus ${p.name}`}
+                        title="Hapus produk"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

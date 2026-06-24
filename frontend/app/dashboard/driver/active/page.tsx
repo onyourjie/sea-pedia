@@ -91,10 +91,10 @@ export default function DriverActivePage() {
                 key={j.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl border-2 border-green-200 shadow-md p-5"
+                className="bg-white rounded-2xl border-2 border-green-200 shadow-md p-4 sm:p-5"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="text-xs font-semibold bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                       <Truck className="w-3 h-3" /> Sedang Dikirim
                     </span>
@@ -126,7 +126,7 @@ export default function DriverActivePage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-gray-100">
                   <div>
                     <p className="text-xs text-gray-400">Earnings</p>
                     <p className="text-lg font-bold text-green-600">{formatPrice(earning)}</p>
@@ -146,7 +146,7 @@ export default function DriverActivePage() {
                       if (result.isConfirmed) completeJob.mutate(j.id);
                     }}
                     disabled={completeJob.isPending}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-green-600/25 flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-xs sm:text-sm font-semibold px-3 sm:px-5 py-2.5 rounded-xl transition shadow-lg shadow-green-600/25 flex items-center gap-2 shrink-0"
                   >
                     <CheckCircle2 className="w-4 h-4" /> Konfirmasi Selesai
                   </button>

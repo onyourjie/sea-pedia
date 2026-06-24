@@ -129,7 +129,7 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 space-y-3">
             {storeName && (
               <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
                 <Store className="w-4 h-4 text-cyan-500" />
@@ -141,9 +141,9 @@ export default function CartPage() {
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0"
+                className="grid grid-cols-[4rem_minmax(0,1fr)] sm:flex sm:items-center gap-3 sm:gap-4 py-3 border-b border-gray-50 last:border-0"
               >
-                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                   <img
                     src={item.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=200"}
                     alt={item.product.name}
@@ -155,7 +155,7 @@ export default function CartPage() {
                   <p className="text-sm text-cyan-600 font-bold mt-1">{formatPrice(Number(item.product.price))}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Stok: {item.product.stock}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="col-start-2 flex items-center gap-2">
                   <button
                     onClick={() => handleQty(item, -1)}
                     disabled={busy === item.productId || item.quantity <= 1}
@@ -174,7 +174,8 @@ export default function CartPage() {
                 </div>
                 <button
                   onClick={() => removeItem.mutate(item.productId)}
-                  className="text-gray-400 hover:text-red-500 transition"
+                  aria-label={`Hapus ${item.product.name}`}
+                  className="col-start-2 sm:col-start-auto justify-self-end text-gray-400 hover:text-red-500 transition"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -182,7 +183,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 h-fit sticky top-20 space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 h-fit lg:sticky lg:top-20 space-y-4">
             <h2 className="font-bold text-gray-800">Ringkasan</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-gray-600">

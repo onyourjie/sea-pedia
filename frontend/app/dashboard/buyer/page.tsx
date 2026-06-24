@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Wallet, Package, CheckCircle, CreditCard, ArrowRight, ChevronRight, Star } from "lucide-react";
+import { Wallet, Package, CheckCircle, CreditCard, ArrowRight, ChevronRight, Star, Eye } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -196,22 +196,29 @@ export default function BuyerDashboardPage() {
             {orders.map((order) => {
               const status = STATUS_LABEL[order.status] || { label: order.status, color: "text-gray-500 bg-gray-50" };
               return (
-                <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                  <div className="flex items-center gap-3">
+                <div key={order.id} className="flex items-center justify-between gap-3 py-3 border-b border-gray-50 last:border-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
                       <Package className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-gray-800">{order.store?.name || "Toko"}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 truncate">
                         {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} · {formatPrice(order.total)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>{status.label}</span>
-                    <Link href={`/dashboard/buyer/orders/${order.id}`} className="text-xs text-cyan-500 hover:text-cyan-600 font-medium flex items-center gap-0.5">
-                      Lihat Detail <ChevronRight className="w-3 h-3" />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`hidden sm:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>{status.label}</span>
+                    <Link
+                      href={`/dashboard/buyer/orders/${order.id}`}
+                      aria-label={`Lihat detail pesanan ${order.id.slice(0, 8)}`}
+                      title="Lihat detail"
+                      className="text-cyan-500 hover:text-cyan-600 font-medium inline-flex items-center justify-center gap-1 rounded-lg p-2 hover:bg-cyan-50"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="hidden sm:inline text-xs">Lihat Detail</span>
+                      <ChevronRight className="hidden sm:block w-3 h-3" />
                     </Link>
                   </div>
                 </div>
