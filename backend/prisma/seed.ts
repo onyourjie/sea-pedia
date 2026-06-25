@@ -1,4 +1,4 @@
-import { PrismaClient, RoleType } from '@prisma/client';
+import { PrismaClient, RoleType, OrderStatus } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
@@ -7,6 +7,264 @@ dotenv.config();
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter } as any);
+
+// --- Financial constants mirror backend services (order.service / delivery.service / admin.service) ---
+const DELIVERY_FEES: Record<string, number> = { INSTANT: 25000, NEXT_DAY: 15000, REGULAR: 9000 };
+const SLA_HOURS: Record<string, number> = { INSTANT: 4, NEXT_DAY: 24, REGULAR: 72 };
+const PPN_RATE = 0.12;
+const DRIVER_EARNING_RATE = 0.8;
+
+type Discount = { discountPct: any; discountAmount: any; maxDiscount: any } | null | undefined;
+
+function discountFrom(d: Discount, subtotal: number): number {
+  if (!d) return 0;
+  const raw = d.discountPct
+    ? (subtotal * Number(d.discountPct)) / 100
+    : Number(d.discountAmount ?? 0);
+  return d.maxDiscount ? Math.min(raw, Number(d.maxDiscount)) : raw;
+}
+
+function computeFinancials(
+  items: { product: { price: any }; quantity: number }[],
+  method: string,
+  voucher?: Discount,
+  promo?: Discount,
+) {
+  const subtotal = items.reduce((s, it) => s + Number(it.product.price) * it.quantity, 0);
+  let discountAmount = 0;
+  if (voucher) discountAmount += discountFrom(voucher, subtotal);
+  if (promo) discountAmount += discountFrom(promo, subtotal);
+  const deliveryFee = DELIVERY_FEES[method];
+  const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+  const taxBase = discountedSubtotal + deliveryFee;
+  const ppn = taxBase * PPN_RATE;
+  const total = taxBase + ppn;
+  return { subtotal, discountAmount, deliveryFee, ppn, total };
+}
+
+function daysAgo(n: number, hour = 8): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
+
+function addHours(date: Date, h: number): Date {
+  const d = new Date(date);
+  d.setHours(d.getHours() + h);
+  return d;
+}
+
+const FLOW = ['SEDANG_DIKEMAS', 'MENUNGGU_PENGIRIM', 'SEDANG_DIKIRIM', 'PESANAN_SELESAI'];
+const reached = (target: string, status: string) =>
+  FLOW.indexOf(status) >= FLOW.indexOf(target) && FLOW.indexOf(target) >= 0;
+
+type WalletEvent = {
+  walletId: string;
+  type: 'TOPUP' | 'PAYMENT' | 'REFUND';
+  amount: number;
+  orderId?: string;
+  description: string;
+  createdAt: Date;
+};
+
+interface SeedOrderOpts {
+  ledger: { walletId: string; payments: number };
+  buyerId: string;
+  store: { id: string };
+  addressId: string;
+  items: { product: { id: string; name: string; price: any }; quantity: number }[];
+  deliveryMethod: 'INSTANT' | 'NEXT_DAY' | 'REGULAR';
+  status: OrderStatus;
+  driver?: { id: string } | null;
+  voucher?: any;
+  promo?: any;
+  daysAgoPlaced: number;
+  reviews?: ({ rating: number; comment: string } | null)[];
+}
+
+async function seedOrder(client: any, walletEvents: WalletEvent[], o: SeedOrderOpts) {
+  const fin = computeFinancials(o.items, o.deliveryMethod, o.voucher, o.promo);
+  const placedAt = daysAgo(o.daysAgoPlaced);
+  const processedAt = addHours(placedAt, 2);
+  const tookAt = addHours(placedAt, 5);
+  const completedAt = addHours(placedAt, 20);
+  const slaHours = SLA_HOURS[o.deliveryMethod];
+  const returnedAt = addHours(placedAt, slaHours + 2);
+
+  const isReturned = o.status === OrderStatus.DIKEMBALIKAN;
+  const driverAssigned =
+    !!o.driver &&
+    (reached('SEDANG_DIKIRIM', o.status) || (isReturned && !!o.driver));
+
+  // Build status-history timeline consistent with the real lifecycle.
+  const history: { status: OrderStatus; note: string; createdAt: Date }[] = [
+    { status: OrderStatus.SEDANG_DIKEMAS, note: 'Order placed', createdAt: placedAt },
+  ];
+  if (reached('MENUNGGU_PENGIRIM', o.status) || isReturned) {
+    history.push({
+      status: OrderStatus.MENUNGGU_PENGIRIM,
+      note: 'Seller processed the order',
+      createdAt: processedAt,
+    });
+  }
+  if (reached('SEDANG_DIKIRIM', o.status) || (isReturned && driverAssigned)) {
+    history.push({
+      status: OrderStatus.SEDANG_DIKIRIM,
+      note: 'Driver took the job',
+      createdAt: tookAt,
+    });
+  }
+  if (o.status === OrderStatus.PESANAN_SELESAI) {
+    history.push({
+      status: OrderStatus.PESANAN_SELESAI,
+      note: 'Delivery completed by driver',
+      createdAt: completedAt,
+    });
+  }
+  if (isReturned) {
+    history.push({
+      status: OrderStatus.DIKEMBALIKAN,
+      note: `Auto-returned: SLA exceeded (${slaHours}h for ${o.deliveryMethod})`,
+      createdAt: returnedAt,
+    });
+  }
+
+  const deliveryData: any = { createdAt: placedAt };
+  if (driverAssigned) {
+    deliveryData.driverId = o.driver!.id;
+    deliveryData.takenAt = tookAt;
+  }
+  if (o.status === OrderStatus.PESANAN_SELESAI) deliveryData.completedAt = completedAt;
+
+  const order = await client.order.create({
+    data: {
+      buyerId: o.buyerId,
+      storeId: o.store.id,
+      addressId: o.addressId,
+      deliveryMethod: o.deliveryMethod,
+      subtotal: fin.subtotal,
+      discountAmount: fin.discountAmount,
+      deliveryFee: fin.deliveryFee,
+      ppn: fin.ppn,
+      total: fin.total,
+      voucherId: o.voucher?.id,
+      promoId: o.promo?.id,
+      status: o.status,
+      isOverdue: isReturned,
+      createdAt: placedAt,
+      statusHistory: { create: history },
+      items: {
+        create: o.items.map((it) => ({
+          productId: it.product.id,
+          name: it.product.name,
+          price: it.product.price,
+          quantity: it.quantity,
+        })),
+      },
+      delivery: { create: deliveryData },
+    },
+    include: { items: true, delivery: true },
+  });
+
+  // Stock: real flow decrements on checkout. A returned order is decremented then
+  // restored (net zero), so we simply leave stock untouched for those.
+  if (!isReturned) {
+    for (const it of o.items) {
+      await client.product.update({
+        where: { id: it.product.id },
+        data: { stock: { decrement: it.quantity } },
+      });
+    }
+  }
+
+  // Voucher / promo usage is consumed at checkout regardless of later outcome.
+  if (o.voucher) {
+    await client.voucher.update({
+      where: { id: o.voucher.id },
+      data: { usageCount: { increment: 1 } },
+    });
+  }
+  if (o.promo) {
+    await client.promo.update({
+      where: { id: o.promo.id },
+      data: { usageCount: { increment: 1 } },
+    });
+  }
+
+  // Buyer wallet payment at checkout.
+  walletEvents.push({
+    walletId: o.ledger.walletId,
+    type: 'PAYMENT',
+    amount: fin.total,
+    orderId: order.id,
+    description: `Payment for order ${order.id}`,
+    createdAt: placedAt,
+  });
+  o.ledger.payments += fin.total;
+
+  // Completed delivery -> driver earning + log.
+  if (o.status === OrderStatus.PESANAN_SELESAI && o.driver) {
+    const earning = fin.deliveryFee * DRIVER_EARNING_RATE;
+    await client.driver.update({
+      where: { id: o.driver.id },
+      data: { earnings: { increment: earning } },
+    });
+    await client.driverEarningLog.create({
+      data: {
+        driverId: o.driver.id,
+        deliveryId: order.delivery.id,
+        orderId: order.id,
+        amount: earning,
+        deliveryFee: fin.deliveryFee,
+        createdAt: completedAt,
+      },
+    });
+
+    // Product reviews can only exist on completed orders.
+    if (o.reviews) {
+      for (let i = 0; i < o.items.length; i++) {
+        const r = o.reviews[i];
+        if (!r) continue;
+        await client.productReview.create({
+          data: {
+            productId: o.items[i].product.id,
+            buyerId: o.buyerId,
+            orderItemId: order.items[i].id,
+            rating: r.rating,
+            comment: r.comment,
+            createdAt: addHours(completedAt, 24),
+          },
+        });
+      }
+    }
+  }
+
+  // Returned order -> auto-refund + income reversal audit trail.
+  if (isReturned) {
+    walletEvents.push({
+      walletId: o.ledger.walletId,
+      type: 'REFUND',
+      amount: fin.total,
+      orderId: order.id,
+      description: `Auto-refund for overdue order ${order.id}`,
+      createdAt: returnedAt,
+    });
+    await client.incomeReversalLog.create({
+      data: {
+        orderId: order.id,
+        storeId: o.store.id,
+        driverId: driverAssigned ? o.driver!.id : null,
+        reversedIncome: fin.total,
+        reversedEarning: 0,
+        reason: `SLA exceeded (${slaHours}h for ${o.deliveryMethod})`,
+        createdAt: returnedAt,
+      },
+    });
+  }
+
+  return order;
+}
 
 async function main() {
   console.log('Seeding database...');
@@ -255,24 +513,47 @@ async function main() {
     update: {},
     create: { userId: buyerUser.id },
   });
-  await prisma.wallet.upsert({
+  const buyerWallet = await prisma.wallet.upsert({
     where: { buyerId: buyer.id },
     update: {},
-    create: { buyerId: buyer.id, balance: 5000000 },
+    create: { buyerId: buyer.id, balance: 0 },
   });
-  await prisma.address.create({
-    data: {
-      buyerId: buyer.id,
-      label: 'Rumah',
-      recipientName: 'Buyer Demo',
-      recipientPhone: '081234567890',
-      street: 'Jl. Sudirman No. 1',
-      city: 'Jakarta',
-      province: 'DKI Jakarta',
-      postalCode: '10110',
-      isDefault: true,
-    },
-  }).catch(() => {});
+  let buyerAddress = await prisma.address.findFirst({
+    where: { buyerId: buyer.id, label: 'Rumah' },
+  });
+  if (!buyerAddress) {
+    buyerAddress = await prisma.address.create({
+      data: {
+        buyerId: buyer.id,
+        label: 'Rumah',
+        recipientName: 'Budi Santoso',
+        recipientPhone: '081234567890',
+        street: 'Jl. Sudirman No. 1',
+        city: 'Jakarta',
+        province: 'DKI Jakarta',
+        postalCode: '10110',
+        isDefault: true,
+      },
+    });
+  }
+  let buyerAddress2 = await prisma.address.findFirst({
+    where: { buyerId: buyer.id, label: 'Kantor' },
+  });
+  if (!buyerAddress2) {
+    buyerAddress2 = await prisma.address.create({
+      data: {
+        buyerId: buyer.id,
+        label: 'Kantor',
+        recipientName: 'Budi Santoso',
+        recipientPhone: '081298765432',
+        street: 'Jl. Gatot Subroto Kav. 21',
+        city: 'Jakarta',
+        province: 'DKI Jakarta',
+        postalCode: '12930',
+        isDefault: false,
+      },
+    });
+  }
   console.log('Buyer created:', buyerUser.username);
 
   // Driver
@@ -286,7 +567,7 @@ async function main() {
       roles: { create: [{ role: RoleType.DRIVER }] },
     },
   });
-  await prisma.driver.upsert({
+  const driver = await prisma.driver.upsert({
     where: { userId: driverUser.id },
     update: {},
     create: { userId: driverUser.id },
@@ -315,16 +596,34 @@ async function main() {
     update: {},
     create: { userId: multiUser.id },
   });
-  await prisma.wallet.upsert({
+  const multiWallet = await prisma.wallet.upsert({
     where: { buyerId: multiBuyer.id },
     update: {},
-    create: { buyerId: multiBuyer.id, balance: 2000000 },
+    create: { buyerId: multiBuyer.id, balance: 0 },
   });
-  await prisma.driver.upsert({
+  const multiDriver = await prisma.driver.upsert({
     where: { userId: multiUser.id },
     update: {},
     create: { userId: multiUser.id },
   });
+  let multiAddress = await prisma.address.findFirst({
+    where: { buyerId: multiBuyer.id, label: 'Dermaga' },
+  });
+  if (!multiAddress) {
+    multiAddress = await prisma.address.create({
+      data: {
+        buyerId: multiBuyer.id,
+        label: 'Dermaga',
+        recipientName: 'Hendra Laut',
+        recipientPhone: '081377778888',
+        street: 'Jl. Pelabuhan Ratu No. 7',
+        city: 'Surabaya',
+        province: 'Jawa Timur',
+        postalCode: '60111',
+        isDefault: true,
+      },
+    });
+  }
   const multiStore = await prisma.store.upsert({
     where: { userId: multiUser.id },
     update: {},
@@ -356,7 +655,7 @@ async function main() {
   console.log('Multi-role user created:', multiUser.username);
 
   // Vouchers
-  await prisma.voucher.upsert({
+  const voucherSave10 = await prisma.voucher.upsert({
     where: { code: 'SAVE10' },
     update: {},
     create: {
@@ -368,7 +667,7 @@ async function main() {
       expiresAt: new Date('2027-12-31'),
     },
   });
-  await prisma.voucher.upsert({
+  const voucherFlat50k = await prisma.voucher.upsert({
     where: { code: 'FLAT50K' },
     update: {},
     create: {
@@ -382,7 +681,7 @@ async function main() {
   });
 
   // Promos
-  await prisma.promo.upsert({
+  const promo20 = await prisma.promo.upsert({
     where: { code: 'PROMO20' },
     update: {},
     create: {
@@ -393,6 +692,210 @@ async function main() {
       expiresAt: new Date('2027-12-31'),
     },
   });
+
+  // ============================================================
+  // Transactional data: orders, deliveries, payments, reviews, etc.
+  // Idempotent — only runs once on a fresh DB (skips if orders exist).
+  // ============================================================
+  const existingOrders = await prisma.order.count();
+  if (existingOrders === 0) {
+    const byName = <T extends { name: string }>(name: string, list: T[]): T =>
+      list.find((p) => p.name.includes(name))!;
+
+    const store1Products = await prisma.product.findMany({ where: { storeId: store.id } });
+    const store2Products = await prisma.product.findMany({ where: { storeId: store2.id } });
+    const store3Products = await prisma.product.findMany({ where: { storeId: store3.id } });
+
+    const masker = byName('Masker Selam', store1Products);
+    const fin = byName('Fin Diving', store1Products);
+    const senter = byName('Senter Selam', store1Products);
+    const wetsuit = byName('Wetsuit', store1Products);
+    const bcd = byName('BCD Aqualung', store1Products);
+    const udang = byName('Udang Vannamei', store2Products);
+    const kerapu = byName('Kerapu', store2Products);
+    const cumi = byName('Cumi', store2Products);
+    const pancing = byName('Set Pancing', store3Products);
+    const jaring = byName('Jaring Ikan', store3Products);
+
+    const walletEvents: WalletEvent[] = [];
+    const buyerLedger = { walletId: buyerWallet.id, payments: 0 };
+    const multiLedger = { walletId: multiWallet.id, payments: 0 };
+
+    // 1. Completed order with reviews (buyer1, store1, voucher used, driver1 delivered)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store,
+      addressId: buyerAddress.id,
+      items: [
+        { product: masker, quantity: 1 },
+        { product: fin, quantity: 1 },
+      ],
+      deliveryMethod: 'NEXT_DAY',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver,
+      voucher: voucherSave10,
+      daysAgoPlaced: 20,
+      reviews: [
+        { rating: 5, comment: 'Maskernya jernih banget, anti fogging beneran works. Pengiriman cepat!' },
+        { rating: 4, comment: 'Fin nyaman dipakai, warnanya cerah gampang keliatan di air. Recommended.' },
+      ],
+    });
+
+    // 2. Completed order, no discount, partial review (buyer1, store2, driver1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store: store2,
+      addressId: buyerAddress.id,
+      items: [
+        { product: udang, quantity: 2 },
+        { product: kerapu, quantity: 1 },
+      ],
+      deliveryMethod: 'INSTANT',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver,
+      daysAgoPlaced: 15,
+      reviews: [
+        { rating: 5, comment: 'Udangnya segar dan ukurannya besar-besar. Mantap buat dibakar!' },
+        null,
+      ],
+    });
+
+    // 3. Completed order with promo (multiuser buyer, store3, delivered by driver1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: multiLedger,
+      buyerId: multiBuyer.id,
+      store: store3,
+      addressId: multiAddress.id,
+      items: [{ product: pancing, quantity: 1 }],
+      deliveryMethod: 'REGULAR',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver,
+      promo: promo20,
+      daysAgoPlaced: 12,
+      reviews: [
+        { rating: 5, comment: 'Joran spinning-nya ringan dan kuat. Sudah dapat strike kakap, worth it!' },
+      ],
+    });
+
+    // 4. Completed order delivered by multiuser-as-driver (buyer1, store1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store,
+      addressId: buyerAddress2.id,
+      items: [{ product: senter, quantity: 1 }],
+      deliveryMethod: 'INSTANT',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver: multiDriver,
+      voucher: voucherFlat50k,
+      daysAgoPlaced: 8,
+      reviews: [{ rating: 4, comment: 'Senter terang sekali, 1200 lumens beneran. Tahan air OK.' }],
+    });
+
+    // 5. In-delivery order (buyer1, store2, driver1 currently delivering)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store: store2,
+      addressId: buyerAddress.id,
+      items: [{ product: cumi, quantity: 3 }],
+      deliveryMethod: 'INSTANT',
+      status: OrderStatus.SEDANG_DIKIRIM,
+      driver,
+      daysAgoPlaced: 1,
+    });
+
+    // 6. Waiting-for-driver order (buyer1, store3) — appears in driver available jobs
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store: store3,
+      addressId: buyerAddress.id,
+      items: [{ product: jaring, quantity: 2 }],
+      deliveryMethod: 'REGULAR',
+      status: OrderStatus.MENUNGGU_PENGIRIM,
+      daysAgoPlaced: 1,
+    });
+
+    // 7. Newly placed order being packed (multiuser buyer, store1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: multiLedger,
+      buyerId: multiBuyer.id,
+      store,
+      addressId: multiAddress.id,
+      items: [{ product: wetsuit, quantity: 1 }],
+      deliveryMethod: 'NEXT_DAY',
+      status: OrderStatus.SEDANG_DIKEMAS,
+      daysAgoPlaced: 0,
+    });
+
+    // 8. Returned/overdue order with auto-refund + income reversal (buyer1, store1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store,
+      addressId: buyerAddress.id,
+      items: [{ product: bcd, quantity: 1 }],
+      deliveryMethod: 'INSTANT',
+      status: OrderStatus.DIKEMBALIKAN,
+      daysAgoPlaced: 5,
+    });
+
+    // ---- Flush wallet ledgers: seed an opening top-up that covers all spend,
+    //      then replay PAYMENT/REFUND events in chronological order so each
+    //      balanceAfter and the final wallet balance are internally consistent.
+    const ledgers = [
+      { wallet: buyerWallet, ledger: buyerLedger, topupExtra: 3000000 },
+      { wallet: multiWallet, ledger: multiLedger, topupExtra: 1500000 },
+    ];
+    for (const { wallet, ledger, topupExtra } of ledgers) {
+      const events = walletEvents
+        .filter((e) => e.walletId === ledger.walletId)
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+      const topupAmount = ledger.payments + topupExtra;
+      const firstEventTime = events.length ? events[0].createdAt : new Date();
+      const topupTime = addHours(firstEventTime, -2);
+
+      let balance = 0;
+      balance += topupAmount;
+      await prisma.walletTx.create({
+        data: {
+          walletId: wallet.id,
+          type: 'TOPUP',
+          amount: topupAmount,
+          balanceAfter: balance,
+          description: `Top-up Rp ${topupAmount.toLocaleString('id-ID')}`,
+          createdAt: topupTime,
+        },
+      });
+
+      for (const e of events) {
+        balance += e.type === 'REFUND' ? e.amount : -e.amount;
+        await prisma.walletTx.create({
+          data: {
+            walletId: wallet.id,
+            type: e.type,
+            amount: e.amount,
+            balanceAfter: balance,
+            description: e.description,
+            orderId: e.orderId,
+            createdAt: e.createdAt,
+          },
+        });
+      }
+
+      await prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { balance },
+      });
+    }
+    console.log('Orders, deliveries, payments, reviews & reversals seeded');
+  } else {
+    console.log('Orders already exist, skipping transactional seed');
+  }
 
   // Sample reviews - maritime theme
   await prisma.review.createMany({
