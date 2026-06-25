@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
-import { ShoppingCart, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle } from "lucide-react";
+import { ShoppingCart, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -167,6 +167,9 @@ export function Navbar() {
           <Link href="/faq" className="text-xs font-medium text-gray-600 hover:text-cyan-600 flex items-center gap-1.5 transition">
             <HelpCircle className="w-3.5 h-3.5 text-cyan-500" /> FAQ
           </Link>
+          <Link href="/contact" className="text-xs font-medium text-gray-600 hover:text-cyan-600 flex items-center gap-1.5 transition">
+            <Mail className="w-3.5 h-3.5 text-cyan-500" /> Contact Us
+          </Link>
           <div className="ml-auto flex items-center gap-1 text-xs text-gray-400">
             <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
             Marketplace aktif
@@ -183,11 +186,12 @@ export function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden border-t border-gray-100 bg-white px-4 pb-4 flex flex-col gap-2"
           >
-            <div className="flex gap-3 py-2 border-b border-gray-100">
+            <div className="flex flex-wrap gap-x-3 gap-y-2 py-2 border-b border-gray-100">
               <Link href="/products?sort=newest" className="text-xs text-gray-600 flex items-center gap-1"><Box className="w-3 h-3 text-cyan-500" /> Baru</Link>
               <Link href="/products?deals=1" className="text-xs text-gray-600 flex items-center gap-1"><Flame className="w-3 h-3 text-orange-500" /> Hot Deals</Link>
               <Link href="/products?promo=1" className="text-xs text-gray-600 flex items-center gap-1"><Tag className="w-3 h-3 text-green-500" /> Voucher & Promo</Link>
               <Link href="/faq" className="text-xs text-gray-600 flex items-center gap-1"><HelpCircle className="w-3 h-3 text-cyan-500" /> FAQ</Link>
+              <Link href="/contact" className="text-xs text-gray-600 flex items-center gap-1"><Mail className="w-3 h-3 text-cyan-500" /> Contact Us</Link>
             </div>
             {user ? (
               <>

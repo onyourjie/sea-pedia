@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 
 export function CtaSection() {
@@ -12,9 +13,22 @@ export function CtaSection() {
         viewport={{ once: true }}
         className="bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-3xl p-10 md:p-16 text-center relative overflow-hidden"
       >
-        {/* decorative circles */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10" />
-        <div className="absolute -bottom-10 -left-10 w-64 h-64 rounded-full bg-white/10" />
+        <Image
+          src="/waves.svg"
+          alt=""
+          width={280}
+          height={280}
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-8 top-1/2 w-56 -translate-y-1/2 scale-[2.2] opacity-20 brightness-0 invert md:right-5 md:w-64"
+        />
+        <Image
+          src="/waves.svg"
+          alt=""
+          width={240}
+          height={240}
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-10 -left-8 w-48 scale-[2] opacity-15 brightness-0 invert md:left-5 md:w-56"
+        />
 
         <div className="relative">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
