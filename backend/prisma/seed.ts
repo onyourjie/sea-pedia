@@ -59,6 +59,77 @@ const FLOW = ['SEDANG_DIKEMAS', 'MENUNGGU_PENGIRIM', 'SEDANG_DIKIRIM', 'PESANAN_
 const reached = (target: string, status: string) =>
   FLOW.indexOf(status) >= FLOW.indexOf(target) && FLOW.indexOf(target) >= 0;
 
+const PRODUCT_IMAGES: Record<string, string[]> = {
+  'Fin Diving Cressi Frog Plus - Yellow High Visibility': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471521/Fin_Diving_Cressi_Frog_Plus_-_Yellow_High_Visibility_1_wimyzu.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471522/Fin_Diving_Cressi_Frog_Plus_-_Yellow_High_Visibility_2_wqral6.png',
+  ],
+  'Perahu Karet Inflatable Boat 4 Orang': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471522/Perahu_Karet_Inflatable_Boat_4_Orang_4_jcxrym.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471522/Perahu_Karet_Inflatable_Boat_4_Orang_2_zpyokt.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471529/Perahu_Karet_Inflatable_Boat_4_Orang_1_ihhsym.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471531/Perahu_Karet_Inflatable_Boat_4_Orang_5_pkm0ew.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471529/Perahu_Karet_Inflatable_Boat_4_Orang_3_ixwsb1.png',
+  ],
+  'BCD Aqualung Pro HD - Weight Integrated': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471522/BCD_Aqualung_Pro_HD_-_Weight_Integrated_1_2_gmwkcx.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471523/BCD_Aqualung_Pro_HD_-_Weight_Integrated_1_o69gcg.png',
+  ],
+  'Masker Selam Scubapro Ghost - Black Series': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471523/Masker_Selam_Scubapro_Ghost_-_Black_Series_buh9zs.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471524/Masker_Selam_Scubapro_Ghost_-_Black_Series_2_tonynx.png',
+  ],
+  'Mesin Tempel Kapal Yamaha 15HP 2-Stroke': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471522/Mesin_Tempel_Kapal_Yamaha_15HP_2-Stroke_1_gt7ies.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471524/Mesin_Tempel_Kapal_Yamaha_15HP_2-Stroke_2_x5weye.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471525/Mesin_Tempel_Kapal_Yamaha_15HP_2-Stroke_3_wfofuh.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471525/Mesin_Tempel_Kapal_Yamaha_15HP_2-Stroke_5_hkx0uv.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471525/Mesin_Tempel_Kapal_Yamaha_15HP_2-Stroke_4_uqwohc.png',
+  ],
+  'Senter Selam Bigblue AL1200NP - 1200 Lumens': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471525/Senter_Selam_Bigblue_AL1200NP_-_1200_Lumens_1_j1ahi4.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471528/Senter_Selam_Bigblue_AL1200NP_-_1200_Lumens_2_nc3lb5.png',
+  ],
+  'Regulator Set Apeks XTX50 + DST': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471525/Regulator_Set_Apeks_XTX50_DST_i7x37s.png',
+  ],
+  'Set Pancing Spinning Carbon 2.1m': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471526/Set_Pancing_Spinning_Carbon_2.1m_kfmg9n.png',
+  ],
+  'Wetsuit Mares Rover 3mm Full Body': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471526/Wetsuit_Mares_Rover_3mm_Full_Body_1_uityab.png',
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471527/Wetsuit_Mares_Rover_3mm_Full_Body_2_fyfosh.png',
+  ],
+  'Jaring Ikan Nilon Premium 100m': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471528/Jaring_Ikan_Nilon_Premium_100m_ygw3wh.png',
+  ],
+  'Ikan Kerapu Merah Segar 1kg': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471528/Ikan_Kerapu_Merah_Segar_1kg_qmxcox.png',
+  ],
+  'Cumi-cumi Segar 1kg': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471528/Cumi-cumi_Segar_1kg_i9am6c.png',
+  ],
+  'Udang Vannamei Super Ekspor 1kg': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782471530/Udang_Vannamei_Super_Ekspor_1kg_octgmt.png',
+  ],
+};
+
+function imageData(name: string) {
+  const urls = PRODUCT_IMAGES[name] ?? [];
+  return { imageUrl: urls[0], imageUrls: urls.slice(1) };
+}
+
+async function updateSeedProductImages() {
+  await Promise.all(
+    Object.entries(PRODUCT_IMAGES).map(([name, urls]) =>
+      prisma.product.updateMany({
+        where: { name },
+        data: { imageUrl: urls[0], imageUrls: urls.slice(1) },
+      }),
+    ),
+  );
+}
+
 type WalletEvent = {
   walletId: string;
   type: 'TOPUP' | 'PAYMENT' | 'REFUND';
@@ -314,12 +385,7 @@ async function main() {
         price: 1250000,
         stock: 25,
         discount: 15,
-        imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
-        imageUrls: [
-          'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
-          'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
-          'https://images.unsplash.com/photo-1559827291-d8d49a55fb2f?w=800',
-        ],
+        ...imageData('Masker Selam Scubapro Ghost - Black Series'),
         specifications: {
           Material: 'Silikon Hipoalergenik',
           Lensa: 'Tempered Glass',
@@ -334,11 +400,7 @@ async function main() {
         price: 850000,
         stock: 40,
         discount: 25,
-        imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
-        imageUrls: [
-          'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
-          'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=800',
-        ],
+        ...imageData('Fin Diving Cressi Frog Plus - Yellow High Visibility'),
         specifications: {
           Ukuran: 'M (40-42)',
           Material: 'Polypropylene',
@@ -352,11 +414,7 @@ async function main() {
         price: 6500000,
         stock: 15,
         discount: 10,
-        imageUrl: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400',
-        imageUrls: [
-          'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800',
-          'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=800',
-        ],
+        ...imageData('BCD Aqualung Pro HD - Weight Integrated'),
         specifications: {
           Kapasitas: 'Maks 18kg pemberat',
           Material: 'Cordura 1000D',
@@ -370,7 +428,7 @@ async function main() {
         price: 9850000,
         stock: 10,
         discount: 8,
-        imageUrl: 'https://images.unsplash.com/photo-1571752726703-5e7d1f6a986d?w=400',
+        ...imageData('Regulator Set Apeks XTX50 + DST'),
         specifications: {
           Tahap: 'Balanced Diaphragm',
           'Maks Kedalaman': '60m',
@@ -383,7 +441,7 @@ async function main() {
         description: 'Wetsuit full body 3mm untuk penyelaman tropis. Material neoprene berkualitas tinggi dengan jahitan flatlock untuk kenyamanan maksimal.',
         price: 2100000,
         stock: 20,
-        imageUrl: 'https://images.unsplash.com/photo-1601760562234-9814eea6db4d?w=400',
+        ...imageData('Wetsuit Mares Rover 3mm Full Body'),
         specifications: {
           Ketebalan: '3mm',
           Tipe: 'Full Body',
@@ -397,7 +455,7 @@ async function main() {
         price: 1850000,
         stock: 30,
         discount: 20,
-        imageUrl: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
+        ...imageData('Senter Selam Bigblue AL1200NP - 1200 Lumens'),
       },
     ],
   });
@@ -432,7 +490,7 @@ async function main() {
         description: 'Udang vannamei segar kualitas ekspor, dipanen langsung dari tambak terpercaya. Ukuran 30-40 ekor/kg.',
         price: 125000,
         stock: 100,
-        imageUrl: 'https://images.unsplash.com/photo-1565680018093-ebb6b9ab5460?w=400',
+        ...imageData('Udang Vannamei Super Ekspor 1kg'),
       },
       {
         storeId: store2.id,
@@ -440,7 +498,7 @@ async function main() {
         description: 'Ikan kerapu merah segar pilihan dari perairan Sulawesi. Cocok untuk dibakar, dikukus, atau digoreng.',
         price: 185000,
         stock: 50,
-        imageUrl: 'https://images.unsplash.com/photo-1535140728325-a4d3707eee61?w=400',
+        ...imageData('Ikan Kerapu Merah Segar 1kg'),
       },
       {
         storeId: store2.id,
@@ -448,7 +506,7 @@ async function main() {
         description: 'Cumi-cumi segar berkualitas tinggi, langsung dari nelayan lokal. Tekstur kenyal dan rasa laut yang autentik.',
         price: 95000,
         stock: 80,
-        imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=400',
+        ...imageData('Cumi-cumi Segar 1kg'),
       },
     ],
   });
@@ -483,7 +541,7 @@ async function main() {
         description: 'Set lengkap joran spinning karbon ringan 2.1m dengan reel berkualitas. Ideal untuk mancing di laut maupun sungai.',
         price: 1450000,
         stock: 35,
-        imageUrl: 'https://images.unsplash.com/photo-1559648028-9bb09d2d3e95?w=400',
+        ...imageData('Set Pancing Spinning Carbon 2.1m'),
       },
       {
         storeId: store3.id,
@@ -491,7 +549,7 @@ async function main() {
         description: 'Jaring ikan nilon kuat dan tahan lama 100 meter. Mata jaring 2cm, cocok untuk berbagai jenis ikan.',
         price: 350000,
         stock: 60,
-        imageUrl: 'https://images.unsplash.com/photo-1573160813959-1c6bfda65c4e?w=400',
+        ...imageData('Jaring Ikan Nilon Premium 100m'),
       },
     ],
   });
@@ -642,6 +700,7 @@ async function main() {
         description: 'Mesin tempel kapal Yamaha 15HP 2-stroke bertenaga dan irit bahan bakar. Cocok untuk kapal nelayan 5-7 meter.',
         price: 24500000,
         stock: 5,
+        ...imageData('Mesin Tempel Kapal Yamaha 15HP 2-Stroke'),
       },
       {
         storeId: multiStore.id,
@@ -649,9 +708,11 @@ async function main() {
         description: 'Perahu karet inflatable kapasitas 4 orang, material PVC tebal tahan abrasi. Lengkap dengan pompa dan dayung.',
         price: 5800000,
         stock: 8,
+        ...imageData('Perahu Karet Inflatable Boat 4 Orang'),
       },
     ],
   });
+  await updateSeedProductImages();
   console.log('Multi-role user created:', multiUser.username);
 
   // Vouchers
