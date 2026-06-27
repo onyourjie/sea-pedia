@@ -2,7 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Briefcase, MapPin, Truck, Package, Store, RefreshCcw } from "lucide-react";
+import { Briefcase, MapPin, Truck, Package, Store, RefreshCcw, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 import { SkeletonList } from "@/components/ui/skeleton";
@@ -21,6 +22,11 @@ interface AvailableJob {
   };
 }
 
+interface ActiveJob {
+  id: string;
+  order: { id: string; status: string };
+}
+
 function formatPrice(p: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
 }
@@ -32,6 +38,16 @@ export default function DriverJobsPage() {
     queryKey: ["driver-available-jobs"],
     queryFn: () => api.get("/delivery/jobs/available?page=1&limit=30").then((r) => r.data),
   });
+
+  // Cek apakah driver sudah punya job aktif
+  const { data: myJobs } = useQuery<{ jobs: ActiveJob[] }>({
+    queryKey: ["driver-my-jobs"],
+    queryFn: () => api.get("/delivery/jobs/my").then((r) => r.data),
+  });
+
+  const hasActiveJob = (myJobs?.jobs || []).some(
+    (j) => j.order.status === "SEDANG_DIKIRIM"
+  );
 
   const takeJob = useMutation({
     mutationFn: (deliveryId: string) => api.post(`/delivery/jobs/${deliveryId}/take`).then((r) => r.data),
@@ -53,6 +69,22 @@ export default function DriverJobsPage() {
         <h1 className="text-2xl font-bold text-gray-800">Cari Job Pengiriman</h1>
         <p className="text-sm text-gray-500 mt-0.5">{jobs.length} job tersedia. Earnings: 80% dari ongkir.</p>
       </div>
+
+      {hasActiveJob && (
+        <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+          <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-yellow-800">Kamu sudah punya job aktif</p>
+            <p className="text-xs text-yellow-700 mt-0.5">Selesaikan dulu job yang sedang berjalan sebelum mengambil job baru.</p>
+          </div>
+          <Link
+            href="/dashboard/driver/active"
+            className="text-xs font-semibold text-yellow-700 hover:text-yellow-900 underline shrink-0"
+          >
+            Lihat Job Aktif
+          </Link>
+        </div>
+      )}
 
       {isLoading ? (
         <SkeletonList count={4} />
@@ -119,10 +151,11 @@ export default function DriverJobsPage() {
                   </div>
                   <button
                     onClick={() => takeJob.mutate(j.id)}
-                    disabled={takeJob.isPending}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-xl transition shadow-md shadow-green-600/20 shrink-0"
+                    disabled={takeJob.isPending || hasActiveJob}
+                    title={hasActiveJob ? "Selesaikan job aktif dulu sebelum mengambil job baru" : "Ambil job ini"}
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-xl transition shadow-md shadow-green-600/20 shrink-0"
                   >
-                    Ambil Job
+                    {hasActiveJob ? "Sudah Ada Job" : "Ambil Job"}
                   </button>
                 </div>
               </motion.div>

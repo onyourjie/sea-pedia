@@ -23,7 +23,7 @@ interface CartItem {
   id: string;
   productId: string;
   quantity: number;
-  product: { id: string; name: string; price: string; imageUrl?: string; store: { id: string; name: string } };
+  product: { id: string; name: string; price: string; discount?: number; imageUrl?: string; store: { id: string; name: string } };
 }
 
 interface Cart {
@@ -80,7 +80,11 @@ export default function CheckoutPage() {
   }, [addresses, addressId]);
 
   const items = cart?.items || [];
-  const subtotal = items.reduce((s, i) => s + Number(i.product.price) * i.quantity, 0);
+  const subtotal = items.reduce((s, i) => {
+    const discountPct = Math.min(Math.max(i.product.discount ?? 0, 0), 90);
+    const effectivePrice = Number(i.product.price) * (1 - discountPct / 100);
+    return s + effectivePrice * i.quantity;
+  }, 0);
   const deliveryFee = DELIVERY_OPTIONS.find((o) => o.value === deliveryMethod)?.fee || 0;
   const totalDiscount = voucherDiscount + promoDiscount;
   const discountedSubtotal = Math.max(0, subtotal - totalDiscount);
@@ -284,17 +288,30 @@ export default function CheckoutPage() {
           <h2 className="font-bold text-gray-800">Ringkasan Pesanan</h2>
 
           <div className="space-y-2 max-h-40 overflow-auto">
-            {items.map((i) => (
-              <div key={i.id} className="flex items-center gap-2 text-sm">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-                  <img src={i.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=80"} alt="" className="w-full h-full object-cover" />
+            {items.map((i) => {
+              const discountPct = Math.min(Math.max(i.product.discount ?? 0, 0), 90);
+              const effectivePrice = Number(i.product.price) * (1 - discountPct / 100);
+              const hasDiscount = discountPct > 0;
+              return (
+                <div key={i.id} className="flex items-center gap-2 text-sm">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
+                    <img src={i.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=80"} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-700 line-clamp-1">{i.product.name}</p>
+                    <div className="flex items-center gap-1">
+                      {hasDiscount && (
+                        <p className="text-[10px] text-gray-400 line-through">{formatPrice(Number(i.product.price))}</p>
+                      )}
+                      <p className="text-xs text-gray-500">{i.quantity} × {formatPrice(effectivePrice)}</p>
+                      {hasDiscount && (
+                        <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded font-semibold">{discountPct}%</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-700 line-clamp-1">{i.product.name}</p>
-                  <p className="text-xs text-gray-400">{i.quantity} × {formatPrice(Number(i.product.price))}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">

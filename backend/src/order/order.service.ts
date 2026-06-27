@@ -50,11 +50,12 @@ export class OrderService {
         throw new BadRequestException(`Insufficient stock for "${item.product.name}"`);
     }
 
-    // Calculate subtotal
-    const subtotal = cart.items.reduce(
-      (sum, item) => sum + Number(item.product.price) * item.quantity,
-      0,
-    );
+    // Calculate subtotal using effective price (after product-level discount)
+    const subtotal = cart.items.reduce((sum, item) => {
+      const discountPct = Math.min(Math.max(item.product.discount ?? 0, 0), 90);
+      const effectivePrice = Number(item.product.price) * (1 - discountPct / 100);
+      return sum + effectivePrice * item.quantity;
+    }, 0);
 
     // Validate and apply discount
     let discountAmount = 0;
@@ -136,12 +137,16 @@ export class OrderService {
             create: { status: OrderStatus.SEDANG_DIKEMAS, note: 'Order placed' },
           },
           items: {
-            create: cart.items.map((item) => ({
-              productId: item.productId,
-              name: item.product.name,
-              price: item.product.price,
-              quantity: item.quantity,
-            })),
+            create: cart.items.map((item) => {
+              const discountPct = Math.min(Math.max(item.product.discount ?? 0, 0), 90);
+              const effectivePrice = Number(item.product.price) * (1 - discountPct / 100);
+              return {
+                productId: item.productId,
+                name: item.product.name,
+                price: effectivePrice,
+                quantity: item.quantity,
+              };
+            }),
           },
         },
         include: { items: true, statusHistory: true },
