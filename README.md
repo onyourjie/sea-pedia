@@ -62,12 +62,20 @@ npm run dev   # jalan di port 3000
 | `driver1` | driver1@seapedia.com | `driver123` | DRIVER | Driver pertama |
 | `multiuser` | multi@seapedia.com | `multi123` | BUYER+SELLER+DRIVER | Multi-role demo |
 
+> **Catatan Admin:** Akun admin hanya bisa dibuat via seed. Jalankan `npx ts-node prisma/seed.ts` dari folder `backend/` untuk membuat semua akun demo termasuk admin. Jika ingin membuat admin secara manual tanpa seed, daftarkan akun baru via `POST /auth/register` lalu tambahkan role ADMIN langsung ke tabel `UserRole` di database:
+> ```sql
+> INSERT INTO "UserRole" (id, "userId", role, "createdAt")
+> VALUES (gen_random_uuid(), '<user-id>', 'ADMIN', NOW());
+> ```
+
 ## Demo Flow End-to-End
 
 ### 1. Guest Browsing (Level 1)
-- Buka http://localhost:3000
-- Browse `/products`, klik salah satu untuk lihat detail
-- Scroll landing page, submit application review (rating + komentar) — bisa tanpa login
+- Buka http://localhost:3000 (tidak perlu login)
+- Browse `/products` → klik salah satu untuk lihat detail produk
+- Browse `/stores` → lihat semua toko, klik toko untuk lihat detail dan produknya
+- Scroll landing page → submit application review (rating + komentar) tanpa login
+- API docs tersedia di http://localhost:3001/api/docs (Swagger)
 
 ### 2. Multi-role Login (Level 1)
 - Login `multiuser` / `multi123`
@@ -175,7 +183,7 @@ SEAPEDIA punya `SystemDate` model yang menyimpan "tanggal sistem" terpisah dari 
 | **XSS — JSX rendering** | React auto-escape semua text content saat render |
 | **Input validation** | Class-validator decorator di semua DTO + global ValidationPipe (whitelist + forbidNonWhitelisted). Validasi spesifik untuk field sensitif: email (`@IsEmail`), nomor HP penerima alamat (`@Matches(/^(\+62\|62\|0)8[1-9][0-9]{6,11}$/)`), kode pos 5 digit, rating 1-5 (`@Min(1) @Max(5)`), price/stock/quantity/discount (`@IsNumber() @Min(0)`) |
 | **Password hashing** | bcrypt cost=12 |
-| **JWT auth** | Bearer token, signed dengan `JWT_SECRET`, default expiry. Selection token (multi-role) expiry 10 menit. JWT membawa `sid` (session id) — logout hanya hapus session yang match (per-device), bukan semua session user |
+| **JWT auth** | Bearer token, signed dengan `JWT_SECRET`. Access token expiry: **7d** (override via env `JWT_EXPIRES_IN`). Selection token (role picker): **10 menit**. JWT membawa `sid` (session id) — logout hanya hapus session yang match (per-device), bukan semua session user |
 | **Role enforcement** | `RolesGuard` cek `activeRole` di JWT payload untuk semua endpoint terproteksi |
 | **CORS** | Lockdown via `CORS_ORIGIN` env (default `http://localhost:3000`), bukan wildcard |
 | **Rate limiting** | `@nestjs/throttler` global guard (10 req/sec, 100 req/min) |
@@ -275,8 +283,11 @@ Saat tombol diklik, browser membuka print dialog. Pilih "Save as PDF" sebagai de
 Backend punya unit tests untuk flow kritis. Jalankan dengan:
 ```bash
 cd backend
-npm test                                    # all
-npm test -- --testPathPatterns=service.spec # service-level only
+npm test                                          # semua tests
+npm test -- --testPathPattern=order.service       # test checkout (PPN, voucher, wallet)
+npm test -- --testPathPattern=delivery.service    # test take job & complete job
+npm test -- --testPathPattern=admin.service       # test overdue refund & idempotency
+npm test -- --testPathPattern=payment.service     # test Xendit webhook idempotency
 ```
 
 Coverage saat ini:
