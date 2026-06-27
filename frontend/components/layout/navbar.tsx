@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth.store";
-import { ShoppingCart, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle, Mail, Store } from "lucide-react";
+import { ShoppingCart, Menu, X, Waves, Heart, Flame, Tag, Box, HelpCircle, Mail, ShoppingBag, Store} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -152,8 +152,11 @@ export function Navbar() {
       {/* Secondary nav row */}
       <div className="hidden md:block border-t border-gray-50 bg-white">
         <div className="max-w-7xl mx-auto px-4 h-10 flex items-center gap-6">
-          <Link href="/products" className="text-xs font-medium text-gray-600 hover:text-indigo-600 flex items-center gap-1.5 transition">
-            <Store className="w-3.5 h-3.5 text-indigo-500" /> Semua Produk
+          <Link href="/products" className="text-xs font-medium text-gray-600 hover:text-yellow-600 flex items-center gap-1.5 transition">
+            <ShoppingBag className="w-3.5 h-3.5 text-yellow-500" /> Semua Produk
+          </Link>
+          <Link href="/stores" className="text-xs font-medium text-gray-600 hover:text-cyan-600 flex items-center gap-1.5 transition">
+            <Store className="w-3.5 h-3.5 text-cyan-500" /> Semua Toko
           </Link>
           <Link href="/products?sort=newest" className="text-xs font-medium text-gray-600 hover:text-blue-600 flex items-center gap-1.5 transition">
             <Box className="w-3.5 h-3.5 text-blue-500" /> Produk Baru
@@ -187,6 +190,7 @@ export function Navbar() {
             className="md:hidden border-t border-gray-100 bg-white px-4 pb-4 flex flex-col gap-2"
           >
             <div className="flex flex-wrap gap-x-3 gap-y-2 py-2 border-b border-gray-100">
+              <Link href="/stores" className="text-xs font-medium text-cyan-600 hover:text-cyan-700 flex items-center gap-1 transition"><Store className="w-3 h-3 text-cyan-500" /> Semua Toko</Link>
               <Link href="/products?sort=newest" className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition"><Box className="w-3 h-3 text-blue-500" /> Baru</Link>
               <Link href="/products?deals=1" className="text-xs font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1 transition"><Flame className="w-3 h-3 text-orange-500" /> Hot Deals</Link>
               <Link href="/products?promo=1" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition"><Tag className="w-3 h-3 text-emerald-500" /> Voucher & Promo</Link>
