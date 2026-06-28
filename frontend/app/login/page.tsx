@@ -9,6 +9,7 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
+import { AuthHeroCarousel } from "@/components/auth/auth-hero-carousel";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,59 +88,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
-      <motion.div
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-cyan-400 via-cyan-500 to-teal-600 flex-col items-center justify-center overflow-hidden"
-      >
-        {[...Array(4)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full border-2 border-white/20"
-            style={{
-              width: `${200 + i * 150}px`,
-              height: `${200 + i * 150}px`,
-              left: `${-60 + i * 20}px`,
-              bottom: `${-60 + i * 20}px`,
-            }}
-            animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.8 }}
-          />
-        ))}
-
-        <div className="relative z-10 text-center px-12 max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="w-72 h-56 rounded-2xl overflow-hidden mx-auto mb-8 shadow-2xl border-4 border-white/30"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=600&q=80"
-              alt="Maritime marketplace"
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-3xl font-bold text-black mb-3"
-          >
-            Selamat Datang di<br />SEAPEDIA
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-black/70 text-base leading-relaxed"
-          >
-            Pasar hasil laut terbesar dan terpercaya di genggaman Anda.
-          </motion.p>
-        </div>
-      </motion.div>
+      <AuthHeroCarousel />
 
       {/* Right panel */}
       <motion.div
