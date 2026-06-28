@@ -54,13 +54,13 @@ npm run dev   # jalan di port 3000
 
 | Username | Email | Password | Roles | Catatan |
 |----------|-------|----------|-------|---------|
-| `admin` | admin@seapedia.com | `admin123` | ADMIN | Akses dashboard admin |
-| `seller1` | seller1@seapedia.com | `seller123` | SELLER | Punya toko "Oceanic Pro Store" |
-| `seller2` | seller2@seapedia.com | `seller123` | SELLER | Punya toko seller kedua |
-| `seller3` | seller3@seapedia.com | `seller123` | SELLER | Punya toko seller ketiga |
-| `buyer1` | buyer1@seapedia.com | `buyer123` | BUYER | Saldo wallet siap pakai |
-| `driver1` | driver1@seapedia.com | `driver123` | DRIVER | Driver pertama |
-| `multiuser` | multi@seapedia.com | `multi123` | BUYER+SELLER+DRIVER | Multi-role demo |
+| `admin` | admin@seapedia.com | `Admin123!` | ADMIN | Akses dashboard admin |
+| `seller1` | seller1@seapedia.com | `Seller123!` | SELLER | Punya toko "Oceanic Pro Store" |
+| `seller2` | seller2@seapedia.com | `Seller123!` | SELLER | Punya toko seller kedua |
+| `seller3` | seller3@seapedia.com | `Seller123!` | SELLER | Punya toko seller ketiga |
+| `buyer1` | buyer1@seapedia.com | `Buyer123!` | BUYER | Saldo wallet siap pakai |
+| `driver1` | driver1@seapedia.com | `Driver123!` | DRIVER | Driver pertama |
+| `multiuser` | multi@seapedia.com | `Multi123!` | BUYER+SELLER+DRIVER | Multi-role demo |
 
 > **Catatan Admin:** Akun admin hanya bisa dibuat via seed. Jalankan `npx ts-node prisma/seed.ts` dari folder `backend/` untuk membuat semua akun demo termasuk admin. Jika ingin membuat admin secara manual tanpa seed, daftarkan akun baru via `POST /auth/register` lalu tambahkan role ADMIN langsung ke tabel `UserRole` di database:
 > ```sql
@@ -78,7 +78,7 @@ npm run dev   # jalan di port 3000
 - API docs tersedia di http://localhost:3001/api/docs (Swagger)
 
 ### 2. Multi-role Login (Level 1)
-- Login `multiuser` / `multi123`
+- Login `multiuser` / `Multi123!`
 - Modal pemilihan peran muncul (BUYER/SELLER/DRIVER)
 - Pilih BUYER → masuk ke `/dashboard/buyer`
 
@@ -92,21 +92,21 @@ npm run dev   # jalan di port 3000
 - Lihat status timeline: status awal **Sedang Dikemas**
 
 ### 4. Seller Flow (Level 2+4)
-- Logout, login `seller1` / `seller123`
+- Logout, login `seller1` / `Seller123!`
 - Buat/kelola toko di `/dashboard/seller/store` (validasi nama unik)
 - CRUD produk di `/dashboard/seller/products`
 - Buka `/dashboard/seller/orders` → klik pesanan dari Buyer
 - Klik "Proses Pesanan" → status pindah ke **Menunggu Pengirim**
 
 ### 5. Driver Flow (Level 5)
-- Logout, login `driver1` / `driver123`
+- Logout, login `driver1` / `Driver123!`
 - `/dashboard/driver/jobs` → list job available (yang Menunggu Pengirim)
 - "Ambil Job" → status pindah ke **Sedang Dikirim**
 - `/dashboard/driver/active` → "Konfirmasi Selesai" → status **Pesanan Selesai**
 - Lihat earnings di `/dashboard/driver/history` (80% dari ongkir)
 
 ### 6. Admin Monitoring (Level 6)
-- Logout, login `admin` / `admin123`
+- Logout, login `admin` / `Admin123!`
 - `/dashboard/admin` — overview (users, stores, products, orders, vouchers, dll)
 - `/dashboard/admin/vouchers` & `/dashboard/admin/promos` — buat voucher/promo baru
 - `/dashboard/admin/overdue` — klik "Maju 1 Hari" beberapa kali untuk simulasi waktu

@@ -4,9 +4,13 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
+  Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RoleType } from '@prisma/client';
+
+const STRONG_PASSWORD =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export class RegisterDto {
   @ApiProperty({ example: 'johndoe', minLength: 1 })
@@ -17,9 +21,13 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', minLength: 6 })
+  @ApiProperty({ example: 'Password1!', minLength: 8 })
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
+  @Matches(STRONG_PASSWORD, {
+    message:
+      'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character',
+  })
   password: string;
 
   @ApiPropertyOptional({ enum: RoleType, isArray: true })

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, Mail, User, AtSign, Waves } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User, AtSign, Waves, Check } from "lucide-react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
@@ -14,6 +14,14 @@ const ROLES = [
   { value: "BUYER", label: "Pembeli", icon: "mdi:cart-outline", desc: "Beli produk maritim" },
   { value: "SELLER", label: "Penjual", icon: "mdi:store-outline", desc: "Jual produk Anda" },
   { value: "DRIVER", label: "Driver", icon: "mdi:truck-delivery-outline", desc: "Antar pesanan" },
+];
+
+const PASSWORD_RULES = [
+  { key: "length", label: "Minimal 8 karakter", test: (p: string) => p.length >= 8 },
+  { key: "upper", label: "Satu huruf besar", test: (p: string) => /[A-Z]/.test(p) },
+  { key: "lower", label: "Satu huruf kecil", test: (p: string) => /[a-z]/.test(p) },
+  { key: "number", label: "Satu angka", test: (p: string) => /[0-9]/.test(p) },
+  { key: "special", label: "Satu karakter spesial", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
 ];
 
 export default function RegisterPage() {
@@ -39,8 +47,8 @@ export default function RegisterPage() {
       toast.error("Password tidak cocok");
       return;
     }
-    if (form.password.length < 6) {
-      toast.error("Password minimal 6 karakter");
+    if (!PASSWORD_RULES.every((r) => r.test(form.password))) {
+      toast.error("Password belum memenuhi semua syarat keamanan");
       return;
     }
     if (!agree) {
@@ -159,7 +167,7 @@ export default function RegisterPage() {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Minimal 6 karakter"
+                    placeholder="Minimal 8 karakter"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     required
@@ -169,6 +177,21 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {form.password && (
+                  <ul className="mt-2 space-y-1">
+                    {PASSWORD_RULES.map((r) => {
+                      const ok = r.test(form.password);
+                      return (
+                        <li key={r.key} className={`flex items-center gap-2 text-xs ${ok ? "text-green-600" : "text-gray-400"}`}>
+                          <span className={`flex items-center justify-center w-3.5 h-3.5 rounded-full ${ok ? "bg-green-500" : "bg-gray-200"}`}>
+                            {ok && <Check className="w-2.5 h-2.5 text-white" />}
+                          </span>
+                          {r.label}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
 
               <div>

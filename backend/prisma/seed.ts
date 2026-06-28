@@ -349,7 +349,7 @@ async function main() {
     create: {
       username: 'admin',
       email: 'admin@seapedia.com',
-      passwordHash: await hash('admin123'),
+      passwordHash: await hash('Admin123!'),
       roles: { create: [{ role: RoleType.ADMIN }] },
     },
   });
@@ -362,7 +362,7 @@ async function main() {
     create: {
       username: 'seller1',
       email: 'seller1@seapedia.com',
-      passwordHash: await hash('seller123'),
+      passwordHash: await hash('Seller123!'),
       roles: { create: [{ role: RoleType.SELLER }] },
     },
   });
@@ -468,7 +468,7 @@ async function main() {
     create: {
       username: 'seller2',
       email: 'seller2@seapedia.com',
-      passwordHash: await hash('seller123'),
+      passwordHash: await hash('Seller123!'),
       roles: { create: [{ role: RoleType.SELLER }] },
     },
   });
@@ -519,7 +519,7 @@ async function main() {
     create: {
       username: 'seller3',
       email: 'seller3@seapedia.com',
-      passwordHash: await hash('seller123'),
+      passwordHash: await hash('Seller123!'),
       roles: { create: [{ role: RoleType.SELLER }] },
     },
   });
@@ -562,7 +562,7 @@ async function main() {
     create: {
       username: 'buyer1',
       email: 'buyer1@seapedia.com',
-      passwordHash: await hash('buyer123'),
+      passwordHash: await hash('Buyer123!'),
       roles: { create: [{ role: RoleType.BUYER }] },
     },
   });
@@ -621,7 +621,7 @@ async function main() {
     create: {
       username: 'driver1',
       email: 'driver1@seapedia.com',
-      passwordHash: await hash('driver123'),
+      passwordHash: await hash('Driver123!'),
       roles: { create: [{ role: RoleType.DRIVER }] },
     },
   });
@@ -639,7 +639,7 @@ async function main() {
     create: {
       username: 'multiuser',
       email: 'multi@seapedia.com',
-      passwordHash: await hash('multi123'),
+      passwordHash: await hash('Multi123!'),
       roles: {
         create: [
           { role: RoleType.BUYER },

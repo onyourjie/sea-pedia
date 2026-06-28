@@ -75,11 +75,11 @@ Swagger docs at `http://localhost:3001/api/docs`
 
 | Role                             | Username    | Password    |
 | -------------------------------- | ----------- | ----------- |
-| Admin                            | `admin`     | `admin123`  |
-| Seller                           | `seller1`   | `seller123` |
-| Buyer                            | `buyer1`    | `buyer123`  |
-| Driver                           | `driver1`   | `driver123` |
-| Multi-role (Buyer+Seller+Driver) | `multiuser` | `multi123`  |
+| Admin                            | `admin`     | `Admin123!`  |
+| Seller                           | `seller1`   | `Seller123!` |
+| Buyer                            | `buyer1`    | `Buyer123!`  |
+| Driver                           | `driver1`   | `Driver123!` |
+| Multi-role (Buyer+Seller+Driver) | `multiuser` | `Multi123!`  |
 
 `buyer1` starts with Rp 5.000.000 wallet balance and a default Jakarta address.
 
