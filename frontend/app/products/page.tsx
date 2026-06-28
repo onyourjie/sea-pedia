@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -72,6 +73,66 @@ const SORTS = [
   { label: "Harga Tertinggi", value: "price_desc" },
   { label: "Terlaris", value: "bestseller" },
 ];
+
+const PROMO_BANNERS = [
+  { src: "/promo%2020.png", alt: "Promo spesial diskon 20 persen" },
+  { src: "/save%2010.png", alt: "Voucher SAVE10 diskon 10 persen" },
+  { src: "/flat50k.png", alt: "Voucher FLAT50K diskon langsung Rp 50.000" },
+];
+
+function PromoBannerCarousel() {
+  const [activeBanner, setActiveBanner] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveBanner((current) => (current + 1) % PROMO_BANNERS.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const banner = PROMO_BANNERS[activeBanner];
+
+  return (
+    <div className="relative mb-5 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="relative aspect-[16/6] min-h-[150px] w-full sm:min-h-[210px] lg:min-h-[260px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={banner.src}
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.01 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={banner.src}
+              alt={banner.alt}
+              fill
+              priority={activeBanner === 0}
+              sizes="(min-width: 1280px) 1120px, 100vw"
+              className="object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-black/20 px-2 py-1 backdrop-blur-sm">
+        {PROMO_BANNERS.map((item, index) => (
+          <button
+            key={item.src}
+            type="button"
+            onClick={() => setActiveBanner(index)}
+            aria-label={`Tampilkan banner promo ${index + 1}`}
+            className={`h-2 rounded-full transition-all ${
+              activeBanner === index ? "w-7 bg-white" : "w-2 bg-white/60 hover:bg-white"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function ProductCard({ product }: { product: Product }) {
   const discountedPrice = product.discount ? product.price * (1 - product.discount / 100) : null;
@@ -418,6 +479,8 @@ function ProductsPageInner() {
               </>
             )}
           </nav>
+
+          {isOffersPage && <PromoBannerCarousel />}
 
           <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div>
