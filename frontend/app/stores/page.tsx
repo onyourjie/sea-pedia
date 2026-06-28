@@ -83,6 +83,7 @@ function StoreCard({ store, index }: { store: StoreItem; index: number }) {
 }
 
 export default function StoresPage() {
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const limit = 12;
@@ -97,11 +98,21 @@ export default function StoresPage() {
   });
 
   const stores = data?.data ?? [];
-  const total = data?.total ?? 0;
+  const filteredStores = stores.filter((store) => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return true;
+
+    return (
+      store.name.toLowerCase().includes(keyword) ||
+      store.description?.toLowerCase().includes(keyword)
+    );
+  });
+  const total = search ? filteredStores.length : data?.total ?? 0;
   const totalPages = Math.ceil(total / limit);
 
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setSearch(searchInput);
     setPage(1);
   }
 
@@ -109,25 +120,35 @@ export default function StoresPage() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
 
-      <section className="bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-600 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-12">
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10">
           <div className="flex items-center gap-3 mb-3">
-            <Store className="h-7 w-7 text-cyan-100" />
-            <h1 className="text-3xl font-bold">Semua Toko</h1>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50">
+              <Store className="h-6 w-6 text-cyan-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-800">Semua Toko</h1>
           </div>
-          <p className="text-cyan-100 text-sm max-w-xl mb-6">
+          <p className="text-gray-500 text-sm max-w-xl mb-6">
             Temukan produk dari berbagai penjual terpercaya di SEAPEDIA marketplace.
           </p>
 
-          <form onSubmit={handleSearch} className="relative max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Cari nama toko..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white text-gray-800 text-sm outline-none focus:ring-2 focus:ring-cyan-300 placeholder:text-gray-400"
-            />
+          <form onSubmit={handleSearch} className="flex max-w-md gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Cari nama toko..."
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-cyan-300 focus:bg-white focus:ring-2 focus:ring-cyan-100"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-600"
+            >
+              Cari
+            </button>
           </form>
         </div>
       </section>
@@ -135,7 +156,7 @@ export default function StoresPage() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
         <div className="flex items-center justify-between mb-5">
           <p className="text-sm text-gray-500">
-            {isLoading ? "Memuat..." : `${total} toko ditemukan`}
+            {isLoading ? "Memuat..." : `${search ? filteredStores.length : total} toko ditemukan`}
           </p>
         </div>
 
@@ -161,7 +182,7 @@ export default function StoresPage() {
             <p className="font-medium text-gray-600">Gagal memuat daftar toko</p>
             <p className="mt-1 text-sm text-gray-400">Silakan coba muat ulang halaman.</p>
           </div>
-        ) : stores.length === 0 ? (
+        ) : filteredStores.length === 0 ? (
           <div className="rounded-2xl border border-gray-100 bg-white p-16 text-center">
             <Store className="mx-auto mb-3 h-14 w-14 text-gray-200" />
             <p className="font-semibold text-gray-700 mb-1">Toko tidak ditemukan</p>
@@ -172,7 +193,7 @@ export default function StoresPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {stores.map((store, index) => (
+              {filteredStores.map((store, index) => (
                 <StoreCard key={store.id} store={store} index={index} />
               ))}
             </div>
