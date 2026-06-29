@@ -4,7 +4,7 @@ import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { RoleType } from '@prisma/client';
+import { RoleType, OrderStatus } from '@prisma/client';
 import {
   ApiEndpoint,
   ApiPagination,
@@ -61,8 +61,12 @@ export class AdminController {
     successDescription: 'Daftar seluruh pesanan dengan pagination.',
     responseExample: { data: [], total: 0, page: 1, limit: 20 },
   })
-  listOrders(@Query('page') page = 1, @Query('limit') limit = 20) {
-    return this.adminService.listOrders(+page, +limit);
+  listOrders(
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @Query('status') status?: OrderStatus,
+  ) {
+    return this.adminService.listOrders(+page, +limit, status);
   }
 
   @Get('deliveries')

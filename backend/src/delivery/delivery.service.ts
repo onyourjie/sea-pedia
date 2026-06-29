@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderStatus } from '@prisma/client';
+import { EventsService } from '../events/events.service';
 
 const DRIVER_EARNING_RATE = 0.8; // Driver earns 80% of delivery fee
 
 @Injectable()
 export class DeliveryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsService: EventsService,
+  ) {}
 
   private async getDriver(userId: string) {
     const driver = await this.prisma.driver.findUnique({ where: { userId } });
@@ -92,6 +96,14 @@ export class DeliveryService {
           },
         },
       });
+
+      this.eventsService.emit(delivery.order.buyerId, {
+        orderId: delivery.orderId,
+        status: OrderStatus.SEDANG_DIKIRIM,
+        note: 'Driver mengambil pesananmu',
+        updatedAt: new Date(),
+      });
+
       return { message: 'Job taken successfully', deliveryId };
     });
   }
@@ -137,6 +149,14 @@ export class DeliveryService {
           deliveryFee: delivery.order.deliveryFee,
         },
       });
+
+      this.eventsService.emit(delivery.order.buyerId, {
+        orderId: delivery.orderId,
+        status: OrderStatus.PESANAN_SELESAI,
+        note: 'Pesananmu telah sampai',
+        updatedAt: new Date(),
+      });
+
       return { message: 'Job completed', earning };
     });
   }

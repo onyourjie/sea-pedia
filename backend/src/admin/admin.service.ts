@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderStatus, DeliveryMethod } from '@prisma/client';
+import { EventsService } from '../events/events.service';
 
 // SLA in hours per delivery method
 const SLA_HOURS: Record<DeliveryMethod, number> = {
@@ -11,7 +12,10 @@ const SLA_HOURS: Record<DeliveryMethod, number> = {
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsService: EventsService,
+  ) {}
 
   async getDashboard() {
     const [users, stores, products, orders, vouchers, promos, deliveries, overdueOrders] =
@@ -43,10 +47,12 @@ export class AdminService {
     return { data, total, page, limit };
   }
 
-  async listOrders(page = 1, limit = 20) {
+  async listOrders(page = 1, limit = 20, status?: OrderStatus) {
     const skip = (page - 1) * limit;
+    const where = status ? { status } : {};
     const [data, total] = await Promise.all([
       this.prisma.order.findMany({
+        where,
         skip,
         take: limit,
         include: {
@@ -56,7 +62,7 @@ export class AdminService {
         },
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.order.count(),
+      this.prisma.order.count({ where }),
     ]);
     return { data, total, page, limit };
   }
@@ -206,6 +212,12 @@ export class AdminService {
               reason: `SLA exceeded (${slaHours}h for ${order.deliveryMethod})`,
             },
           });
+        });
+        this.eventsService.emit(order.buyer.id, {
+          orderId: order.id,
+          status: OrderStatus.DIKEMBALIKAN,
+          note: 'Pesanan melewati batas waktu, saldo dikembalikan ke wallet',
+          updatedAt: new Date(),
         });
         processed++;
       }

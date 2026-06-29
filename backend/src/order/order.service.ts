@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CheckoutDto } from './order.dto';
 import { DeliveryMethod, OrderStatus } from '@prisma/client';
+import { EventsService } from '../events/events.service';
 
 const DELIVERY_FEES: Record<DeliveryMethod, number> = {
   INSTANT: 25000,
@@ -18,7 +19,10 @@ const PPN_RATE = 0.12;
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsService: EventsService,
+  ) {}
 
   private async getBuyer(userId: string) {
     const buyer = await this.prisma.buyer.findUnique({
@@ -187,6 +191,13 @@ export class OrderService {
       return newOrder;
     });
 
+    this.eventsService.emit(buyer.id, {
+      orderId: order.id,
+      status: OrderStatus.SEDANG_DIKEMAS,
+      note: 'Order placed',
+      updatedAt: new Date(),
+    });
+
     return {
       order,
       summary: { subtotal, discountAmount, deliveryFee, ppn, total },
@@ -262,7 +273,7 @@ export class OrderService {
     if (order.status !== OrderStatus.SEDANG_DIKEMAS)
       throw new BadRequestException('Order cannot be processed in its current status');
 
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: {
         status: OrderStatus.MENUNGGU_PENGIRIM,
@@ -272,6 +283,15 @@ export class OrderService {
       },
       include: { statusHistory: { orderBy: { createdAt: 'asc' } } },
     });
+
+    this.eventsService.emit(order.buyerId, {
+      orderId: order.id,
+      status: OrderStatus.MENUNGGU_PENGIRIM,
+      note: 'Seller processed the order',
+      updatedAt: new Date(),
+    });
+
+    return updated;
   }
 
   async getSellerOrderDetail(userId: string, orderId: string) {
