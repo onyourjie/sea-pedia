@@ -2,6 +2,16 @@
 
 SEAPEDIA adalah marketplace lengkap untuk komoditas hasil laut yang menghubungkan **Buyer**, **Seller**, **Driver**, dan **Admin** dalam satu ekosistem. Project ini dibangun untuk technical challenge SEAPEDIA dan mengimplementasikan Level 1-7 dari spesifikasi.
 
+## Deployment (Live Demo)
+
+| Bagian | URL |
+|--------|-----|
+| **Frontend** | https://sea-pedia.vercel.app/ |
+| **Backend API** | https://sea-pedia-production.up.railway.app/api |
+| **API Docs (Swagger)** | https://sea-pedia-production.up.railway.app/api/docs |
+
+Frontend di-deploy di **Vercel**, backend + PostgreSQL di **Railway**. Aplikasi bisa langsung diakses dan dites tanpa setup lokal. Gunakan demo account di bawah untuk login.
+
 ## Arsitektur
 
 ```
@@ -131,18 +141,24 @@ SEDANG_DIKEMAS  →  MENUNGGU_PENGIRIM  →  SEDANG_DIKIRIM  →  PESANAN_SELESA
 Setiap perubahan status disimpan di `OrderStatusHistory` dengan timestamp.
 
 ### Discount Rules
-- **Voucher**: punya `usageLimit`. Tidak bisa dipakai jika expired atau usage sudah penuh.
-- **Promo**: punya `usageLimit` opsional (0 = unlimited). Sama-sama dicek expired & usage.
-- **Voucher dan Promo BISA digabungkan** dalam satu transaksi. Total diskon = voucher_disc + promo_disc.
-- Semua dihitung dari `subtotal`, bukan akumulasi.
-- **Product-level discount** (`Product.discount`, 0–90%): potongan harga ditampilkan di kartu produk dan halaman detail. Berbeda dari Voucher/Promo (yang dipakai di checkout) — discount produk hanya cosmetic price label dan tidak otomatis terkalkulasi di checkout. Produk dengan `discount > 0` muncul di halaman `/products?promo=1` dan section **Hot Deals**.
+
+SEAPEDIA punya **tiga lapis** potongan harga yang posisinya jelas terhadap PPN:
+
+1. **Product-level discount** (`Product.discount`, 0–90%) — potongan per produk. Ini **benar-benar dihitung di checkout**, bukan cosmetic: `subtotal` dihitung dari *effective price* = `price × (1 − discount%)`, dan `OrderItem.price` disimpan sebagai effective price tersebut. Produk dengan `discount > 0` juga muncul di halaman `/products?promo=1` dan section **Hot Deals**.
+2. **Voucher** — punya `usageLimit`. Tidak bisa dipakai jika expired atau usage sudah penuh. Bisa punya `minOrder`, `discountPct` atau `discountAmount`, dan `maxDiscount` (cap).
+3. **Promo** — punya `usageLimit` opsional (0 = unlimited). Sama-sama dicek expired & usage, mendukung `minOrder`/`maxDiscount` juga.
+
+**Aturan kombinasi:** Voucher dan Promo **BISA digabungkan** dalam satu transaksi. `discountAmount = voucher_disc + promo_disc`, keduanya dihitung dari `subtotal` (yang sudah memperhitungkan product-level discount), bukan akumulasi berurutan.
+
+**Urutan terhadap PPN:** product discount → membentuk subtotal → voucher/promo dipotong dari subtotal → baru PPN dihitung. Buyer hanya membayar PPN atas nilai bersih barang + ongkir. Implementasi di `OrderService.checkout` (`order.service.ts:53-101`).
 
 ### PPN 12% Calculation
 PPN dihitung dari `(subtotal_setelah_diskon + ongkir) × 12%`. Bukan dari subtotal mentah, dan ongkir ikut dipajaki. Lihat `OrderService.checkout` untuk implementasi.
 
 **Detail rumus:**
 ```
-discounted_subtotal = max(0, subtotal − total_diskon)
+subtotal            = Σ (price × (1 − product_discount%)) × qty   # product discount sudah masuk di sini
+discounted_subtotal = max(0, subtotal − (voucher + promo))
 tax_base            = discounted_subtotal + delivery_fee
 ppn                 = tax_base × 12%
 total               = tax_base + ppn
@@ -267,6 +283,9 @@ Endpoint baru di `/products`:
 - `GET /products/new-arrivals` — 10 produk terbaru by `createdAt` desc.
 - Sort `?sort=bestseller` di `/products` memetakan ke endpoint bestsellers.
 - Filter `?promo=1` mengembalikan hanya produk dengan `discount > 0`.
+
+### Product Category
+Tiap produk punya field `category` (`Product.category`, opsional) yang dipilih seller saat membuat/mengedit produk. Nilai kategori berasal dari daftar tetap: `seafood`, `pancing`, `kapal`, `suku-cadang`, `navigasi`, `keselamatan`, `jasa-selam` (divalidasi `@IsIn` di `product.dto.ts`). Filter katalog `GET /products?category=seafood` mem-filter langsung lewat kolom database (`where.category`), bukan menebak dari teks nama/deskripsi — jadi deterministik dan seller punya kontrol penuh atas kategori produknya. Frontend menyediakan dropdown kategori di form seller dan filter kategori di halaman `/products`.
 
 
 
