@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, ShoppingCart, Trash2, ArrowLeft } from "lucide-react";
@@ -12,6 +13,7 @@ import { Footer } from "@/components/layout/footer";
 
 const FAVORITES_KEY = "seapedia_favorites";
 const FAVORITES_CHANGED_EVENT = "seapedia:favorites-changed";
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80";
 
 interface Product {
   id: string;
@@ -36,6 +38,21 @@ function removeFavorite(id: string) {
   const favs = getFavoriteIds().filter((f) => f !== id);
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
   window.dispatchEvent(new Event(FAVORITES_CHANGED_EVENT));
+}
+
+function ProductImage({ product }: { product: Product }) {
+  const [imageSrc, setImageSrc] = useState(product.imageUrl || FALLBACK_IMAGE);
+
+  return (
+    <Image
+      src={imageSrc}
+      alt={product.name}
+      fill
+      sizes="(min-width: 768px) 25vw, 50vw"
+      className="object-cover group-hover:scale-105 transition duration-300"
+      onError={() => setImageSrc(FALLBACK_IMAGE)}
+    />
+  );
 }
 
 export default function WishlistPage() {
@@ -141,16 +158,7 @@ export default function WishlistPage() {
                   </button>
                   <Link href={`/products/${product.id}`} className="flex h-full flex-col">
                     <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                      <img
-                        src={product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80"}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        onError={(e) => {
-                          const image = e.currentTarget;
-                          image.onerror = null;
-                          image.src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80";
-                        }}
-                      />
+                      <ProductImage product={product} />
                       {product.discount && (
                         <span className="absolute top-2 left-2 text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded-full">
                           {product.discount}% OFF

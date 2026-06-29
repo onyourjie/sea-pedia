@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { Star, Flame, TrendingUp, ArrowRight, LucideIcon, BoxIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,6 +34,7 @@ function formatPrice(price: number) {
 function ProductCard({ product, badge }: { product: Product; badge?: { label: string; color: string } }) {
   const price = Number(product.price);
   const discountedPrice = product.discount ? price * (1 - product.discount / 100) : null;
+  const [imageSrc, setImageSrc] = useState(product.imageUrl || FALLBACK);
 
   return (
     <motion.div whileHover={{ y: -3 }} className="group h-full">
@@ -40,15 +43,13 @@ function ProductCard({ product, badge }: { product: Product; badge?: { label: st
         className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
       >
         <div className="relative aspect-square overflow-hidden bg-gray-50">
-          <img
-            src={product.imageUrl || FALLBACK}
+          <Image
+            src={imageSrc}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-            onError={(e) => {
-              const img = e.currentTarget;
-              img.onerror = null;
-              img.src = FALLBACK;
-            }}
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover transition duration-300 group-hover:scale-105"
+            onError={() => setImageSrc(FALLBACK)}
           />
           {badge && (
             <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${badge.color}`}>

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -77,6 +78,7 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [imageIdx, setImageIdx] = useState(0);
   const [isFavorite, setIsFavorite] = useState(() => getFavorites().includes(id as string));
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["product", id],
@@ -105,6 +107,8 @@ export default function ProductDetailPage() {
   }, [product]);
 
   const safeIdx = Math.min(imageIdx, galleryImages.length - 1);
+  const selectedImage = galleryImages[safeIdx] || FALLBACK;
+  const selectedImageSrc = failedImages[selectedImage] ? FALLBACK : selectedImage;
   const relatedProducts = storeProducts?.data?.filter((p) => p.id !== id).slice(0, 5) || [];
   const discountedPrice = product?.discount ? product.price * (1 - product.discount / 100) : null;
   const ratingAvg = product?.ratingAverage ?? 0;
@@ -217,11 +221,14 @@ export default function ProductDetailPage() {
         <div className="grid md:grid-cols-2 gap-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div>
             <div className="relative rounded-xl overflow-hidden aspect-square bg-gray-50 group">
-              <img
-                src={galleryImages[safeIdx] || FALLBACK}
+              <Image
+                src={selectedImageSrc}
                 alt={product.name}
-                className="w-full h-full object-cover transition duration-500"
-                onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK; }}
+                fill
+                priority
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover transition duration-500"
+                onError={() => setFailedImages((prev) => ({ ...prev, [selectedImage]: true }))}
               />
               {galleryImages.length > 1 && (
                 <>
@@ -270,13 +277,15 @@ export default function ProductDetailPage() {
                   <button
                     key={i}
                     onClick={() => setImageIdx(i)}
-                    className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${i === safeIdx ? "border-cyan-500" : "border-transparent opacity-70 hover:opacity-100"}`}
+                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${i === safeIdx ? "border-cyan-500" : "border-transparent opacity-70 hover:opacity-100"}`}
                   >
-                    <img
-                      src={src}
+                    <Image
+                      src={failedImages[src] ? FALLBACK : src}
                       alt={`thumb-${i}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK; }}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                      onError={() => setFailedImages((prev) => ({ ...prev, [src]: true }))}
                     />
                   </button>
                 ))}
@@ -457,12 +466,14 @@ export default function ProductDetailPage() {
                   className="h-full"
                 >
                   <Link href={`/products/${p.id}`} className="flex h-full flex-col bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition">
-                    <div className="aspect-square bg-gray-50 overflow-hidden">
-                      <img
-                        src={p.imageUrl || FALLBACK}
+                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                      <Image
+                        src={failedImages[p.imageUrl || FALLBACK] ? FALLBACK : p.imageUrl || FALLBACK}
                         alt={p.name}
-                        className="w-full h-full object-cover hover:scale-105 transition duration-300"
-                        onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK; }}
+                        fill
+                        sizes="(min-width: 768px) 20vw, 50vw"
+                        className="object-cover hover:scale-105 transition duration-300"
+                        onError={() => setFailedImages((prev) => ({ ...prev, [p.imageUrl || FALLBACK]: true }))}
                       />
                     </div>
                     <div className="flex flex-1 flex-col p-2.5">

@@ -137,20 +137,20 @@ function PromoBannerCarousel() {
 
 function ProductCard({ product }: { product: Product }) {
   const discountedPrice = product.discount ? product.price * (1 - product.discount / 100) : null;
+  const fallbackImage = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80";
+  const [imageSrc, setImageSrc] = useState(product.imageUrl || fallbackImage);
 
   return (
     <motion.div whileHover={{ y: -3 }} className="group h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden">
       <Link href={`/products/${product.id}`} className="flex h-full flex-col">
         <div className="relative aspect-square bg-gray-50 overflow-hidden">
-          <img
-            src={product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80"}
+          <Image
+            src={imageSrc}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-            onError={(e) => {
-              const image = e.currentTarget;
-              image.onerror = null;
-              image.src = "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80";
-            }}
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover group-hover:scale-105 transition duration-300"
+            onError={() => setImageSrc(fallbackImage)}
           />
           {product.discount && (
             <span className="absolute top-2 left-2 text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded-full">

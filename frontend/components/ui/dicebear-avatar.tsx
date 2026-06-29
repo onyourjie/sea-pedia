@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type DiceBearAvatarProps = {
   seed: string;
   type?: "person" | "store";
@@ -21,9 +23,12 @@ export function DiceBearAvatar({
   alt,
 }: DiceBearAvatarProps) {
   return (
-    <img
+    <Image
       src={getDiceBearAvatarUrl(seed, type)}
       alt={alt || (type === "store" ? `Avatar toko ${seed}` : `Avatar ${seed}`)}
+      width={80}
+      height={80}
+      unoptimized
       className={`shrink-0 rounded-full bg-white object-cover ${className}`}
     />
   );

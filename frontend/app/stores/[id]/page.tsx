@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -49,6 +51,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   const discountedPrice = product.discount
     ? price * (1 - product.discount / 100)
     : null;
+  const [imageSrc, setImageSrc] = useState(product.imageUrl || FALLBACK_IMAGE);
 
   return (
     <motion.div
@@ -63,15 +66,13 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
         className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
       >
         <div className="relative aspect-square overflow-hidden bg-gray-100">
-          <img
-            src={product.imageUrl || FALLBACK_IMAGE}
+          <Image
+            src={imageSrc}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-            onError={(event) => {
-              const image = event.currentTarget;
-              image.onerror = null;
-              image.src = FALLBACK_IMAGE;
-            }}
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover transition duration-300 group-hover:scale-105"
+            onError={() => setImageSrc(FALLBACK_IMAGE)}
           />
           {product.discount ? (
             <span className="absolute left-2 top-2 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">

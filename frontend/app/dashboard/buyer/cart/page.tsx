@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -143,11 +144,13 @@ export default function CartPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="grid grid-cols-[4rem_minmax(0,1fr)] sm:flex sm:items-center gap-3 sm:gap-4 py-3 border-b border-gray-50 last:border-0"
               >
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                  <img
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                  <Image
                     src={item.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=200"}
                     alt={item.product.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(min-width: 640px) 80px, 64px"
+                    className="object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">

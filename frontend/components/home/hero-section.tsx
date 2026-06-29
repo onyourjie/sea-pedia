@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Store, Search, Ship } from "lucide-react";
 import { useState } from "react";
@@ -140,11 +141,13 @@ export function HeroSection() {
           className="hidden md:flex justify-center"
         >
           <div className="relative">
-            <div className="w-80 h-72 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-              <img
+            <div className="relative w-80 h-72 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+              <Image
                 src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80"
                 alt="Maritime products"
-                className="w-full h-full object-cover"
+                fill
+                sizes="320px"
+                className="object-cover"
               />
             </div>
             {stats && stats.completedOrders > 0 && (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Eye, Package } from "lucide-react";
@@ -74,11 +75,13 @@ export default function AdminProductsPage() {
                   <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
                     <td data-label="Produk" className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                          <img
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                          <Image
                             src={p.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=120"}
                             alt={p.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="40px"
+                            className="object-cover"
                           />
                         </div>
                         <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>

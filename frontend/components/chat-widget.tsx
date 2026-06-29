@@ -2,11 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Bot } from "lucide-react";
+import { isAxiosError } from "axios";
 import api from "@/lib/api";
 
 interface Message {
   role: "user" | "model";
   content: string;
+}
+
+interface ChatErrorResponse {
+  message?: string;
 }
 
 const WELCOME: Message = {
@@ -91,10 +96,10 @@ export function ChatWidget() {
       const history = next.slice(1, -1);
       const { data } = await api.post("/chat", { message, history });
       setMessages([...next, { role: "model", content: data.reply }]);
-    } catch (err: any) {
-      const errMsg =
-        err?.response?.data?.message ||
-        "Maaf, terjadi kesalahan. Silakan coba lagi.";
+    } catch (err: unknown) {
+      const errMsg = isAxiosError<ChatErrorResponse>(err)
+        ? err.response?.data?.message || "Maaf, terjadi kesalahan. Silakan coba lagi."
+        : "Maaf, terjadi kesalahan. Silakan coba lagi.";
       setMessages([...next, { role: "model", content: errMsg }]);
     } finally {
       setLoading(false);

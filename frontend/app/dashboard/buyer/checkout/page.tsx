@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -294,8 +295,14 @@ export default function CheckoutPage() {
               const hasDiscount = discountPct > 0;
               return (
                 <div key={i.id} className="flex items-center gap-2 text-sm">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-                    <img src={i.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=80"} alt="" className="w-full h-full object-cover" />
+                  <div className="relative w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
+                    <Image
+                      src={i.product.imageUrl || "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=80"}
+                      alt=""
+                      fill
+                      sizes="40px"
+                      className="object-cover"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-700 line-clamp-1">{i.product.name}</p>
