@@ -20,6 +20,8 @@ import { AdminModule } from './admin/admin.module';
 import { ReviewModule } from './review/review.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProductReviewModule } from './product-review/product-review.module';
+import { ChatModule } from './chat/chat.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { ProductReviewModule } from './product-review/product-review.module';
     ReviewModule,
     PaymentModule,
     ProductReviewModule,
+    ChatModule,
+    EventsModule,
   ],
   controllers: [AppController, StatsController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
