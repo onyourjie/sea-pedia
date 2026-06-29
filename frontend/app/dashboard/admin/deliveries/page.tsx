@@ -1,9 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Truck } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+
+const LIMIT = 20;
 
 interface AdminDelivery {
   id: string;
@@ -27,9 +31,12 @@ function formatPrice(p: number) {
 }
 
 export default function AdminDeliveriesPage() {
+  const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery<{ data: AdminDelivery[]; total: number }>({
-    queryKey: ["admin-deliveries"],
-    queryFn: () => api.get("/admin/deliveries?page=1&limit=100").then((r) => r.data),
+    queryKey: ["admin-deliveries", page],
+    queryFn: () => api.get(`/admin/deliveries?page=${page}&limit=${LIMIT}`).then((r) => r.data),
+    placeholderData: keepPreviousData,
   });
 
   const deliveries = data?.data || [];
@@ -87,6 +94,8 @@ export default function AdminDeliveriesPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} total={data?.total ?? 0} limit={LIMIT} onPageChange={setPage} accent="bg-purple-600" />
     </div>
   );
 }

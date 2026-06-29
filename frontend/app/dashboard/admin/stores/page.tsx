@@ -1,10 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Store } from "lucide-react";
 import api from "@/lib/api";
 import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+
+const LIMIT = 20;
 
 interface AdminStore {
   id: string;
@@ -15,9 +19,12 @@ interface AdminStore {
 }
 
 export default function AdminStoresPage() {
+  const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery<{ data: AdminStore[]; total: number }>({
-    queryKey: ["admin-stores"],
-    queryFn: () => api.get("/stores?page=1&limit=100").then((r) => r.data),
+    queryKey: ["admin-stores", page],
+    queryFn: () => api.get(`/stores?page=${page}&limit=${LIMIT}`).then((r) => r.data),
+    placeholderData: keepPreviousData,
   });
 
   const stores = data?.data || [];
@@ -72,6 +79,8 @@ export default function AdminStoresPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} total={data?.total ?? 0} limit={LIMIT} onPageChange={setPage} accent="bg-purple-600" />
     </div>
   );
 }

@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Eye, Package } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+
+const LIMIT = 20;
 
 interface AdminProduct {
   id: string;
@@ -23,9 +27,12 @@ function formatPrice(p: number) {
 }
 
 export default function AdminProductsPage() {
+  const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery<{ data: AdminProduct[]; total: number }>({
-    queryKey: ["admin-products"],
-    queryFn: () => api.get("/products?page=1&limit=100").then((r) => r.data),
+    queryKey: ["admin-products", page],
+    queryFn: () => api.get(`/products?page=${page}&limit=${LIMIT}`).then((r) => r.data),
+    placeholderData: keepPreviousData,
   });
 
   const products = data?.data || [];
@@ -110,6 +117,8 @@ export default function AdminProductsPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} total={data?.total ?? 0} limit={LIMIT} onPageChange={setPage} accent="bg-purple-600" />
     </div>
   );
 }

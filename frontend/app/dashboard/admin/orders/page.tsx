@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { ClipboardList } from "lucide-react";
 import api from "@/lib/api";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+
+const LIMIT = 20;
 
 interface AdminOrder {
   id: string;
@@ -33,13 +36,23 @@ function formatPrice(p: number) {
 
 export default function AdminOrdersPage() {
   const [filter, setFilter] = useState("Semua");
+  const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery<{ data: AdminOrder[]; total: number }>({
-    queryKey: ["admin-orders"],
-    queryFn: () => api.get("/admin/orders?page=1&limit=100").then((r) => r.data),
+    queryKey: ["admin-orders", filter, page],
+    queryFn: () => {
+      const statusParam = filter === "Semua" ? "" : `&status=${filter}`;
+      return api.get(`/admin/orders?page=${page}&limit=${LIMIT}${statusParam}`).then((r) => r.data);
+    },
+    placeholderData: keepPreviousData,
   });
 
-  const orders = (data?.data || []).filter((o) => filter === "Semua" || o.status === filter);
+  const orders = data?.data || [];
+
+  const changeFilter = (f: string) => {
+    setFilter(f);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -53,7 +66,7 @@ export default function AdminOrdersPage() {
           {FILTERS.map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => changeFilter(f)}
               className={`text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap transition ${
                 filter === f ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
@@ -115,6 +128,8 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} total={data?.total ?? 0} limit={LIMIT} onPageChange={setPage} accent="bg-purple-600" />
     </div>
   );
 }

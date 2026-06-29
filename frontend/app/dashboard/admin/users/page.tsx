@@ -1,10 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import api from "@/lib/api";
 import { DiceBearAvatar } from "@/components/ui/dicebear-avatar";
 import { SkeletonTable } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
+
+const LIMIT = 20;
 
 interface AdminUser {
   id: string;
@@ -22,9 +26,12 @@ const ROLE_COLOR: Record<string, string> = {
 };
 
 export default function AdminUsersPage() {
+  const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery<{ data: AdminUser[]; total: number }>({
-    queryKey: ["admin-users"],
-    queryFn: () => api.get("/admin/users?page=1&limit=100").then((r) => r.data),
+    queryKey: ["admin-users", page],
+    queryFn: () => api.get(`/admin/users?page=${page}&limit=${LIMIT}`).then((r) => r.data),
+    placeholderData: keepPreviousData,
   });
 
   const users = data?.data || [];
@@ -83,6 +90,8 @@ export default function AdminUsersPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} total={data?.total ?? 0} limit={LIMIT} onPageChange={setPage} accent="bg-purple-600" />
     </div>
   );
 }
