@@ -97,6 +97,7 @@ model Product {
   description    String?
   price          Decimal  @db.Decimal(15, 2)
   stock          Int      @default(0)
+  category       String?
   imageUrl       String?
   imageUrls      String[] @default([])
   discount       Int      @default(0)

@@ -417,6 +417,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Masker Selam Scubapro Ghost - Black Series',
+        category: 'jasa-selam',
         description: 'Masker selam premium dengan lensa tempered ultra-clear untuk pandangan bawah air tajam tanpa distorsi. Teknologi Trufit Generasi Kedua dengan silikon ganda.',
         price: 1250000,
         stock: 25,
@@ -432,6 +433,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Fin Diving Cressi Frog Plus - Yellow High Visibility',
+        category: 'jasa-selam',
         description: 'Fin selam Cressi dengan desain ergonomis untuk efisiensi tendangan maksimal. Warna kuning high visibility untuk keamanan di laut.',
         price: 850000,
         stock: 40,
@@ -446,6 +448,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'BCD Aqualung Pro HD - Weight Integrated',
+        category: 'jasa-selam',
         description: 'BCD profesional dengan sistem integrasi pemberat, bahan durable untuk kondisi laut keras. Cocok untuk penyelam profesional maupun rekreasi.',
         price: 6500000,
         stock: 15,
@@ -460,6 +463,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Regulator Set Apeks XTX50 + DST',
+        category: 'jasa-selam',
         description: 'Set regulator premium Apeks dengan teknologi terbaru untuk pernapasan mudah di kedalaman. Termasuk dive computer DST.',
         price: 9850000,
         stock: 10,
@@ -474,6 +478,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Wetsuit Mares Rover 3mm Full Body',
+        category: 'jasa-selam',
         description: 'Wetsuit full body 3mm untuk penyelaman tropis. Material neoprene berkualitas tinggi dengan jahitan flatlock untuk kenyamanan maksimal.',
         price: 2100000,
         stock: 20,
@@ -487,6 +492,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Senter Selam Bigblue AL1200NP - 1200 Lumens',
+        category: 'jasa-selam',
         description: 'Senter selam profesional 1200 lumens dengan sudut sinar lebar. Tahan air hingga 100 meter, baterai lithium tahan lama.',
         price: 1850000,
         stock: 30,
@@ -496,6 +502,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'Seal Kit Tabung Selam High Pressure',
+        category: 'suku-cadang',
         description: 'Paket seal kit untuk servis valve tabung selam high pressure. Cocok untuk penggantian seal berkala agar tabung tetap rapat, aman, dan minim risiko bocor saat pengisian.',
         price: 285000,
         stock: 45,
@@ -512,6 +519,7 @@ async function main() {
       {
         storeId: store.id,
         name: 'O-Ring Regulator Selam NBR Service Pack',
+        category: 'suku-cadang',
         description: 'Set O-Ring NBR untuk perawatan first stage dan second stage regulator selam. Membantu menjaga tekanan stabil dan mencegah rembes pada sambungan regulator.',
         price: 175000,
         stock: 70,
@@ -554,6 +562,7 @@ async function main() {
       {
         storeId: store2.id,
         name: 'Udang Vannamei Super Ekspor 1kg',
+        category: 'seafood',
         description: 'Udang vannamei segar kualitas ekspor, dipanen langsung dari tambak terpercaya. Ukuran 30-40 ekor/kg.',
         price: 125000,
         stock: 100,
@@ -562,6 +571,7 @@ async function main() {
       {
         storeId: store2.id,
         name: 'Ikan Kerapu Merah Segar 1kg',
+        category: 'seafood',
         description: 'Ikan kerapu merah segar pilihan dari perairan Sulawesi. Cocok untuk dibakar, dikukus, atau digoreng.',
         price: 185000,
         stock: 50,
@@ -570,6 +580,7 @@ async function main() {
       {
         storeId: store2.id,
         name: 'Cumi-cumi Segar 1kg',
+        category: 'seafood',
         description: 'Cumi-cumi segar berkualitas tinggi, langsung dari nelayan lokal. Tekstur kenyal dan rasa laut yang autentik.',
         price: 95000,
         stock: 80,
@@ -605,6 +616,7 @@ async function main() {
       {
         storeId: store3.id,
         name: 'Set Pancing Spinning Carbon 2.1m',
+        category: 'pancing',
         description: 'Set lengkap joran spinning karbon ringan 2.1m dengan reel berkualitas. Ideal untuk mancing di laut maupun sungai.',
         price: 1450000,
         stock: 35,
@@ -613,6 +625,7 @@ async function main() {
       {
         storeId: store3.id,
         name: 'Jaring Ikan Nilon Premium 100m',
+        category: 'pancing',
         description: 'Jaring ikan nilon kuat dan tahan lama 100 meter. Mata jaring 2cm, cocok untuk berbagai jenis ikan.',
         price: 350000,
         stock: 60,
@@ -764,6 +777,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Mesin Tempel Kapal Yamaha 15HP 2-Stroke',
+        category: 'kapal',
         description: 'Mesin tempel kapal Yamaha 15HP 2-stroke bertenaga dan irit bahan bakar. Cocok untuk kapal nelayan 5-7 meter.',
         price: 24500000,
         stock: 5,
@@ -772,6 +786,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Perahu Karet Inflatable Boat 4 Orang',
+        category: 'kapal',
         description: 'Perahu karet inflatable kapasitas 4 orang, material PVC tebal tahan abrasi. Lengkap dengan pompa dan dayung.',
         price: 5800000,
         stock: 8,
@@ -780,6 +795,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Fuel Filter Mercury Outboard Original',
+        category: 'suku-cadang',
         description: 'Fuel filter original untuk mesin tempel Mercury. Menyaring kotoran dan air dari bahan bakar agar suplai bensin lebih bersih, pembakaran stabil, dan mesin kapal lebih awet.',
         price: 320000,
         stock: 36,
@@ -796,6 +812,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Propeller Yamaha 15HP Aluminium 9 1/4 x 11',
+        category: 'suku-cadang',
         description: 'Propeller aluminium untuk mesin tempel Yamaha 15HP. Pitch 11 cocok untuk kapal nelayan ringan yang butuh akselerasi responsif dan dorongan stabil di perairan pesisir.',
         price: 1250000,
         stock: 18,
@@ -812,6 +829,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Impeller Suzuki DF40 Water Pump Kit',
+        category: 'suku-cadang',
         description: 'Impeller water pump kit untuk Suzuki DF40. Sparepart penting untuk menjaga sirkulasi pendingin mesin tetap lancar dan mencegah overheat saat perjalanan laut panjang.',
         price: 675000,
         stock: 24,
@@ -827,6 +845,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Garmin Striker Vivid 5CV Fishfinder GPS',
+        category: 'navigasi',
         description: 'Fishfinder GPS Garmin dengan layar warna 5 inch dan sonar CHIRP ClearVu. Membantu membaca kontur dasar laut, titik ikan, kedalaman, dan waypoint favorit secara akurat.',
         price: 4850000,
         stock: 12,
@@ -843,6 +862,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Icom IC-M25 VHF Marine Radio',
+        category: 'navigasi',
         description: 'Radio komunikasi VHF marine Icom IC-M25 yang ringan, waterproof, dan mudah dibawa. Ideal untuk koordinasi kapal, komunikasi darurat, dan aktivitas pelayaran harian.',
         price: 2950000,
         stock: 16,
@@ -858,6 +878,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Kompas Silva Marine 70P Bracket Mount',
+        category: 'navigasi',
         description: 'Kompas kapal Silva Marine 70P dengan bracket mount stabil untuk dashboard atau bulkhead. Bacaan arah jelas dan tetap mudah dipantau saat kapal bergerak.',
         price: 980000,
         stock: 22,
@@ -873,6 +894,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Marine Radar 24nm Compact Radome',
+        category: 'navigasi',
         description: 'Marine radar compact radome untuk membantu pemantauan kapal sekitar, buoy, garis pantai, dan kondisi visibilitas rendah. Cocok untuk kapal operasional dan perjalanan malam.',
         price: 18450000,
         stock: 6,
@@ -889,6 +911,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Peta Laut Waterproof Indonesia Barat',
+        category: 'navigasi',
         description: 'Peta laut waterproof untuk area Indonesia bagian barat. Dicetak tahan air dengan penanda jalur pelayaran, pelabuhan, area dangkal, dan titik referensi navigasi.',
         price: 245000,
         stock: 50,
@@ -904,6 +927,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Red Hand Flare Marine SOLAS 60 Detik',
+        category: 'keselamatan',
         description: 'Red hand flare marine untuk sinyal darurat visual di laut. Nyala merah terang membantu kapal penolong menemukan posisi saat kondisi darurat atau visibilitas rendah.',
         price: 425000,
         stock: 30,
@@ -919,6 +943,7 @@ async function main() {
       {
         storeId: multiStore.id,
         name: 'Waterproof Emergency Strobe Light LED',
+        category: 'keselamatan',
         description: 'Lampu strobe darurat waterproof dengan LED intensitas tinggi. Dapat dipasang pada life jacket, tas keselamatan, atau dek kapal untuk penanda posisi saat malam hari.',
         price: 360000,
         stock: 42,

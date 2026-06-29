@@ -3,31 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
 import { OrderStatus } from '@prisma/client';
 
-const CATEGORY_TERMS: Record<string, string[]> = {
-  seafood: ['seafood', 'ikan', 'udang', 'cumi', 'kerapu', 'hasil laut'],
-  pancing: ['pancing', 'joran', 'reel', 'jaring'],
-  kapal: ['kapal', 'boat', 'perahu'],
-  'suku-cadang': [
-    'suku cadang',
-    'sparepart',
-    'mesin',
-    'baling',
-    'propeller',
-    'onderdil',
-    'filter',
-    'impeller',
-    'seal kit',
-    'o-ring',
-  ],
-  navigasi: ['navigasi', 'gps', 'kompas', 'radar', 'radio', 'vhf', 'peta laut', 'chartplotter'],
-  keselamatan: ['keselamatan', 'pelampung', 'life jacket', 'jaket', 'safety', 'flare', 'strobe', 'emergency'],
-  'jasa-selam': ['jasa selam', 'selam', 'diving'],
-};
-
-const CATEGORY_EXCLUDED_TERMS: Record<string, string[]> = {
-  seafood: ['jaring', 'pancing', 'joran', 'reel'],
-};
-
 @Injectable()
 export class ProductService {
   constructor(private prisma: PrismaService) {}
@@ -47,10 +22,8 @@ export class ProductService {
     const where: any = { isActive: true };
     const textFilters: any[] = [];
     if (search) textFilters.push(this.textSearchFilter([search]));
-    if (category && CATEGORY_TERMS[category]) {
-      textFilters.push(this.categorySearchFilter(category));
-    }
     if (textFilters.length > 0) where.AND = textFilters;
+    if (category) where.category = category;
     if (storeId) where.storeId = storeId;
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
@@ -88,14 +61,6 @@ export class ProductService {
         { name: { contains: term, mode: 'insensitive' } },
         { description: { contains: term, mode: 'insensitive' } },
       ]),
-    };
-  }
-
-  private categorySearchFilter(category: string) {
-    const excludedTerms = CATEGORY_EXCLUDED_TERMS[category] ?? [];
-    return {
-      ...this.textSearchFilter(CATEGORY_TERMS[category]),
-      ...(excludedTerms.length > 0 ? { NOT: this.textSearchFilter(excludedTerms) } : {}),
     };
   }
 

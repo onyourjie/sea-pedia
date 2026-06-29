@@ -9,8 +9,19 @@ import {
   IsInt,
   IsObject,
   ArrayMaxSize,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export const PRODUCT_CATEGORIES = [
+  'seafood',
+  'pancing',
+  'kapal',
+  'suku-cadang',
+  'navigasi',
+  'keselamatan',
+  'jasa-selam',
+] as const;
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Sepatu Lari', maxLength: 200 })
@@ -32,6 +43,14 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   stock: number;
+
+  @ApiPropertyOptional({
+    description: 'Kategori produk',
+    enum: PRODUCT_CATEGORIES,
+  })
+  @IsOptional()
+  @IsIn(PRODUCT_CATEGORIES)
+  category?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -92,6 +111,11 @@ export class UpdateProductDto {
   @IsNumber()
   @Min(0)
   stock?: number;
+
+  @ApiPropertyOptional({ enum: PRODUCT_CATEGORIES })
+  @IsOptional()
+  @IsIn(PRODUCT_CATEGORIES)
+  category?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
