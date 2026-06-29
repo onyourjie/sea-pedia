@@ -190,6 +190,7 @@ export function Navbar() {
             className="md:hidden border-t border-gray-100 bg-white px-4 pb-4 flex flex-col gap-2"
           >
             <div className="flex flex-wrap gap-x-3 gap-y-2 py-2 border-b border-gray-100">
+              <Link href="/products" className="text-xs font-medium text-yellow-600 hover:text-yellow-700 flex items-center gap-1 transition"><ShoppingBag className="w-3 h-3 text-yellow-500" /> Semua Produk</Link>
               <Link href="/stores" className="text-xs font-medium text-cyan-600 hover:text-cyan-700 flex items-center gap-1 transition"><Store className="w-3 h-3 text-cyan-500" /> Semua Toko</Link>
               <Link href="/products?sort=newest" className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition"><Box className="w-3 h-3 text-blue-500" /> Baru</Link>
               <Link href="/products?deals=1" className="text-xs font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1 transition"><Flame className="w-3 h-3 text-orange-500" /> Hot Deals</Link>

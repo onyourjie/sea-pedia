@@ -11,12 +11,23 @@ import { SkeletonTable } from "@/components/ui/skeleton";
 
 interface SpecItem { key: string; value: string; }
 
+const CATEGORIES = [
+  { label: "Seafood", value: "seafood" },
+  { label: "Alat Pancing", value: "pancing" },
+  { label: "Kapal & Boat", value: "kapal" },
+  { label: "Suku Cadang", value: "suku-cadang" },
+  { label: "Navigasi", value: "navigasi" },
+  { label: "Keselamatan", value: "keselamatan" },
+  { label: "Jasa Selam", value: "jasa-selam" },
+];
+
 interface Product {
   id: string;
   name: string;
   description?: string;
   price: string;
   stock: number;
+  category?: string;
   imageUrl?: string;
   imageUrls?: string[];
   discount?: number;
@@ -29,6 +40,7 @@ interface FormState {
   description: string;
   price: number;
   stock: number;
+  category: string;
   imageUrl: string;
   imageUrls: string[];
   discount: number;
@@ -40,6 +52,7 @@ const empty: FormState = {
   description: "",
   price: 0,
   stock: 0,
+  category: "",
   imageUrl: "",
   imageUrls: [],
   discount: 0,
@@ -68,6 +81,7 @@ function buildPayload(form: FormState) {
     description: form.description.trim(),
     price: form.price,
     stock: form.stock,
+    category: form.category || undefined,
     imageUrl: form.imageUrl.trim() || undefined,
     imageUrls: form.imageUrls.map((u) => u.trim()).filter(Boolean),
     discount: form.discount,
@@ -134,6 +148,7 @@ export default function SellerProductsPage() {
       description: p.description || "",
       price: Number(p.price),
       stock: p.stock,
+      category: p.category || "",
       imageUrl: p.imageUrl || "",
       imageUrls: p.imageUrls || [],
       discount: p.discount || 0,
@@ -254,6 +269,19 @@ export default function SellerProductsPage() {
                 required
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">Kategori</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-orange-400 bg-white"
+              >
+                <option value="">Tanpa kategori</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
