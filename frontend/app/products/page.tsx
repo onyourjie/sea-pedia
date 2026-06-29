@@ -59,12 +59,13 @@ function formatPrice(price: number) {
 
 const CATEGORIES = [
   { label: "Semua", value: "" },
-  { label: "Ikan Segar", value: "ikan" },
+  { label: "Seafood", value: "seafood" },
   { label: "Alat Pancing", value: "pancing" },
   { label: "Kapal & Boat", value: "kapal" },
   { label: "Suku Cadang", value: "suku-cadang" },
   { label: "Navigasi", value: "navigasi" },
   { label: "Keselamatan", value: "keselamatan" },
+  { label: "Jasa Selam", value: "jasa-selam" },
 ];
 
 const SORTS = [
@@ -295,6 +296,7 @@ function ProductsPageInner() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "newest");
   const [page, setPage] = useState(1);
   const [minPrice, setMinPrice] = useState("");
@@ -309,18 +311,21 @@ function ProductsPageInner() {
 
   useEffect(() => {
     const s = searchParams.get("search") || "";
+    const c = searchParams.get("category") || "";
     const so = searchParams.get("sort") || "newest";
     setSearch(s);
     setSearchInput(s);
+    setCategory(c);
     setSort(so);
     setPage(1);
   }, [searchParams]);
 
   const { data, isLoading } = useQuery<ProductsResponse>({
-    queryKey: ["products", search, sort, page, minPrice, maxPrice, isDealsPage],
+    queryKey: ["products", search, category, sort, page, minPrice, maxPrice, isDealsPage],
     queryFn: () => {
       let url = `/products?page=${page}&limit=${limit}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (category) url += `&category=${encodeURIComponent(category)}`;
       if (sort) url += `&sort=${sort}`;
       if (minPrice) url += `&minPrice=${minPrice}`;
       if (maxPrice) url += `&maxPrice=${maxPrice}`;
@@ -377,6 +382,7 @@ function ProductsPageInner() {
   const resetFilters = () => {
     setSearch("");
     setSearchInput("");
+    setCategory("");
     setMinPrice("");
     setMaxPrice("");
     setMinPriceInput("");
@@ -416,8 +422,8 @@ function ProductsPageInner() {
                 {CATEGORIES.map((cat) => (
                   <li key={cat.value}>
                     <button
-                      onClick={() => { setSearch(cat.value); setPage(1); }}
-                      className={`w-full text-left text-sm px-2 py-1.5 rounded-lg transition ${search === cat.value ? "bg-cyan-50 text-cyan-600 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
+                      onClick={() => { setCategory(cat.value); setPage(1); }}
+                      className={`w-full text-left text-sm px-2 py-1.5 rounded-lg transition ${category === cat.value ? "bg-cyan-50 text-cyan-600 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
                     >
                       {cat.label}
                     </button>
@@ -472,6 +478,12 @@ function ProductsPageInner() {
             <Link href="/" className="hover:text-cyan-500">Beranda</Link>
             <span>/</span>
             <span className="text-gray-600">{isOffersPage ? "Voucher & Promo" : "Produk"}</span>
+            {!isOffersPage && category && (
+              <>
+                <span>/</span>
+                <span className="text-gray-600">{CATEGORIES.find((cat) => cat.value === category)?.label}</span>
+              </>
+            )}
             {!isOffersPage && search && (
               <>
                 <span>/</span>
@@ -489,6 +501,8 @@ function ProductsPageInner() {
                   ? "Voucher & Promo"
                   : search
                     ? `Hasil: "${search}"`
+                    : category
+                      ? CATEGORIES.find((cat) => cat.value === category)?.label || "Produk"
                     : isDealsPage
                       ? "Hot Deals"
                       : "Semua Produk"}

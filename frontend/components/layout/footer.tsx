@@ -9,6 +9,12 @@ const SOCIAL = [
   { icon: "mdi:youtube", href: "#" },
 ];
 
+const POPULAR_CATEGORIES = [
+  { label: "Seafood", value: "seafood" },
+  { label: "Alat Pancing", value: "pancing" },
+  { label: "Suku Cadang Kapal", value: "suku-cadang" },
+];
+
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
@@ -34,8 +40,8 @@ export function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Kategori Populer</h4>
             <ul className="space-y-2 text-sm">
-              {["Ikan Segar", "Alat Pancing", "Suku Cadang Kapal", "Logistik Maritim"].map((item) => (
-                <li key={item}><Link href="/products" className="hover:text-cyan-400 transition">{item}</Link></li>
+              {POPULAR_CATEGORIES.map((item) => (
+                <li key={item.value}><Link href={`/products?category=${item.value}`} className="hover:text-cyan-400 transition">{item.label}</Link></li>
               ))}
             </ul>
           </div>

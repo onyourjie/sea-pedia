@@ -112,6 +112,42 @@ const PRODUCT_IMAGES: Record<string, string[]> = {
   'Udang Vannamei Super Ekspor 1kg': [
     'https://res.cloudinary.com/deady5xap/image/upload/v1782471530/Udang_Vannamei_Super_Ekspor_1kg_octgmt.png',
   ],
+  'Garmin Striker Vivid 5CV Fishfinder GPS': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714905/Garmin_Striker_Vivid_5CV_nasbap.png',
+  ],
+  'Fuel Filter Mercury Outboard Original': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714905/Fuel_Filter_Mercury_owfu1e.png',
+  ],
+  'Propeller Yamaha 15HP Aluminium 9 1/4 x 11': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714911/Propeller_Yamaha_15HP_ernu4w.png',
+  ],
+  'Impeller Suzuki DF40 Water Pump Kit': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714916/Impeller_Suzuki_DF40_u977mg.png',
+  ],
+  'Icom IC-M25 VHF Marine Radio': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714916/Icom_IC-M25_VHF_Radio_xgnula.png',
+  ],
+  'Kompas Silva Marine 70P Bracket Mount': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714918/Kompas_Silva_Marine_jobxe3.png',
+  ],
+  'Marine Radar 24nm Compact Radome': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714921/Marine_Radar_ulleqk.png',
+  ],
+  'Seal Kit Tabung Selam High Pressure': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714930/Seal_Kit_Tabung_Selam_ahl479.png',
+  ],
+  'O-Ring Regulator Selam NBR Service Pack': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714936/O-Ring_Regulator_Selam_qk5kap.png',
+  ],
+  'Peta Laut Waterproof Indonesia Barat': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782714938/Peta_Laut_Waterproof_ll54oe.png',
+  ],
+  'Red Hand Flare Marine SOLAS 60 Detik': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782715568/Red_Hand_Flare_Marine_oymedr.png',
+  ],
+  'Waterproof Emergency Strobe Light LED': [
+    'https://res.cloudinary.com/deady5xap/image/upload/v1782715646/Waterproof_Emergency_Strobe_Light_t413pi.png',
+  ],
 };
 
 function imageData(name: string) {
@@ -457,6 +493,37 @@ async function main() {
         discount: 20,
         ...imageData('Senter Selam Bigblue AL1200NP - 1200 Lumens'),
       },
+      {
+        storeId: store.id,
+        name: 'Seal Kit Tabung Selam High Pressure',
+        description: 'Paket seal kit untuk servis valve tabung selam high pressure. Cocok untuk penggantian seal berkala agar tabung tetap rapat, aman, dan minim risiko bocor saat pengisian.',
+        price: 285000,
+        stock: 45,
+        discount: 5,
+        ...imageData('Seal Kit Tabung Selam High Pressure'),
+        specifications: {
+          Kompatibilitas: 'Valve tabung selam DIN/Yoke umum',
+          Material: 'NBR dan polyurethane marine grade',
+          Isi: 'Seal, washer, dan backup ring',
+          Penggunaan: 'Servis berkala tabung selam',
+          Rekomendasi: 'Dipakai oleh teknisi bersertifikat',
+        },
+      },
+      {
+        storeId: store.id,
+        name: 'O-Ring Regulator Selam NBR Service Pack',
+        description: 'Set O-Ring NBR untuk perawatan first stage dan second stage regulator selam. Membantu menjaga tekanan stabil dan mencegah rembes pada sambungan regulator.',
+        price: 175000,
+        stock: 70,
+        ...imageData('O-Ring Regulator Selam NBR Service Pack'),
+        specifications: {
+          Material: 'NBR 90 shore',
+          Isi: '24 pcs berbagai ukuran',
+          Kompatibilitas: 'Regulator selam standar rekreasi',
+          Ketahanan: 'Tahan air laut dan tekanan tinggi',
+          Penyimpanan: 'Kotak organizer tersegel',
+        },
+      },
     ],
   });
   console.log('Seller + store + products created:', sellerUser.username);
@@ -710,6 +777,161 @@ async function main() {
         stock: 8,
         ...imageData('Perahu Karet Inflatable Boat 4 Orang'),
       },
+      {
+        storeId: multiStore.id,
+        name: 'Fuel Filter Mercury Outboard Original',
+        description: 'Fuel filter original untuk mesin tempel Mercury. Menyaring kotoran dan air dari bahan bakar agar suplai bensin lebih bersih, pembakaran stabil, dan mesin kapal lebih awet.',
+        price: 320000,
+        stock: 36,
+        discount: 7,
+        ...imageData('Fuel Filter Mercury Outboard Original'),
+        specifications: {
+          Merek: 'Mercury',
+          Tipe: 'Inline fuel filter',
+          Kompatibilitas: 'Outboard Mercury 4-stroke dan 2-stroke tertentu',
+          Fungsi: 'Menyaring partikel dan kandungan air',
+          IntervalGanti: '100 jam operasi atau sesuai manual mesin',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Propeller Yamaha 15HP Aluminium 9 1/4 x 11',
+        description: 'Propeller aluminium untuk mesin tempel Yamaha 15HP. Pitch 11 cocok untuk kapal nelayan ringan yang butuh akselerasi responsif dan dorongan stabil di perairan pesisir.',
+        price: 1250000,
+        stock: 18,
+        discount: 10,
+        ...imageData('Propeller Yamaha 15HP Aluminium 9 1/4 x 11'),
+        specifications: {
+          Merek: 'Yamaha compatible',
+          Material: 'Aluminium alloy',
+          Diameter: '9 1/4 inch',
+          Pitch: '11 inch',
+          Spline: 'Standar Yamaha 15HP',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Impeller Suzuki DF40 Water Pump Kit',
+        description: 'Impeller water pump kit untuk Suzuki DF40. Sparepart penting untuk menjaga sirkulasi pendingin mesin tetap lancar dan mencegah overheat saat perjalanan laut panjang.',
+        price: 675000,
+        stock: 24,
+        ...imageData('Impeller Suzuki DF40 Water Pump Kit'),
+        specifications: {
+          Kompatibilitas: 'Suzuki DF40',
+          Material: 'Rubber marine grade',
+          Isi: 'Impeller dan gasket kit',
+          Fungsi: 'Sirkulasi air pendingin mesin',
+          RekomendasiGanti: 'Setiap 12 bulan atau 200 jam operasi',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Garmin Striker Vivid 5CV Fishfinder GPS',
+        description: 'Fishfinder GPS Garmin dengan layar warna 5 inch dan sonar CHIRP ClearVu. Membantu membaca kontur dasar laut, titik ikan, kedalaman, dan waypoint favorit secara akurat.',
+        price: 4850000,
+        stock: 12,
+        discount: 8,
+        ...imageData('Garmin Striker Vivid 5CV Fishfinder GPS'),
+        specifications: {
+          Layar: '5 inch color display',
+          Sonar: 'CHIRP dan ClearVu',
+          GPS: 'Built-in high sensitivity GPS',
+          Fitur: 'Waypoint, depth alarm, fish symbol ID',
+          Daya: '12V DC kapal',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Icom IC-M25 VHF Marine Radio',
+        description: 'Radio komunikasi VHF marine Icom IC-M25 yang ringan, waterproof, dan mudah dibawa. Ideal untuk koordinasi kapal, komunikasi darurat, dan aktivitas pelayaran harian.',
+        price: 2950000,
+        stock: 16,
+        ...imageData('Icom IC-M25 VHF Marine Radio'),
+        specifications: {
+          Frekuensi: 'VHF marine band',
+          Waterproof: 'IPX7',
+          DayaPancar: '5W/1W',
+          Baterai: 'Lithium-ion rechargeable',
+          Fitur: 'Float n flash, channel scan, weather channel',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Kompas Silva Marine 70P Bracket Mount',
+        description: 'Kompas kapal Silva Marine 70P dengan bracket mount stabil untuk dashboard atau bulkhead. Bacaan arah jelas dan tetap mudah dipantau saat kapal bergerak.',
+        price: 980000,
+        stock: 22,
+        ...imageData('Kompas Silva Marine 70P Bracket Mount'),
+        specifications: {
+          Tipe: 'Bracket mount compass',
+          Pencahayaan: 'Built-in illumination',
+          Kompensasi: 'Adjustable deviation compensator',
+          Mounting: 'Dashboard atau bulkhead',
+          Penggunaan: 'Kapal kecil, speedboat, perahu nelayan',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Marine Radar 24nm Compact Radome',
+        description: 'Marine radar compact radome untuk membantu pemantauan kapal sekitar, buoy, garis pantai, dan kondisi visibilitas rendah. Cocok untuk kapal operasional dan perjalanan malam.',
+        price: 18450000,
+        stock: 6,
+        discount: 6,
+        ...imageData('Marine Radar 24nm Compact Radome'),
+        specifications: {
+          Jangkauan: 'Hingga 24 nautical miles',
+          Antena: 'Compact radome',
+          Daya: '12/24V DC',
+          Fitur: 'Target tracking dan guard zone',
+          Aplikasi: 'Navigasi malam dan cuaca berkabut',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Peta Laut Waterproof Indonesia Barat',
+        description: 'Peta laut waterproof untuk area Indonesia bagian barat. Dicetak tahan air dengan penanda jalur pelayaran, pelabuhan, area dangkal, dan titik referensi navigasi.',
+        price: 245000,
+        stock: 50,
+        ...imageData('Peta Laut Waterproof Indonesia Barat'),
+        specifications: {
+          Area: 'Indonesia Barat',
+          Material: 'Synthetic waterproof paper',
+          Skala: 'Regional coastal chart',
+          Fitur: 'Pelabuhan, area dangkal, rambu laut',
+          Ukuran: 'A1 lipat',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Red Hand Flare Marine SOLAS 60 Detik',
+        description: 'Red hand flare marine untuk sinyal darurat visual di laut. Nyala merah terang membantu kapal penolong menemukan posisi saat kondisi darurat atau visibilitas rendah.',
+        price: 425000,
+        stock: 30,
+        ...imageData('Red Hand Flare Marine SOLAS 60 Detik'),
+        specifications: {
+          WarnaSinyal: 'Merah terang',
+          DurasiNyala: 'Sekitar 60 detik',
+          Standar: 'SOLAS marine safety',
+          Penggunaan: 'Sinyal darurat visual',
+          Penyimpanan: 'Tabung tahan lembap',
+        },
+      },
+      {
+        storeId: multiStore.id,
+        name: 'Waterproof Emergency Strobe Light LED',
+        description: 'Lampu strobe darurat waterproof dengan LED intensitas tinggi. Dapat dipasang pada life jacket, tas keselamatan, atau dek kapal untuk penanda posisi saat malam hari.',
+        price: 360000,
+        stock: 42,
+        discount: 5,
+        ...imageData('Waterproof Emergency Strobe Light LED'),
+        specifications: {
+          TipeLampu: 'LED strobe',
+          Waterproof: 'IPX8',
+          Mode: 'Flash dan steady',
+          Baterai: 'Replaceable lithium battery',
+          Mounting: 'Clip untuk life jacket atau deck bag',
+        },
+      },
     ],
   });
   await updateSeedProductImages();
@@ -766,17 +988,30 @@ async function main() {
     const store1Products = await prisma.product.findMany({ where: { storeId: store.id } });
     const store2Products = await prisma.product.findMany({ where: { storeId: store2.id } });
     const store3Products = await prisma.product.findMany({ where: { storeId: store3.id } });
+    const multiStoreProducts = await prisma.product.findMany({ where: { storeId: multiStore.id } });
 
     const masker = byName('Masker Selam', store1Products);
     const fin = byName('Fin Diving', store1Products);
     const senter = byName('Senter Selam', store1Products);
     const wetsuit = byName('Wetsuit', store1Products);
     const bcd = byName('BCD Aqualung', store1Products);
+    const sealKit = byName('Seal Kit Tabung Selam', store1Products);
+    const oRing = byName('O-Ring Regulator Selam', store1Products);
     const udang = byName('Udang Vannamei', store2Products);
     const kerapu = byName('Kerapu', store2Products);
     const cumi = byName('Cumi', store2Products);
     const pancing = byName('Set Pancing', store3Products);
     const jaring = byName('Jaring Ikan', store3Products);
+    const fuelFilter = byName('Fuel Filter Mercury', multiStoreProducts);
+    const propeller = byName('Propeller Yamaha', multiStoreProducts);
+    const impeller = byName('Impeller Suzuki', multiStoreProducts);
+    const garmin = byName('Garmin Striker', multiStoreProducts);
+    const icom = byName('Icom IC-M25', multiStoreProducts);
+    const kompas = byName('Kompas Silva', multiStoreProducts);
+    const radar = byName('Marine Radar', multiStoreProducts);
+    const petaLaut = byName('Peta Laut', multiStoreProducts);
+    const flare = byName('Red Hand Flare', multiStoreProducts);
+    const strobe = byName('Waterproof Emergency Strobe', multiStoreProducts);
 
     const walletEvents: WalletEvent[] = [];
     const buyerLedger = { walletId: buyerWallet.id, payments: 0 };
@@ -902,6 +1137,96 @@ async function main() {
       deliveryMethod: 'INSTANT',
       status: OrderStatus.DIKEMBALIKAN,
       daysAgoPlaced: 5,
+    });
+
+    // 9. Completed spare-part order with detailed reviews (buyer1, multiStore)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store: multiStore,
+      addressId: buyerAddress.id,
+      items: [
+        { product: fuelFilter, quantity: 2 },
+        { product: propeller, quantity: 1 },
+        { product: impeller, quantity: 1 },
+      ],
+      deliveryMethod: 'REGULAR',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver,
+      daysAgoPlaced: 18,
+      reviews: [
+        { rating: 5, comment: 'Fuel filter original, ulir dan dudukannya pas. Mesin tempel jadi lebih stabil di rpm rendah.' },
+        { rating: 5, comment: 'Propeller Yamaha-nya presisi, akselerasi kapal terasa lebih enteng dan tidak getar.' },
+        { rating: 4, comment: 'Impeller sesuai DF40, packing rapi. Setelah diganti suhu mesin lebih aman.' },
+      ],
+    });
+
+    // 10. Completed navigation order with reviews (multiuser buyer, multiStore)
+    await seedOrder(prisma, walletEvents, {
+      ledger: multiLedger,
+      buyerId: multiBuyer.id,
+      store: multiStore,
+      addressId: multiAddress.id,
+      items: [
+        { product: garmin, quantity: 1 },
+        { product: icom, quantity: 1 },
+        { product: kompas, quantity: 1 },
+        { product: radar, quantity: 1 },
+        { product: petaLaut, quantity: 2 },
+      ],
+      deliveryMethod: 'NEXT_DAY',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver,
+      promo: promo20,
+      daysAgoPlaced: 10,
+      reviews: [
+        { rating: 5, comment: 'Garmin Striker Vivid jelas banget buat baca kedalaman dan waypoint spot mancing.' },
+        { rating: 5, comment: 'Radio VHF Icom ringan, suara bersih, dan baterainya awet untuk patroli harian.' },
+        { rating: 4, comment: 'Kompas Silva mudah dibaca, bracket kokoh walau kapal kena ombak.' },
+        { rating: 5, comment: 'Radar sangat membantu saat berangkat subuh. Target kapal kecil tetap kebaca.' },
+        { rating: 4, comment: 'Peta laut waterproof tebal dan informasinya detail untuk rute pesisir.' },
+      ],
+    });
+
+    // 11. Completed safety equipment order with reviews (buyer1, multiStore)
+    await seedOrder(prisma, walletEvents, {
+      ledger: buyerLedger,
+      buyerId: buyer.id,
+      store: multiStore,
+      addressId: buyerAddress2.id,
+      items: [
+        { product: flare, quantity: 4 },
+        { product: strobe, quantity: 3 },
+      ],
+      deliveryMethod: 'INSTANT',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver: multiDriver,
+      voucher: voucherFlat50k,
+      daysAgoPlaced: 6,
+      reviews: [
+        { rating: 5, comment: 'Hand flare masa pakainya panjang dan tabungnya tersegel rapi, cocok untuk safety kit kapal.' },
+        { rating: 5, comment: 'Strobe light terang banget saat dites malam, clip-nya kuat di life jacket.' },
+      ],
+    });
+
+    // 12. Completed diving spare-part order with reviews (multiuser buyer, store1)
+    await seedOrder(prisma, walletEvents, {
+      ledger: multiLedger,
+      buyerId: multiBuyer.id,
+      store,
+      addressId: multiAddress.id,
+      items: [
+        { product: sealKit, quantity: 2 },
+        { product: oRing, quantity: 3 },
+      ],
+      deliveryMethod: 'REGULAR',
+      status: OrderStatus.PESANAN_SELESAI,
+      driver: multiDriver,
+      daysAgoPlaced: 4,
+      reviews: [
+        { rating: 5, comment: 'Seal kit lengkap, teknisi kami langsung bisa servis valve tabung tanpa cari ukuran tambahan.' },
+        { rating: 4, comment: 'O-ring regulator ukurannya lengkap dan kualitas karetnya bagus, tidak gampang melar.' },
+      ],
     });
 
     // ---- Flush wallet ledgers: seed an opening top-up that covers all spend,

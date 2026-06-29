@@ -45,6 +45,20 @@ export class ProductController {
     description: 'Filter berdasarkan ID toko.',
   })
   @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: [
+      'seafood',
+      'pancing',
+      'kapal',
+      'suku-cadang',
+      'navigasi',
+      'keselamatan',
+      'jasa-selam',
+    ],
+    description: 'Filter kategori produk.',
+  })
+  @ApiQuery({
     name: 'sort',
     required: false,
     enum: ['newest', 'price_asc', 'price_desc', 'bestseller'],
@@ -68,6 +82,7 @@ export class ProductController {
     @Query('limit') limit = 20,
     @Query('search') search?: string,
     @Query('storeId') storeId?: string,
+    @Query('category') category?: string,
     @Query('sort') sort?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
@@ -78,6 +93,7 @@ export class ProductController {
       +limit,
       search,
       storeId,
+      category,
       sort,
       minPrice ? +minPrice : undefined,
       maxPrice ? +maxPrice : undefined,

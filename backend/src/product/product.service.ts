@@ -3,6 +3,31 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
 import { OrderStatus } from '@prisma/client';
 
+const CATEGORY_TERMS: Record<string, string[]> = {
+  seafood: ['seafood', 'ikan', 'udang', 'cumi', 'kerapu', 'hasil laut'],
+  pancing: ['pancing', 'joran', 'reel', 'jaring'],
+  kapal: ['kapal', 'boat', 'perahu'],
+  'suku-cadang': [
+    'suku cadang',
+    'sparepart',
+    'mesin',
+    'baling',
+    'propeller',
+    'onderdil',
+    'filter',
+    'impeller',
+    'seal kit',
+    'o-ring',
+  ],
+  navigasi: ['navigasi', 'gps', 'kompas', 'radar', 'radio', 'vhf', 'peta laut', 'chartplotter'],
+  keselamatan: ['keselamatan', 'pelampung', 'life jacket', 'jaket', 'safety', 'flare', 'strobe', 'emergency'],
+  'jasa-selam': ['jasa selam', 'selam', 'diving'],
+};
+
+const CATEGORY_EXCLUDED_TERMS: Record<string, string[]> = {
+  seafood: ['jaring', 'pancing', 'joran', 'reel'],
+};
+
 @Injectable()
 export class ProductService {
   constructor(private prisma: PrismaService) {}
@@ -12,6 +37,7 @@ export class ProductService {
     limit = 20,
     search?: string,
     storeId?: string,
+    category?: string,
     sort?: string,
     minPrice?: number,
     maxPrice?: number,
@@ -19,7 +45,12 @@ export class ProductService {
   ) {
     const skip = (page - 1) * limit;
     const where: any = { isActive: true };
-    if (search) where.name = { contains: search, mode: 'insensitive' };
+    const textFilters: any[] = [];
+    if (search) textFilters.push(this.textSearchFilter([search]));
+    if (category && CATEGORY_TERMS[category]) {
+      textFilters.push(this.categorySearchFilter(category));
+    }
+    if (textFilters.length > 0) where.AND = textFilters;
     if (storeId) where.storeId = storeId;
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
@@ -49,6 +80,23 @@ export class ProductService {
       this.prisma.product.count({ where }),
     ]);
     return { data: await this.attachRatings(products), total, page, limit };
+  }
+
+  private textSearchFilter(terms: string[]) {
+    return {
+      OR: terms.flatMap((term) => [
+        { name: { contains: term, mode: 'insensitive' } },
+        { description: { contains: term, mode: 'insensitive' } },
+      ]),
+    };
+  }
+
+  private categorySearchFilter(category: string) {
+    const excludedTerms = CATEGORY_EXCLUDED_TERMS[category] ?? [];
+    return {
+      ...this.textSearchFilter(CATEGORY_TERMS[category]),
+      ...(excludedTerms.length > 0 ? { NOT: this.textSearchFilter(excludedTerms) } : {}),
+    };
   }
 
   async listBestsellers(opts?: { page?: number; limit?: number; where?: any }) {
