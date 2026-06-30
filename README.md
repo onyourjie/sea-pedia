@@ -373,3 +373,32 @@ frontend/app/
 - **UI** Iconify atau Lucide icons.
 - Frontend client-side — semua data dari API, tidak ada SSR data fetching.
 - React Query cache 60 detik default; invalidasi setelah mutation.
+
+### AI Chatbot (Gemini)
+Chatbot asisten belanja berbasis Gemini 2.5 Flash dengan function calling ke data nyata.
+
+**Setup:**
+```
+GEMINI_API_KEY=your_key_here   # tambahkan ke backend/.env
+```
+Dapatkan API key gratis di https://aistudio.google.com → Get API Key.
+
+**Fitur:**
+- Cek status pesanan buyer yang sedang login (`get_my_orders`)
+- Cari produk dari katalog (`search_products`)
+- Info kebijakan pengiriman, SLA, refund, PPN (`get_shipping_policy`)
+- FAQ umum: register, top up, cara jadi seller/driver, cart, checkout, review (`get_faq`)
+
+**UI:** Floating bubble di pojok kanan bawah semua halaman. Muncul tanpa login untuk pertanyaan umum; otomatis terhubung ke data pesanan saat buyer login.
+
+**Endpoint:** `POST /chat` — JWT optional, throttle 2 req/detik / 20 req/menit.
+
+### Real-time Notifikasi (SSE)
+Update status pesanan dikirim langsung ke browser buyer tanpa perlu refresh.
+
+**Cara kerja:**
+- Backend: `EventsService` (RxJS Subject per buyerId), endpoint `GET /events/orders`
+- Token dikirim via query param (`?token=`) karena `EventSource` browser tidak support custom header
+- Emit di 5 titik: checkout → SEDANG_DIKEMAS, seller proses → MENUNGGU_PENGIRIM, driver ambil → SEDANG_DIKIRIM, driver selesai → PESANAN_SELESAI, overdue → DIKEMBALIKAN
+- Frontend: hook `useOrderSSE` aktif otomatis saat login sebagai BUYER, tampil toast berwarna sesuai status
+- Browser auto-reconnect jika koneksi terputus
