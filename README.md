@@ -14,7 +14,9 @@ Frontend di-deploy di **Vercel**, backend + PostgreSQL di **Railway**. Aplikasi 
 
 ## Prototype
 
-![Prototype SEAPEDIA](frontend/public/prototype.png)
+Klik gambar di bawah untuk lihat video demo prototype SEAPEDIA:
+
+[![Prototype SEAPEDIA](frontend/public/prototype.png)](https://youtu.be/7dKTbVpE5c0?si=juPg8pzDDncTFgXW)
 
 ## Arsitektur
 
