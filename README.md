@@ -12,6 +12,10 @@ SEAPEDIA adalah marketplace lengkap untuk komoditas hasil laut yang menghubungka
 
 Frontend di-deploy di **Vercel**, backend + PostgreSQL di **Railway**. Aplikasi bisa langsung diakses dan dites tanpa setup lokal. Gunakan demo account di bawah untuk login.
 
+## Prototype
+
+![Prototype SEAPEDIA](frontend/public/prototype.png)
+
 ## Arsitektur
 
 ```
