@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -21,11 +22,16 @@ const STATUS_ICON: Record<string, string> = {
 };
 
 export function useOrderSSE() {
+  const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const activeRole = useAuthStore((s) => s.user?.activeRole);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
+    // Wait for Zustand to rehydrate from localStorage before checking auth
+    if (!hasHydrated) return;
+
     // Only subscribe when logged in as BUYER
     if (!token || activeRole !== "BUYER") {
       esRef.current?.close();
@@ -56,6 +62,12 @@ export function useOrderSSE() {
         const isDone = event.status === "PESANAN_SELESAI";
         const isReturn = event.status === "DIKEMBALIKAN";
 
+        queryClient.invalidateQueries({ queryKey: ["buyer-orders"] });
+        queryClient.invalidateQueries({ queryKey: ["buyer-orders-all"] });
+        queryClient.invalidateQueries({ queryKey: ["order-detail", event.orderId] });
+        queryClient.invalidateQueries({ queryKey: ["buyer-wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
+
         toast(
           `${icon} ${label}\nOrder #${event.orderId.slice(0, 8)}${event.note ? `\n${event.note}` : ""}`,
           {
@@ -85,5 +97,5 @@ export function useOrderSSE() {
       es.close();
       esRef.current = null;
     };
-  }, [token, activeRole]);
+  }, [token, activeRole, hasHydrated, queryClient]);
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 export interface OrderStatusEvent {
   orderId: string;
@@ -10,18 +10,20 @@ export interface OrderStatusEvent {
 
 @Injectable()
 export class EventsService {
-  // Map buyerId → Subject so each buyer gets their own stream
-  private readonly streams = new Map<string, Subject<OrderStatusEvent>>();
+  // ReplaySubject(10) buffers last 10 events so late SSE subscribers don't miss events
+  // emitted between page load and SSE connection establishment
+  private readonly streams = new Map<string, ReplaySubject<OrderStatusEvent>>();
 
-  getStream(buyerId: string): Subject<OrderStatusEvent> {
+  getStream(buyerId: string): ReplaySubject<OrderStatusEvent> {
     if (!this.streams.has(buyerId)) {
-      this.streams.set(buyerId, new Subject<OrderStatusEvent>());
+      this.streams.set(buyerId, new ReplaySubject<OrderStatusEvent>(10));
     }
     return this.streams.get(buyerId)!;
   }
 
   emit(buyerId: string, event: OrderStatusEvent) {
-    this.streams.get(buyerId)?.next(event);
+    // Create stream if buyer isn't connected yet — event will be buffered and replayed on connect
+    this.getStream(buyerId).next(event);
   }
 
   removeStream(buyerId: string) {

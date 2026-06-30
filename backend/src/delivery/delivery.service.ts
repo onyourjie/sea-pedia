@@ -79,7 +79,7 @@ export class DeliveryService {
     });
     if (activeJob) throw new BadRequestException('You already have an active delivery job');
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Atomic update: only succeeds if driverId is still null (race condition safe)
       const result = await tx.delivery.updateMany({
         where: { id: deliveryId, driverId: null },
@@ -97,15 +97,17 @@ export class DeliveryService {
         },
       });
 
-      this.eventsService.emit(delivery.order.buyerId, {
-        orderId: delivery.orderId,
-        status: OrderStatus.SEDANG_DIKIRIM,
-        note: 'Driver mengambil pesananmu',
-        updatedAt: new Date(),
-      });
-
       return { message: 'Job taken successfully', deliveryId };
     });
+
+    this.eventsService.emit(delivery.order.buyerId, {
+      orderId: delivery.orderId,
+      status: OrderStatus.SEDANG_DIKIRIM,
+      note: 'Driver mengambil pesananmu',
+      updatedAt: new Date(),
+    });
+
+    return result;
   }
 
   async completeJob(userId: string, deliveryId: string) {
@@ -122,7 +124,7 @@ export class DeliveryService {
 
     const earning = Number(delivery.order.deliveryFee) * DRIVER_EARNING_RATE;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       await tx.delivery.update({
         where: { id: deliveryId },
         data: { completedAt: new Date() },
@@ -150,15 +152,17 @@ export class DeliveryService {
         },
       });
 
-      this.eventsService.emit(delivery.order.buyerId, {
-        orderId: delivery.orderId,
-        status: OrderStatus.PESANAN_SELESAI,
-        note: 'Pesananmu telah sampai',
-        updatedAt: new Date(),
-      });
-
       return { message: 'Job completed', earning };
     });
+
+    this.eventsService.emit(delivery.order.buyerId, {
+      orderId: delivery.orderId,
+      status: OrderStatus.PESANAN_SELESAI,
+      note: 'Pesananmu telah sampai',
+      updatedAt: new Date(),
+    });
+
+    return result;
   }
 
   async getDriverJobs(userId: string) {
